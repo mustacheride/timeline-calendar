@@ -14,6 +14,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// DEBUG: Output timeline context at the top of the template
+$debug_vars = [
+    'timeline_year' => isset($timeline_year) ? $timeline_year : 'unset',
+    'timeline_month' => isset($timeline_month) ? $timeline_month : 'unset',
+    'timeline_day' => isset($timeline_day) ? $timeline_day : 'unset',
+    'timeline_article' => isset($timeline_article) ? $timeline_article : 'unset',
+    'timeline_overview' => isset($timeline_overview) ? $timeline_overview : 'unset',
+];
+echo '<!-- Timeline template loaded: ' . htmlspecialchars(json_encode($debug_vars)) . ' -->';
+
 // Function to generate breadcrumbs
 function get_timeline_breadcrumbs($year = null, $month = null, $day = null, $article = null) {
     $breadcrumbs = [];
@@ -40,30 +50,30 @@ function get_timeline_breadcrumbs($year = null, $month = null, $day = null, $art
 }
 
 // Get URL parameters
-$timeline_year = intval(get_query_var('timeline_year'));
-$timeline_month = intval(get_query_var('timeline_month'));
-$timeline_day = intval(get_query_var('timeline_day'));
-$timeline_article = get_query_var('timeline_article');
-$timeline_overview = get_query_var('timeline_overview');
+$timeline_year = get_query_var('timeline_year', null);
+$timeline_month = get_query_var('timeline_month', null);
+$timeline_day = get_query_var('timeline_day', null);
+$timeline_article = get_query_var('timeline_article', null);
+$timeline_overview = get_query_var('timeline_overview', null);
 
 // Debug output
 if (isset($_GET['debug'])) {
     echo "<!-- Debug Info:\n";
-    echo "timeline_year: " . ($timeline_year ?: 'null') . "\n";
-    echo "timeline_month: " . ($timeline_month ?: 'null') . "\n";
-    echo "timeline_day: " . ($timeline_day ?: 'null') . "\n";
-    echo "timeline_article: " . ($timeline_article ?: 'null') . "\n";
-    echo "timeline_overview: " . ($timeline_overview ?: 'null') . "\n";
+    echo "timeline_year: " . ($timeline_year !== null ? $timeline_year : 'null') . "\n";
+    echo "timeline_month: " . ($timeline_month !== null ? $timeline_month : 'null') . "\n";
+    echo "timeline_day: " . ($timeline_day !== null ? $timeline_day : 'null') . "\n";
+    echo "timeline_article: " . ($timeline_article !== null ? $timeline_article : 'null') . "\n";
+    echo "timeline_overview: " . ($timeline_overview !== null ? $timeline_overview : 'null') . "\n";
     echo "-->\n";
 }
 
 // Always show debug info for now
 echo "<!-- Debug Info:\n";
-echo "timeline_year: " . ($timeline_year ?: 'null') . "\n";
-echo "timeline_month: " . ($timeline_month ?: 'null') . "\n";
-echo "timeline_day: " . ($timeline_day ?: 'null') . "\n";
-echo "timeline_article: " . ($timeline_article ?: 'null') . "\n";
-echo "timeline_overview: " . ($timeline_overview ?: 'null') . "\n";
+echo "timeline_year: " . ($timeline_year !== null ? $timeline_year : 'null') . "\n";
+echo "timeline_month: " . ($timeline_month !== null ? $timeline_month : 'null') . "\n";
+echo "timeline_day: " . ($timeline_day !== null ? $timeline_day : 'null') . "\n";
+echo "timeline_article: " . ($timeline_article !== null ? $timeline_article : 'null') . "\n";
+echo "timeline_overview: " . ($timeline_overview !== null ? $timeline_overview : 'null') . "\n";
 echo "-->";
 
 // Enqueue timeline assets
@@ -75,7 +85,7 @@ get_header();
 
 <div class="timeline-container">
     <div class="timeline-content">
-        <?php if ($timeline_overview): ?>
+        <?php if ($timeline_overview !== null): ?>
             <!-- Timeline Overview -->
             <div class="timeline-overview">
                 <div class="timeline-sparkline-calendar" id="timeline-sparkline-calendar"></div>
@@ -105,7 +115,7 @@ get_header();
                 </div>
             </div>
 
-        <?php elseif ($timeline_article): ?>
+        <?php elseif ($timeline_article !== null): ?>
             <!-- Individual Article View -->
             <?php
             $args = [
@@ -139,7 +149,7 @@ get_header();
                     <div class="timeline-sparkline-calendar" id="timeline-article-sparkline-<?php echo $timeline_year; ?>-<?php echo $timeline_month; ?>-<?php echo $timeline_day; ?>-<?php echo $timeline_article; ?>"></div>
                     
                     <h2><?php the_title(); ?></h2>
-                    <?php echo get_timeline_breadcrumbs($timeline_year, $timeline_month, $timeline_day, $timeline_article); ?>
+                                            <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null, $timeline_month !== null ? intval($timeline_month) : null, $timeline_day !== null ? intval($timeline_day) : null, $timeline_article); ?>
                     
                     <article class="timeline-article">
                         <header class="timeline-article-header">
@@ -278,7 +288,7 @@ get_header();
                     
                     // Initialize sparkline calendar with 7-year view centered on current year
                     if (typeof TimelineSparklineCalendar !== 'undefined') {
-                        const currentYear = <?php echo $timeline_year; ?>;
+                        const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                         console.log('Timeline template - Current year:', currentYear);
                         
                         // Ensure we always show 7 years, with current year centered
@@ -299,7 +309,7 @@ get_header();
                         
                         console.log('Timeline template - Article view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
                         
-                        new TimelineSparklineCalendar('#timeline-article-sparkline-<?php echo $timeline_year; ?>-<?php echo $timeline_month; ?>-<?php echo $timeline_day; ?>-<?php echo $timeline_article; ?>', {
+                        new TimelineSparklineCalendar('#timeline-article-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>-<?php echo $timeline_day !== null ? intval($timeline_day) : 0; ?>-<?php echo $timeline_article; ?>', {
                             startYear: startYear,
                             endYear: endYear,
                             showNavigation: true,
@@ -332,17 +342,17 @@ get_header();
             wp_reset_postdata();
             ?>
 
-        <?php elseif ($timeline_day): ?>
+        <?php elseif ($timeline_day !== null): ?>
             <!-- Day Overview - Sparkline calendar + Alphabetized list of articles for that day -->
             <div class="timeline-day-overview">
                 <!-- Sparkline Calendar at the top -->
-                <div class="timeline-sparkline-calendar" id="timeline-day-sparkline-<?php echo $timeline_year; ?>-<?php echo $timeline_month; ?>-<?php echo $timeline_day; ?>"></div>
+                <div class="timeline-sparkline-calendar" id="timeline-day-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>-<?php echo $timeline_day !== null ? intval($timeline_day) : 0; ?>"></div>
                 
                 <h2><?php 
                     $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                    echo esc_html($month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year); 
+                    echo esc_html($month_names[intval($timeline_month)] . ' ' . intval($timeline_day) . ', Year ' . intval($timeline_year)); 
                 ?></h2>
-                <?php echo get_timeline_breadcrumbs($timeline_year, $timeline_month, $timeline_day); ?>
+                <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null, $timeline_month !== null ? intval($timeline_month) : null, $timeline_day !== null ? intval($timeline_day) : null); ?>
                 
                 <?php
                 $args = [
@@ -389,7 +399,7 @@ get_header();
                         <h3>No Articles Found</h3>
                         <p>No articles found for <?php 
                             $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                            echo esc_html($month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year); 
+                            echo esc_html($month_names[intval($timeline_month)] . ' ' . intval($timeline_day) . ', Year ' . intval($timeline_year)); 
                         ?>.</p>
                     </div>
                 <?php
@@ -400,33 +410,33 @@ get_header();
                 <!-- Day Navigation -->
                 <div class="timeline-day-navigation">
                     <?php
-                    $prev_day = $timeline_day - 1;
-                    $prev_month = $timeline_month;
-                    $prev_year = $timeline_year;
+                    $prev_day = intval($timeline_day) - 1;
+                    $prev_month = intval($timeline_month);
+                    $prev_year = intval($timeline_year);
                     
                     // Handle month/year rollover for previous day
                     if ($prev_day < 1) {
-                        $prev_month = $timeline_month - 1;
+                        $prev_month = intval($timeline_month) - 1;
                         if ($prev_month < 1) {
                             $prev_month = 12;
-                            $prev_year = $timeline_year - 1;
+                            $prev_year = intval($timeline_year) - 1;
                         }
                         // Get the last day of the previous month
                         $prev_day = date('j', mktime(0, 0, 0, $prev_month + 1, 0, $prev_year));
                     }
                     
-                    $next_day = $timeline_day + 1;
-                    $next_month = $timeline_month;
-                    $next_year = $timeline_year;
+                    $next_day = intval($timeline_day) + 1;
+                    $next_month = intval($timeline_month);
+                    $next_year = intval($timeline_year);
                     
                     // Handle month/year rollover for next day
-                    $days_in_current_month = date('j', mktime(0, 0, 0, $timeline_month + 1, 0, $timeline_year));
+                    $days_in_current_month = date('j', mktime(0, 0, 0, intval($timeline_month) + 1, 0, intval($timeline_year)));
                     if ($next_day > $days_in_current_month) {
                         $next_day = 1;
-                        $next_month = $timeline_month + 1;
+                        $next_month = intval($timeline_month) + 1;
                         if ($next_month > 12) {
                             $next_month = 1;
-                            $next_year = $timeline_year + 1;
+                            $next_year = intval($timeline_year) + 1;
                         }
                     }
                     ?>
@@ -458,7 +468,7 @@ get_header();
                         AND pm3.meta_value = %d
                     ", $timeline_year, $timeline_month, $timeline_day));
                     ?>
-                    <p>Articles on <?php echo esc_html($month_names[$timeline_month]); ?> <?php echo esc_html($timeline_day); ?>, Year <?php echo esc_html($timeline_year); ?>: <?php echo esc_html($day_articles); ?></p>
+                    <p>Articles on <?php echo esc_html($month_names[intval($timeline_month)]); ?> <?php echo esc_html(intval($timeline_day)); ?>, Year <?php echo esc_html(intval($timeline_year)); ?>: <?php echo esc_html($day_articles); ?></p>
                 </div>
             </div>
             
@@ -469,7 +479,7 @@ get_header();
                 
                 // Initialize sparkline calendar with 7-year view centered on current year
                 if (typeof TimelineSparklineCalendar !== 'undefined') {
-                    const currentYear = <?php echo $timeline_year; ?>;
+                    const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                     console.log('Timeline template - Current year:', currentYear);
                     
                     // Ensure we always show 7 years, with current year centered
@@ -490,7 +500,7 @@ get_header();
                     
                     console.log('Timeline template - Day view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
                     
-                    new TimelineSparklineCalendar('#timeline-day-sparkline-<?php echo $timeline_year; ?>-<?php echo $timeline_month; ?>-<?php echo $timeline_day; ?>', {
+                    new TimelineSparklineCalendar('#timeline-day-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>-<?php echo $timeline_day !== null ? intval($timeline_day) : 0; ?>', {
                         startYear: startYear,
                         endYear: endYear,
                         showNavigation: true,
@@ -511,38 +521,38 @@ get_header();
             }
             </script>
 
-        <?php elseif ($timeline_month): ?>
+        <?php elseif ($timeline_month !== null): ?>
             <!-- Month Overview - Sparkline calendar + Single month calendar view -->
             <div class="timeline-month-overview">
                 <!-- Sparkline Calendar at the top -->
-                <div class="timeline-sparkline-calendar" id="timeline-month-sparkline-<?php echo $timeline_year; ?>-<?php echo $timeline_month; ?>"></div>
+                <div class="timeline-sparkline-calendar" id="timeline-month-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>"></div>
                 
                 <h2><?php 
                     $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                    echo esc_html($month_names[$timeline_month] . ', Year ' . $timeline_year); 
+                    echo esc_html($month_names[intval($timeline_month)] . ', Year ' . intval($timeline_year)); 
                 ?></h2>
-                <?php echo get_timeline_breadcrumbs($timeline_year, $timeline_month); ?>
+                <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null, $timeline_month !== null ? intval($timeline_month) : null); ?>
                 
                 <!-- Single Month Calendar -->
                 <div class="timeline-single-month-calendar">
-                    <div class="timeline-calendar-root" data-year="<?php echo $timeline_year; ?>" data-month="<?php echo $timeline_month; ?>"></div>
+                    <div class="timeline-calendar-root" data-year="<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>" data-month="<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>"></div>
                 </div>
                 
                 <!-- Month Navigation -->
                 <div class="timeline-month-navigation">
                     <?php
-                    $prev_month = $timeline_month - 1;
-                    $prev_year = $timeline_year;
+                    $prev_month = intval($timeline_month) - 1;
+                    $prev_year = intval($timeline_year);
                     if ($prev_month < 1) {
                         $prev_month = 12;
-                        $prev_year = $timeline_year - 1;
+                        $prev_year = intval($timeline_year) - 1;
                     }
                     
-                    $next_month = $timeline_month + 1;
-                    $next_year = $timeline_year;
+                    $next_month = intval($timeline_month) + 1;
+                    $next_year = intval($timeline_year);
                     if ($next_month > 12) {
                         $next_month = 1;
-                        $next_year = $timeline_year + 1;
+                        $next_year = intval($timeline_year) + 1;
                     }
                     ?>
                     <a href="<?php echo home_url('/timeline/' . $prev_year . '/' . $prev_month . '/'); ?>" class="timeline-nav-prev">
@@ -584,7 +594,7 @@ get_header();
                         AND pm3.meta_key = 'timeline_day'
                     ", $timeline_year, $timeline_month));
                     ?>
-                    <p>Articles in <?php echo esc_html($month_names[$timeline_month]); ?>, Year <?php echo esc_html($timeline_year); ?>: <?php echo esc_html($month_articles); ?></p>
+                    <p>Articles in <?php echo esc_html($month_names[intval($timeline_month)]); ?>, Year <?php echo esc_html(intval($timeline_year)); ?>: <?php echo esc_html($month_articles); ?></p>
                     <p>Days with Articles: <?php echo esc_html($month_days_with_articles); ?></p>
                 </div>
             </div>
@@ -596,7 +606,7 @@ get_header();
                 
                 // Initialize sparkline calendar with 8-year view centered on current year
                 if (typeof TimelineSparklineCalendar !== 'undefined') {
-                    const currentYear = <?php echo $timeline_year; ?>;
+                    const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                     console.log('Timeline template - Current year:', currentYear);
                     
                     // Ensure we always show 7 years, with current year centered
@@ -617,7 +627,7 @@ get_header();
                     
                     console.log('Timeline template - Month view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
                     
-                    new TimelineSparklineCalendar('#timeline-month-sparkline-<?php echo $timeline_year; ?>-<?php echo $timeline_month; ?>', {
+                    new TimelineSparklineCalendar('#timeline-month-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>', {
                         startYear: startYear,
                         endYear: endYear,
                         showNavigation: true,
@@ -646,18 +656,18 @@ get_header();
             }
             </script>
 
-        <?php elseif ($timeline_year): ?>
+        <?php elseif ($timeline_year !== null): ?>
             <!-- Year Overview - Sparkline calendar + 12 month grid -->
             <div class="timeline-year-overview">
                 <!-- Sparkline Calendar at the top -->
-                <div class="timeline-sparkline-calendar" id="timeline-year-sparkline-<?php echo $timeline_year; ?>"></div>
+                <div class="timeline-sparkline-calendar" id="timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>"></div>
                 
-                <h2>Year <?php echo esc_html($timeline_year); ?> Overview</h2>
-                <?php echo get_timeline_breadcrumbs($timeline_year); ?>
+                <h2>Year <?php echo esc_html(intval($timeline_year)); ?> Overview</h2>
+                <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null); ?>
                 
                 <!-- Month Grid -->
                 <div class="timeline-year-calendar">
-                    <!-- Debug: Year calendar div generated for year <?php echo $timeline_year; ?> -->
+                    <!-- Debug: Year calendar div generated for year <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?> -->
                     <?php
                     $months = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
                     $i = 0;
@@ -665,8 +675,8 @@ get_header();
                         if ($i % 3 === 0) echo "<div class='timeline-year-row'>";
                     ?>
                         <div class='timeline-month-block'>
-                            <h4><a href="<?php echo home_url('/timeline/' . $timeline_year . '/' . $num . '/'); ?>"><?php echo $name; ?></a></h4>
-                            <div class='timeline-calendar-root' data-year='<?php echo $timeline_year; ?>' data-month='<?php echo $num; ?>'></div>
+                            <h4><a href="<?php echo home_url('/timeline/' . ($timeline_year !== null ? intval($timeline_year) : 0) . '/' . $num . '/'); ?>"><?php echo $name; ?></a></h4>
+                            <div class='timeline-calendar-root' data-year='<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>' data-month='<?php echo $num; ?>'></div>
                         </div>
                     <?php
                         $i++;
@@ -679,8 +689,8 @@ get_header();
                 <!-- Year Navigation -->
                 <div class="timeline-year-navigation">
                     <?php
-                    $prev_year = $timeline_year - 1;
-                    $next_year = $timeline_year + 1;
+                    $prev_year = intval($timeline_year) - 1;
+                    $next_year = intval($timeline_year) + 1;
                     ?>
                     <a href="<?php echo home_url('/timeline/' . $prev_year . '/'); ?>" class="timeline-nav-prev">
                         &larr; Year <?php echo $prev_year; ?>
@@ -715,7 +725,7 @@ get_header();
                         AND pm2.meta_key = 'timeline_month'
                     ", $timeline_year));
                     ?>
-                    <p>Articles in Year <?php echo esc_html($timeline_year); ?>: <?php echo esc_html($year_articles); ?></p>
+                    <p>Articles in Year <?php echo esc_html(intval($timeline_year)); ?>: <?php echo esc_html($year_articles); ?></p>
                     <p>Months with Articles: <?php echo esc_html($year_months_with_articles); ?></p>
                 </div>
             </div>
@@ -728,7 +738,7 @@ get_header();
                 
                 // Initialize sparkline calendar with 8-year view centered on current year
                 if (typeof TimelineSparklineCalendar !== 'undefined') {
-                    const currentYear = <?php echo $timeline_year; ?>;
+                    const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                     console.log('Timeline template - Current year:', currentYear);
                     
                     // Ensure we always show 7 years, with current year centered
@@ -749,12 +759,12 @@ get_header();
                     
                     console.log('Timeline template - Year view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
                     console.log('Timeline template - Calculated range:', startYear, 'to', endYear);
-                    console.log('Timeline template - Creating sparkline calendar with selector: #timeline-year-sparkline-<?php echo $timeline_year; ?>');
+                    console.log('Timeline template - Creating sparkline calendar with selector: #timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>');
                     
-                    const element = document.querySelector('#timeline-year-sparkline-<?php echo $timeline_year; ?>');
+                    const element = document.querySelector('#timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>');
                     console.log('Timeline template - Element found:', element);
                     
-                    new TimelineSparklineCalendar('#timeline-year-sparkline-<?php echo $timeline_year; ?>', {
+                    new TimelineSparklineCalendar('#timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>', {
                         startYear: startYear,
                         endYear: endYear,
                         showNavigation: true,

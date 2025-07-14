@@ -1,9 +1,23 @@
 <?php
 /*
 Plugin Name: Timeline Calendar
-Description: Calendar and timeline article system.
-Version: 1.0
-Author: Your Name
+Plugin URI: https://github.com/mustacheride/timeline-calendar
+Description: A comprehensive WordPress plugin for creating and managing timeline-based content with interactive calendar views, sparkline visualizations, and hierarchical navigation. Perfect for historical blogs, project timelines, or any content that needs chronological organization.
+Version: 1.0.0
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.4
+Author: mustacheride
+Author URI: https://github.com/mustacheride
+License: GPL v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: timeline-calendar
+Domain Path: /languages
+Network: false
+
+Timeline Calendar is a powerful WordPress plugin that transforms your site into a timeline management system. 
+Create historical content organized by years, months, and days with interactive calendar views, 
+sparkline visualizations, and smart navigation.
 */
 
 if (!defined('ABSPATH')) exit;
@@ -106,6 +120,46 @@ add_shortcode('timeline_sparkline_calendar', function() {
                 endYear: 4,
                 yearsPerView: 7
             });
+        }
+    });
+    </script>
+    <?php
+    return ob_get_clean();
+});
+
+// New improved sparkline shortcode
+add_shortcode('timeline_sparkline', function($atts) {
+    $atts = shortcode_atts([
+        'start_year' => null,
+        'end_year' => null,
+        'years_per_view' => 7
+    ], $atts);
+    
+    // Generate unique ID for this instance
+    $unique_id = 'timeline-sparkline-' . uniqid();
+    
+    ob_start();
+    ?>
+    <div class="timeline-sparkline-calendar" id="<?php echo esc_attr($unique_id); ?>"></div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof TimelineSparklineCalendar !== 'undefined') {
+            const config = {
+                yearsPerView: <?php echo intval($atts['years_per_view']); ?>,
+                showNavigation: true
+            };
+            
+            <?php if ($atts['start_year'] !== null): ?>
+            config.startYear = <?php echo intval($atts['start_year']); ?>;
+            <?php endif; ?>
+            
+            <?php if ($atts['end_year'] !== null): ?>
+            config.endYear = <?php echo intval($atts['end_year']); ?>;
+            <?php endif; ?>
+            
+            new TimelineSparklineCalendar('#<?php echo esc_js($unique_id); ?>', config);
+        } else {
+            console.log('TimelineSparklineCalendar not available');
         }
     });
     </script>
@@ -302,8 +356,15 @@ function timeline_calendar_articles_ajax() {
     wp_send_json($articles);
 } 
 
-// Add rewrite rules for timeline URLs
+// Add rewrite rules for timeline URLs with higher priority
 add_action('init', function() {
+    // Special-case: /timeline/1/ (to avoid WP pagination redirect)
+    add_rewrite_rule(
+        '^timeline/1/?$',
+        'index.php?timeline_year=1',
+        'top'
+    );
+    
     // Article view: /timeline/year/month/day/article/
     add_rewrite_rule(
         '^timeline/(-?[0-9]+)/([0-9]+)/([0-9]+)/([^/]+)/?$',
@@ -338,7 +399,7 @@ add_action('init', function() {
         'index.php?timeline_overview=1',
         'top'
     );
-});
+}, 1, 0);
 
 // Add admin action to flush rewrite rules manually
 add_action('admin_post_flush_timeline_rewrite_rules', function() {
@@ -421,55 +482,76 @@ add_filter('query_vars', function($vars) {
     return $vars;
 });
 
-// Handle timeline requests
-add_action('template_redirect', function() {
-    $timeline_overview = get_query_var('timeline_overview');
-    $timeline_year = get_query_var('timeline_year');
-    $timeline_month = get_query_var('timeline_month');
-    $timeline_day = get_query_var('timeline_day');
-    $timeline_article = get_query_var('timeline_article');
-    
-    // Debug output for timeline URLs
-    if (strpos($_SERVER['REQUEST_URI'], 'timeline') !== false) {
-        error_log('Timeline Debug - REQUEST_URI: ' . $_SERVER['REQUEST_URI']);
-        error_log('Timeline Debug - timeline_overview: ' . ($timeline_overview ? 'true' : 'false'));
-        error_log('Timeline Debug - timeline_year: ' . ($timeline_year ? $timeline_year : 'null'));
-        error_log('Timeline Debug - timeline_month: ' . ($timeline_month ? $timeline_month : 'null'));
-        error_log('Timeline Debug - timeline_day: ' . ($timeline_day ? $timeline_day : 'null'));
-        error_log('Timeline Debug - timeline_article: ' . ($timeline_article ? $timeline_article : 'null'));
+// Handle timeline requests early in the process
+add_action('parse_request', function($wp) {
+    // Only process if this is actually a timeline URL
+    if (strpos($_SERVER['REQUEST_URI'], '/timeline/') !== 0) {
+        return;
     }
+    
+    $timeline_overview = $wp->query_vars['timeline_overview'] ?? null;
+    $timeline_year = array_key_exists('timeline_year', $wp->query_vars) ? $wp->query_vars['timeline_year'] : null;
+    $timeline_month = array_key_exists('timeline_month', $wp->query_vars) ? $wp->query_vars['timeline_month'] : null;
+    $timeline_day = array_key_exists('timeline_day', $wp->query_vars) ? $wp->query_vars['timeline_day'] : null;
+    $timeline_article = array_key_exists('timeline_article', $wp->query_vars) ? $wp->query_vars['timeline_article'] : null;
     
     // Check if this is a timeline request
-    if ($timeline_overview || $timeline_year || $timeline_month || $timeline_day || $timeline_article) {
-        // Set up WordPress properly
-        global $wp_query;
-        
-        // Create a fake post to satisfy WordPress
-        $wp_query->is_page = true;
-        $wp_query->is_single = false;
-        $wp_query->is_home = false;
-        $wp_query->is_archive = false;
-        $wp_query->is_search = false;
-        
-        // Set the page title
-        if ($timeline_overview) {
-            $wp_query->post_title = 'Timeline Overview';
-        } elseif ($timeline_article) {
-            $wp_query->post_title = $timeline_article;
-        } elseif ($timeline_day) {
-            $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-            $wp_query->post_title = $month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year;
-        } elseif ($timeline_month) {
-            $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-            $wp_query->post_title = $month_names[$timeline_month] . ', Year ' . $timeline_year;
-        } elseif ($timeline_year) {
-            $wp_query->post_title = 'Year ' . $timeline_year;
-        }
-        
-        // Load our timeline template
-        include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
-        exit;
+    if ($timeline_overview !== null || $timeline_year !== null || $timeline_month !== null || $timeline_day !== null || $timeline_article !== null) {
+        // Set a flag to indicate this is a timeline request
+        $wp->query_vars['is_timeline_request'] = true;
     }
+});
+
+// Handle timeline requests
+add_action('template_redirect', function() {
+    global $wp_query;
+    
+    // Only process if this is actually a timeline URL
+    if (strpos($_SERVER['REQUEST_URI'], '/timeline/') !== 0) {
+        return;
+    }
+    
+    // Check if this is a timeline request using the flag set in parse_request
+    $is_timeline_request = $wp_query->get('is_timeline_request');
+    
+    // Get query vars directly from the global query
+    $timeline_overview = $wp_query->get('timeline_overview');
+    $timeline_year = $wp_query->get('timeline_year');
+    $timeline_month = $wp_query->get('timeline_month');
+    $timeline_day = $wp_query->get('timeline_day');
+    $timeline_article = $wp_query->get('timeline_article');
+    
+    // Only proceed if we have actual timeline query vars
+    if (!$is_timeline_request && $timeline_overview === null && $timeline_year === null && $timeline_month === null && $timeline_day === null && $timeline_article === null) {
+        return;
+    }
+    
+    // Set up WordPress properly
+    $wp_query->is_page = true;
+    $wp_query->is_single = false;
+    $wp_query->is_home = false;
+    $wp_query->is_archive = false;
+    $wp_query->is_search = false;
+    $wp_query->is_404 = false;
+    
+    // Set the page title
+    if ($timeline_overview !== null) {
+        $wp_query->post_title = 'Timeline Overview';
+    } elseif ($timeline_article !== null) {
+        $wp_query->post_title = $timeline_article;
+    } elseif ($timeline_day !== null) {
+        $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
+        $wp_query->post_title = $month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year;
+    } elseif ($timeline_month !== null) {
+        $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
+        $wp_query->post_title = $month_names[$timeline_month] . ', Year ' . $timeline_year;
+    } elseif ($timeline_year !== null) {
+        $wp_query->post_title = 'Year ' . $timeline_year;
+    }
+    
+    // Load our timeline template
+    include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
+    exit;
 });
 
 // Alternative approach: Handle timeline URLs directly
@@ -627,3 +709,12 @@ function debug_timeline_permalinks() {
         wp_reset_postdata();
     }
 } 
+
+// Disable canonical redirects for /timeline/ URLs to prevent unwanted redirects (e.g., /timeline/1/ to /timeline/)
+add_filter('redirect_canonical', function($redirect_url, $requested_url) {
+    // Only disable canonical redirects for actual timeline URLs
+    if (strpos($_SERVER['REQUEST_URI'], '/timeline/') === 0) {
+        return false;
+    }
+    return $redirect_url;
+}, 10, 2); 

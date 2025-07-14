@@ -1134,7 +1134,14 @@
 }
 
 .timeline-article-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 0.5rem;
+    padding: 1rem;
+    background: var(--year-nav-bg);
+    border-radius: 8px;
+    border: 1px solid var(--calendar-border);
 }
 
 .timeline-back-to-day {
@@ -1242,4 +1249,16 @@
         width: 6px;
         height: 16px;
     }
+} 
+
+/* Day Navigation */
+.timeline-day-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--year-nav-bg);
+    border-radius: 8px;
+    border: 1px solid var(--calendar-border);
 } 
