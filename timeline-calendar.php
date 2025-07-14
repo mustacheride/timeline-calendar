@@ -53,18 +53,52 @@ add_action('add_meta_boxes', function() {
             $year = get_post_meta($post->ID, 'timeline_year', true);
             $month = get_post_meta($post->ID, 'timeline_month', true);
             $day = get_post_meta($post->ID, 'timeline_day', true);
-            echo '<label>Year: <input type="number" name="timeline_year" value="' . esc_attr($year) . '" step="1" /></label> ';
-            echo '<label>Month: <select name="timeline_month">';
+            echo '<label>Year: <input type="number" name="timeline_year" id="timeline_year" value="' . esc_attr($year) . '" step="1" /></label> ';
+            echo '<label>Month: <select name="timeline_month" id="timeline_month">';
             $months = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
             foreach ($months as $num=>$name) {
                 echo '<option value="' . $num . '"' . selected($month, $num, false) . '>' . $name . '</option>';
             }
             echo '</select></label> ';
-            echo '<label>Day: <select name="timeline_day">';
+            echo '<label>Day: <select name="timeline_day" id="timeline_day">';
             for ($d=1; $d<=31; $d++) {
                 echo '<option value="' . $d . '"' . selected($day, $d, false) . '>' . $d . '</option>';
             }
             echo '</select></label>';
+            echo '<p><em>Changing these values will update the permalink below.</em></p>';
+            ?>
+            <script>
+            jQuery(document).ready(function($) {
+                function updatePermalink() {
+                    var year = $('#timeline_year').val();
+                    var month = $('#timeline_month').val();
+                    var day = $('#timeline_day').val();
+                    var postName = $('#post_name').val() || $('#title').val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    
+                    if (year && month && day && postName) {
+                        var newPermalink = '<?php echo home_url('/'); ?>timeline/' + year + '/' + month + '/' + day + '/' + postName + '/';
+                        
+                        // Update the permalink display
+                        var permalinkLink = $('.permalink a');
+                        if (permalinkLink.length) {
+                            permalinkLink.attr('href', newPermalink).text(newPermalink.replace('<?php echo home_url('/'); ?>', ''));
+                        }
+                        
+                        // Update the sample permalink input
+                        var samplePermalink = $('#sample-permalink');
+                        if (samplePermalink.length) {
+                            samplePermalink.val('timeline/' + year + '/' + month + '/' + day + '/' + postName + '/');
+                        }
+                    }
+                }
+                
+                $('#timeline_year, #timeline_month, #timeline_day, #post_name, #title').on('change keyup', updatePermalink);
+                
+                // Initial update
+                updatePermalink();
+            });
+            </script>
+            <?php
         },
         'timeline_article'
     );
@@ -669,6 +703,56 @@ function get_timeline_permalink($post_id) {
     // Fallback to default permalink if timeline data is missing
     return get_permalink($post_id);
 }
+
+// Filter to show correct timeline permalinks in admin
+add_filter('post_link', function($permalink, $post) {
+    if ($post->post_type === 'timeline_article') {
+        return get_timeline_permalink($post->ID);
+    }
+    return $permalink;
+}, 10, 2);
+
+// Filter to show correct timeline permalinks in admin for get_permalink()
+add_filter('get_permalink', function($permalink, $post_id) {
+    $post = get_post($post_id);
+    if ($post && $post->post_type === 'timeline_article') {
+        return get_timeline_permalink($post_id);
+    }
+    return $permalink;
+}, 10, 2);
+
+// Filter to update the permalink display in the admin edit screen
+add_filter('admin_post_link', function($permalink, $post_id) {
+    $post = get_post($post_id);
+    if ($post && $post->post_type === 'timeline_article') {
+        return get_timeline_permalink($post_id);
+    }
+    return $permalink;
+}, 10, 2);
+
+// Filter to update the permalink preview in the admin edit screen
+add_filter('sample_permalink_html', function($html, $post_id, $title, $name, $post) {
+    if ($post && $post->post_type === 'timeline_article') {
+        $timeline_permalink = get_timeline_permalink($post_id);
+        $home_url = home_url('/');
+        $relative_permalink = str_replace($home_url, '', $timeline_permalink);
+        
+        // Replace the permalink in the HTML
+        $html = preg_replace(
+            '/<a[^>]*href="[^"]*"[^>]*>([^<]*)<\/a>/',
+            '<a href="' . esc_url($timeline_permalink) . '">' . esc_html($relative_permalink) . '</a>',
+            $html
+        );
+        
+        // Also update the input field if it exists
+        $html = preg_replace(
+            '/<input[^>]*id="sample-permalink"[^>]*value="[^"]*"/',
+            '<input id="sample-permalink" value="' . esc_attr($relative_permalink) . '"',
+            $html
+        );
+    }
+    return $html;
+}, 10, 5);
 
 // Debug function to test permalink generation
 function debug_timeline_permalinks() {
