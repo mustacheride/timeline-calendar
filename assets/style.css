@@ -1,0 +1,1245 @@
+:root {
+    --calendar-bg: #ffffff;
+    --calendar-border: #e1e5e9;
+    --calendar-text: #2c3e50;
+    --calendar-hover: #f8f9fa;
+    --calendar-article-highlight: #0066cc;
+    --calendar-article-highlight-hover: #0052a3;
+    --year-nav-text: #6c757d;
+    --year-nav-bg: #f8f9fa;
+    --year-nav-hover: #e9ecef;
+}
+
+/* Year View Styles */
+.timeline-year-view {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Year Overview with Sparkline */
+.timeline-year-overview {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.timeline-year-sparkline,
+.timeline-month-sparkline {
+    margin-bottom: 2rem;
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-year-sparkline .timeline-sparkline-calendar,
+.timeline-month-sparkline .timeline-sparkline-calendar {
+    margin: 0;
+}
+
+/* Clickable Month Links */
+.timeline-month-block h4 a {
+    color: var(--calendar-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.timeline-month-block h4 a:hover {
+    color: var(--calendar-article-highlight);
+}
+
+/* Single Month Calendar View */
+.timeline-single-month-calendar {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.timeline-single-month-calendar .timeline-calendar-root {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Month Navigation */
+.timeline-month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--year-nav-bg);
+    border-radius: 8px;
+    border: 1px solid var(--calendar-border);
+}
+
+.timeline-nav-prev,
+.timeline-nav-next {
+    color: var(--calendar-article-highlight);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.timeline-nav-prev:hover,
+.timeline-nav-next:hover {
+    background: var(--calendar-article-highlight);
+    color: white;
+    text-decoration: none;
+}
+
+/* Year Navigation */
+.timeline-year-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--year-nav-bg);
+    border-radius: 8px;
+    border: 1px solid var(--calendar-border);
+}
+
+
+
+.timeline-year-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--year-nav-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--calendar-border);
+}
+
+.timeline-year-nav-btn {
+    background: var(--calendar-article-highlight);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.timeline-year-nav-btn:hover {
+    background: var(--calendar-article-highlight-hover);
+}
+
+.timeline-year-scroll {
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--calendar-border) transparent;
+}
+
+.timeline-year-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.timeline-year-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.timeline-year-scroll::-webkit-scrollbar-thumb {
+    background: var(--calendar-border);
+    border-radius: 3px;
+}
+
+.timeline-year-list {
+    display: flex;
+    gap: 0.5rem;
+    min-width: max-content;
+}
+
+.timeline-year-item {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--calendar-text);
+}
+
+.timeline-year-item:hover {
+    background: var(--year-nav-hover);
+    border-color: var(--calendar-article-highlight);
+}
+
+.timeline-year-item.active {
+    background: var(--calendar-article-highlight);
+    color: white;
+    border-color: var(--calendar-article-highlight);
+}
+
+.timeline-year-calendar {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-year-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.timeline-year-row:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-month-block {
+    background: var(--calendar-hover);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.timeline-month-block h4 {
+    margin: 0 0 1rem 0;
+    color: var(--calendar-text);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Calendar Grid Styles */
+.timeline-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--calendar-border);
+    border-radius: 4px;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
+.calendar-day {
+    background: var(--calendar-bg);
+    padding: 0.5rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: var(--calendar-hover);
+}
+
+.calendar-day:empty,
+.calendar-day:not(:has(*)) {
+    background: var(--calendar-hover);
+    cursor: default;
+}
+
+.day-has-articles {
+    background: var(--calendar-article-highlight);
+    color: white;
+    font-weight: 600;
+}
+
+.day-has-articles::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+}
+
+.day-has-articles[data-article-count="2"]::after {
+    background: rgba(255, 255, 255, 0.9);
+    width: 8px;
+    height: 8px;
+}
+
+.day-has-articles[data-article-count="3"]::after {
+    background: white;
+    width: 10px;
+    height: 10px;
+}
+
+.day-has-articles[data-article-count="4"]::after,
+.day-has-articles[data-article-count="5"]::after,
+.day-has-articles[data-article-count="6"]::after,
+.day-has-articles[data-article-count="7"]::after,
+.day-has-articles[data-article-count="8"]::after,
+.day-has-articles[data-article-count="9"]::after,
+.day-has-articles[data-article-count="10"]::after {
+    background: white;
+    width: 12px;
+    height: 12px;
+}
+
+.timeline-calendar-root {
+    min-height: 200px;
+}
+
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+}
+
+.calendar-nav button {
+    background: var(--calendar-article-highlight);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.calendar-nav button:hover {
+    background: var(--calendar-article-highlight-hover);
+}
+
+.calendar-nav span {
+    font-weight: 600;
+    color: var(--calendar-text);
+    font-size: 1rem;
+}
+
+/* Modal Styles */
+#calendar-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#calendar-modal-content {
+    background-color: var(--calendar-bg);
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+#calendar-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--year-nav-text);
+    transition: color 0.2s ease;
+}
+
+#calendar-modal-close:hover {
+    color: var(--calendar-text);
+}
+
+#calendar-modal-list h3 {
+    margin: 0 0 1rem 0;
+    color: var(--calendar-text);
+    border-bottom: 2px solid var(--calendar-article-highlight);
+    padding-bottom: 0.5rem;
+}
+
+#calendar-modal-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#calendar-modal-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--calendar-border);
+}
+
+#calendar-modal-list li:last-child {
+    border-bottom: none;
+}
+
+#calendar-modal-list a {
+    color: var(--calendar-article-highlight);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+#calendar-modal-list a:hover {
+    color: var(--calendar-article-highlight-hover);
+    text-decoration: underline;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .timeline-year-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .timeline-month-block {
+        padding: 1rem;
+    }
+    
+    .timeline-year-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .timeline-year-item {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .timeline-year-nav-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .timeline-year-calendar {
+        padding: 1rem;
+    }
+    
+    .calendar-day {
+        padding: 0.25rem;
+        min-height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .timeline-month-block h4 {
+        font-size: 1rem;
+    }
+}
+
+/* Breadcrumb Styles */
+.timeline-breadcrumbs {
+    margin: 1rem 0 2rem 0;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--year-nav-text);
+    border-bottom: 1px solid var(--calendar-border);
+}
+
+.timeline-breadcrumbs a {
+    color: var(--calendar-article-highlight);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.timeline-breadcrumbs a:hover {
+    color: var(--calendar-article-highlight-hover);
+    text-decoration: underline;
+}
+
+.timeline-breadcrumbs span {
+    color: var(--calendar-text);
+    font-weight: 500;
+}
+
+/* Article View Styles */
+.timeline-article-overview {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.timeline-article-overview .timeline-sparkline-calendar {
+    margin-bottom: 2rem;
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-article-overview .timeline-sparkline-calendar .timeline-sparkline-calendar {
+    margin: 0;
+}
+
+.timeline-article {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.timeline-article-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--calendar-article-highlight);
+}
+
+.timeline-article-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.timeline-date {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--calendar-text);
+    background: var(--year-nav-bg);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--calendar-border);
+}
+
+.timeline-article-content {
+    line-height: 1.6;
+    color: var(--calendar-text);
+}
+
+.timeline-article-content h1,
+.timeline-article-content h2,
+.timeline-article-content h3,
+.timeline-article-content h4,
+.timeline-article-content h5,
+.timeline-article-content h6 {
+    color: var(--calendar-text);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.timeline-article-content p {
+    margin-bottom: 1rem;
+}
+
+.timeline-article-content a {
+    color: var(--calendar-article-highlight);
+    text-decoration: none;
+}
+
+.timeline-article-content a:hover {
+    color: var(--calendar-article-highlight-hover);
+    text-decoration: underline;
+}
+
+.timeline-article-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--year-nav-bg);
+    border-radius: 8px;
+    border: 1px solid var(--calendar-border);
+}
+
+.timeline-article-stats {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-article-stats h3 {
+    margin: 0 0 1rem 0;
+    color: var(--calendar-text);
+    border-bottom: 2px solid var(--calendar-article-highlight);
+    padding-bottom: 0.5rem;
+}
+
+.timeline-article-stats p {
+    margin: 0.5rem 0;
+    color: var(--calendar-text);
+}
+
+/* This Day in History Styles */
+.timeline-this-day-in-history {
+    max-width: 800px;
+    margin: 2rem auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-this-day-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--calendar-text);
+    text-align: center;
+    border-bottom: 2px solid var(--calendar-article-highlight);
+    padding-bottom: 1rem;
+}
+
+.timeline-this-day-subtitle {
+    text-align: center;
+    margin: 0 0 2rem 0;
+    font-size: 1.1rem;
+    color: var(--year-nav-text);
+    font-style: italic;
+}
+
+.timeline-this-day-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--year-nav-text);
+    font-size: 1.1rem;
+}
+
+.timeline-this-day-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.timeline-this-day-item {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--calendar-hover);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.timeline-this-day-item:hover {
+    border-color: var(--calendar-article-highlight);
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+}
+
+.timeline-this-day-year {
+    flex-shrink: 0;
+    background: var(--calendar-article-highlight);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-this-day-content {
+    flex: 1;
+}
+
+.timeline-this-day-article-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.timeline-this-day-article-title a {
+    color: var(--calendar-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.timeline-this-day-article-title a:hover {
+    color: var(--calendar-article-highlight);
+}
+
+.timeline-this-day-excerpt {
+    color: var(--year-nav-text);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* Responsive Design for This Day in History */
+@media (max-width: 768px) {
+    .timeline-this-day-in-history {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .timeline-this-day-title {
+        font-size: 1.75rem;
+    }
+    
+    .timeline-this-day-item {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .timeline-this-day-year {
+        align-self: flex-start;
+        min-width: auto;
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .timeline-this-day-in-history {
+        padding: 1rem;
+    }
+    
+    .timeline-this-day-title {
+        font-size: 1.5rem;
+    }
+    
+    .timeline-this-day-item {
+        padding: 1rem;
+    }
+    
+    .timeline-this-day-article-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* Timeline Sparkline Calendar Styles (Archive.org style) */
+.timeline-sparkline-calendar {
+    max-width: 1200px;
+    margin: 2rem auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-sparkline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--calendar-border);
+}
+
+.timeline-sparkline-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--calendar-text);
+}
+
+.timeline-sparkline-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.timeline-sparkline-nav {
+    background: var(--calendar-article-highlight);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.timeline-sparkline-nav:hover {
+    background: var(--calendar-article-highlight-hover);
+}
+
+/* Sparkline Calendar Container with Side Navigation */
+.timeline-sparkline-container {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+/* Sparkline Calendar Side Navigation */
+.timeline-sparkline-nav-left,
+.timeline-sparkline-nav-right {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--calendar-text);
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-sparkline-nav-left {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-right: none;
+}
+
+.timeline-sparkline-nav-right {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-left: none;
+}
+
+.timeline-sparkline-nav-left:hover,
+.timeline-sparkline-nav-right:hover {
+    background: var(--calendar-article-highlight);
+    color: white;
+}
+
+.timeline-sparkline-nav-left:active,
+.timeline-sparkline-nav-right:active {
+    background: var(--calendar-article-highlight-hover);
+}
+
+.timeline-sparkline-range {
+    font-size: 0.9rem;
+    color: var(--year-nav-text);
+    font-weight: 500;
+}
+
+.timeline-sparkline-scroll {
+    overflow-x: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid var(--calendar-border);
+    border-radius: 0;
+    flex: 1;
+}
+
+.timeline-sparkline-years {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    padding: 1rem 0;
+    justify-content: space-between;
+}
+
+.timeline-sparkline-year {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.timeline-sparkline-year-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--calendar-text);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.timeline-sparkline-year-label:hover {
+    background: var(--calendar-hover);
+    color: var(--calendar-article-highlight);
+}
+
+.timeline-sparkline-months {
+    display: flex;
+    gap: 1px;
+    background: var(--calendar-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.timeline-sparkline-month {
+    width: 8px;
+    height: 20px;
+    background: var(--calendar-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.timeline-sparkline-month:hover {
+    background: var(--calendar-article-highlight);
+    transform: scaleY(1.2);
+}
+
+.timeline-sparkline-month.has-articles {
+    background: var(--calendar-article-highlight);
+}
+
+.timeline-sparkline-month.has-articles:hover {
+    background: var(--calendar-article-highlight-hover);
+    transform: scaleY(1.2);
+}
+
+.timeline-sparkline-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--calendar-border);
+}
+
+.timeline-sparkline-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--year-nav-text);
+}
+
+.timeline-sparkline-legend-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.timeline-sparkline-legend-box.empty {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+}
+
+.timeline-sparkline-legend-box.has-articles {
+    background: var(--calendar-article-highlight);
+}
+
+/* Timeline Container Styles */
+.timeline-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.timeline-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--calendar-border);
+}
+
+.timeline-title {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+    color: var(--calendar-text);
+}
+
+.timeline-breadcrumb {
+    font-size: 0.9rem;
+    color: var(--year-nav-text);
+}
+
+.timeline-breadcrumb a {
+    color: var(--calendar-article-highlight);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.timeline-breadcrumb a:hover {
+    color: var(--calendar-article-highlight-hover);
+}
+
+.timeline-content {
+    background: var(--calendar-bg);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-overview-stats {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--calendar-border);
+}
+
+.timeline-overview-stats h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    color: var(--calendar-text);
+}
+
+.timeline-overview-stats p {
+    margin: 0.5rem 0;
+    color: var(--year-nav-text);
+}
+
+.timeline-not-found {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--year-nav-text);
+}
+
+.timeline-not-found h2 {
+    margin: 0 0 1rem 0;
+    color: var(--calendar-text);
+}
+
+/* Month Overview Styles */
+.timeline-month-overview h2 {
+    margin: 0 0 2rem 0;
+    color: var(--calendar-text);
+}
+
+.timeline-month-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--calendar-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.timeline-month-day {
+    background: var(--calendar-bg);
+    padding: 0.5rem;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-month-day.has-articles {
+    background: var(--calendar-hover);
+}
+
+.timeline-day-number {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--calendar-text);
+    margin-bottom: 0.25rem;
+}
+
+.timeline-day-articles {
+    flex: 1;
+}
+
+.timeline-day-article {
+    margin-bottom: 0.25rem;
+}
+
+.timeline-day-article a {
+    font-size: 0.75rem;
+    color: var(--calendar-article-highlight);
+    text-decoration: none;
+    line-height: 1.2;
+}
+
+.timeline-day-article a:hover {
+    text-decoration: underline;
+}
+
+/* Day Overview Styles */
+.timeline-day-articles h2 {
+    margin: 0 0 2rem 0;
+    color: var(--calendar-text);
+}
+
+.timeline-articles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.timeline-article-preview {
+    padding: 1.5rem;
+    background: var(--calendar-hover);
+    border: 1px solid var(--calendar-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.timeline-article-preview:hover {
+    border-color: var(--calendar-article-highlight);
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+}
+
+.timeline-article-preview h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+}
+
+.timeline-article-preview h3 a {
+    color: var(--calendar-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.timeline-article-preview h3 a:hover {
+    color: var(--calendar-article-highlight);
+}
+
+.timeline-article-excerpt {
+    color: var(--year-nav-text);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* Article View Styles */
+.timeline-article {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.timeline-article-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--calendar-border);
+}
+
+.timeline-article-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+    color: var(--calendar-text);
+}
+
+.timeline-article-meta {
+    color: var(--year-nav-text);
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.timeline-date {
+    background: var(--calendar-article-highlight);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.timeline-article-navigation {
+    margin-top: 0.5rem;
+}
+
+.timeline-back-to-day {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--calendar-article-highlight);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.timeline-back-to-day:hover {
+    background: #005a87;
+    color: white;
+    text-decoration: none;
+}
+
+.timeline-article-content {
+    line-height: 1.8;
+    color: var(--calendar-text);
+    font-size: 1.1rem;
+}
+
+/* Responsive Design for Timeline */
+@media (max-width: 768px) {
+    .timeline-container {
+        padding: 1rem;
+    }
+    
+    .timeline-content {
+        padding: 1.5rem;
+    }
+    
+    .timeline-title {
+        font-size: 1.75rem;
+    }
+    
+    .timeline-article-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .timeline-article-navigation {
+        margin-top: 0;
+    }
+    
+    .timeline-sparkline-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .timeline-sparkline-years {
+        gap: 1rem;
+        justify-content: flex-start;
+    }
+    
+    .timeline-sparkline-year {
+        min-width: 80px;
+    }
+    
+    .timeline-month-calendar {
+        grid-template-columns: repeat(7, 1fr);
+    }
+    
+    .timeline-month-day {
+        min-height: 50px;
+        padding: 0.25rem;
+    }
+    
+    .timeline-day-article a {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .timeline-container {
+        padding: 0.5rem;
+    }
+    
+    .timeline-content {
+        padding: 1rem;
+    }
+    
+    .timeline-title {
+        font-size: 1.5rem;
+    }
+    
+    .timeline-sparkline-calendar {
+        padding: 1rem;
+    }
+    
+    .timeline-sparkline-years {
+        gap: 0.5rem;
+    }
+    
+    .timeline-sparkline-year {
+        min-width: 60px;
+    }
+    
+    .timeline-sparkline-month {
+        width: 6px;
+        height: 16px;
+    }
+} 
