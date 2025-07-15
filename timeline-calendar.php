@@ -22,6 +22,148 @@ sparkline visualizations, and smart navigation.
 
 if (!defined('ABSPATH')) exit;
 
+// Plugin settings
+class TimelineCalendarSettings {
+    private $options;
+    
+    public function __construct() {
+        add_action('admin_menu', array($this, 'add_plugin_page'));
+        add_action('admin_init', array($this, 'page_init'));
+        $this->options = get_option('timeline_calendar_options', array(
+            'reference_year' => 1989,
+            'allow_year_zero' => false,
+            'allow_negative_years' => false
+        ));
+    }
+    
+    public function add_plugin_page() {
+        add_options_page(
+            'Timeline Calendar Settings',
+            'Timeline Calendar',
+            'manage_options',
+            'timeline-calendar-settings',
+            array($this, 'create_admin_page')
+        );
+    }
+    
+    public function create_admin_page() {
+        ?>
+        <div class="wrap">
+            <h1>Timeline Calendar Settings</h1>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('timeline_calendar_options_group');
+                do_settings_sections('timeline-calendar-settings');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
+    }
+    
+    public function page_init() {
+        register_setting(
+            'timeline_calendar_options_group',
+            'timeline_calendar_options',
+            array($this, 'sanitize')
+        );
+        
+        add_settings_section(
+            'timeline_calendar_setting_section',
+            'Calendar Configuration',
+            array($this, 'section_info'),
+            'timeline-calendar-settings'
+        );
+        
+        add_settings_field(
+            'reference_year',
+            'Reference Year for Day of Week Alignment',
+            array($this, 'reference_year_callback'),
+            'timeline-calendar-settings',
+            'timeline_calendar_setting_section'
+        );
+        
+        add_settings_field(
+            'allow_year_zero',
+            'Allow Year 0',
+            array($this, 'allow_year_zero_callback'),
+            'timeline-calendar-settings',
+            'timeline_calendar_setting_section'
+        );
+        
+        add_settings_field(
+            'allow_negative_years',
+            'Allow Negative Years',
+            array($this, 'allow_negative_years_callback'),
+            'timeline-calendar-settings',
+            'timeline_calendar_setting_section'
+        );
+    }
+    
+    public function sanitize($input) {
+        $new_input = array();
+        
+        if (isset($input['reference_year'])) {
+            $new_input['reference_year'] = intval($input['reference_year']);
+        }
+        
+        if (isset($input['allow_year_zero'])) {
+            $new_input['allow_year_zero'] = (bool) $input['allow_year_zero'];
+        }
+        
+        if (isset($input['allow_negative_years'])) {
+            $new_input['allow_negative_years'] = (bool) $input['allow_negative_years'];
+        }
+        
+        return $new_input;
+    }
+    
+    public function section_info() {
+        echo '<p>Configure the timeline calendar settings below:</p>';
+    }
+    
+    public function reference_year_callback() {
+        printf(
+            '<input type="number" id="reference_year" name="timeline_calendar_options[reference_year]" value="%s" step="1" />',
+            isset($this->options['reference_year']) ? esc_attr($this->options['reference_year']) : 1989
+        );
+        echo '<p class="description">The year to use as reference for aligning days of the week in the calendar. This affects how the calendar grid is displayed.</p>';
+    }
+    
+    public function allow_year_zero_callback() {
+        printf(
+            '<input type="checkbox" id="allow_year_zero" name="timeline_calendar_options[allow_year_zero]" value="1" %s />',
+            (isset($this->options['allow_year_zero']) && $this->options['allow_year_zero']) ? 'checked' : ''
+        );
+        echo '<label for="allow_year_zero"> Allow Year 0 in timeline articles</label>';
+        echo '<p class="description">When enabled, you can set timeline articles to Year 0.</p>';
+    }
+    
+    public function allow_negative_years_callback() {
+        printf(
+            '<input type="checkbox" id="allow_negative_years" name="timeline_calendar_options[allow_negative_years]" value="1" %s />',
+            (isset($this->options['allow_negative_years']) && $this->options['allow_negative_years']) ? 'checked' : ''
+        );
+        echo '<label for="allow_negative_years"> Allow negative years (BC/BCE) in timeline articles</label>';
+        echo '<p class="description">When enabled, you can set timeline articles to negative years (e.g., -100 for 100 BC).</p>';
+    }
+}
+
+// Initialize settings
+if (is_admin()) {
+    new TimelineCalendarSettings();
+}
+
+// Helper function to get plugin options
+function get_timeline_calendar_option($key, $default = null) {
+    $options = get_option('timeline_calendar_options', array(
+        'reference_year' => 1989,
+        'allow_year_zero' => false,
+        'allow_negative_years' => false
+    ));
+    return isset($options[$key]) ? $options[$key] : $default;
+}
+
 // Flush rewrite rules on plugin activation
 register_activation_hook(__FILE__, function() {
     // Flush rewrite rules to ensure our rules are registered
@@ -53,7 +195,15 @@ add_action('add_meta_boxes', function() {
             $year = get_post_meta($post->ID, 'timeline_year', true);
             $month = get_post_meta($post->ID, 'timeline_month', true);
             $day = get_post_meta($post->ID, 'timeline_day', true);
-            echo '<label>Year: <input type="number" name="timeline_year" id="timeline_year" value="' . esc_attr($year) . '" step="1" /></label> ';
+            
+            // Get plugin settings
+            $allow_year_zero = get_timeline_calendar_option('allow_year_zero', false);
+            $allow_negative_years = get_timeline_calendar_option('allow_negative_years', false);
+            
+            // Set min value based on settings
+            $min_year = $allow_negative_years ? -9999 : ($allow_year_zero ? 0 : 1);
+            
+            echo '<label>Year: <input type="number" name="timeline_year" id="timeline_year" value="' . esc_attr($year) . '" step="1" min="' . $min_year . '" /></label> ';
             echo '<label>Month: <select name="timeline_month" id="timeline_month">';
             $months = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
             foreach ($months as $num=>$name) {
@@ -69,6 +219,12 @@ add_action('add_meta_boxes', function() {
             ?>
             <script>
             jQuery(document).ready(function($) {
+                // Get timeline calendar settings
+                var timelineSettings = <?php echo json_encode(array(
+                    'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
+                    'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false)
+                )); ?>;
+                
                 function updatePermalink() {
                     var year = $('#timeline_year').val();
                     var month = $('#timeline_month').val();
@@ -92,7 +248,18 @@ add_action('add_meta_boxes', function() {
                     }
                 }
                 
+                // Validate year input based on settings
+                function validateYearInput() {
+                    var year = parseInt($('#timeline_year').val());
+                    var minYear = timelineSettings.allowNegativeYears ? -9999 : (timelineSettings.allowYearZero ? 0 : 1);
+                    
+                    if (year < minYear) {
+                        $('#timeline_year').val(minYear);
+                    }
+                }
+                
                 $('#timeline_year, #timeline_month, #timeline_day, #post_name, #title').on('change keyup', updatePermalink);
+                $('#timeline_year').on('blur', validateYearInput);
                 
                 // Initial update
                 updatePermalink();
@@ -130,6 +297,13 @@ add_action('wp_enqueue_scripts', function() {
             '1.0.12',
             true
         );
+        
+        // Localize script with timeline calendar settings
+        wp_localize_script('timeline-calendar-js', 'timelineCalendarSettings', array(
+            'referenceYear' => get_timeline_calendar_option('reference_year', 1989),
+            'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
+            'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false)
+        ));
 });
 
 // Calendar shortcode
@@ -150,7 +324,7 @@ add_shortcode('timeline_sparkline_calendar', function() {
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof TimelineSparklineCalendar !== 'undefined') {
             new TimelineSparklineCalendar('#timeline-sparkline-calendar', {
-                startYear: -2,
+                startYear: <?php echo get_timeline_calendar_option('allow_negative_years', false) ? '-2' : '1'; ?>,
                 endYear: 4,
                 yearsPerView: 7
             });

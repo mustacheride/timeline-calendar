@@ -17,9 +17,10 @@ class TimelineCalendar {
         this.init();
     }
 
-    // Convert fictional year to real year (Year 1 = 1989)
+    // Convert fictional year to real year (Year 1 = reference year)
     getRealYear(fictionalYear) {
-        return 1989 + (fictionalYear - 1);
+        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989;
+        return referenceYear + (fictionalYear - 1);
     }
 
     // Get the day of the week for a given fictional date
