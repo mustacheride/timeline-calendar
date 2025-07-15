@@ -879,8 +879,8 @@
 }
 
 .timeline-sparkline-month {
-    width: 8px;
-    height: 20px;
+    width: 12px;
+    height: 80px;
     background: var(--calendar-bg);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -889,7 +889,7 @@
 
 .timeline-sparkline-month:hover {
     background: var(--calendar-article-highlight);
-    transform: scaleY(1.2);
+    transform: scaleY(1.1);
 }
 
 .timeline-sparkline-month.has-articles {
@@ -898,7 +898,7 @@
 
 .timeline-sparkline-month.has-articles:hover {
     background: var(--calendar-article-highlight-hover);
-    transform: scaleY(1.2);
+    transform: scaleY(1.1);
 }
 
 .timeline-sparkline-legend {
@@ -918,9 +918,9 @@
 }
 
 .timeline-sparkline-legend-box {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
 }
 
 .timeline-sparkline-legend-box.empty {
