@@ -850,7 +850,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     gap: 0.5rem;
     flex: 1;
     min-width: 0;
@@ -865,6 +864,8 @@
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     transition: background-color 0.2s ease;
+    vertical-align: top;
+    align-self: flex-start;
 }
 
 .timeline-sparkline-year-label:hover {
@@ -878,6 +879,9 @@
     background: var(--calendar-border);
     border-radius: 4px;
     overflow: hidden;
+    vertical-align: bottom;
+    align-self: flex-end;
+    margin-top: auto;
 }
 
 .timeline-sparkline-month {
