@@ -788,6 +788,7 @@
     font-size: 1.5rem;
     font-weight: bold;
     width: 40px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -831,14 +832,18 @@
     border: 1px solid var(--calendar-border);
     border-radius: 0;
     flex: 1;
+    height: 60px;
+    display: flex;
+    align-items: center;
 }
 
 .timeline-sparkline-years {
     display: flex;
     gap: 0;
     width: 100%;
-    padding: 1rem 0;
+    padding: 0 1rem;
     justify-content: space-between;
+    align-items: center;
 }
 
 .timeline-sparkline-year {
