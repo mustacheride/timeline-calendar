@@ -14,35 +14,75 @@ The Timeline Calendar plugin transforms WordPress into a powerful timeline manag
 - **Day View**: Detailed view of articles for a specific day
 - **Article View**: Individual article display with navigation
 
-### 📊 Sparkline Calendar
+### 📊 Dynamic Sparkline Calendar
 - Archive.org-style sparkline visualization
-- Visual representation of article density across time
+- **Dynamic height scaling**: Month heights scale based on article count
+- **Global consistency**: Heights remain consistent across all timeline views
+- **Visual data representation**: Quickly identify busy periods and patterns
 - Interactive navigation between years
 - Customizable date ranges and display options
+
+### ⚙️ Configurable Settings
+- **Reference Year**: Configure which year to use for day-of-week alignment
+- **Year 0 Support**: Option to enable/disable Year 0 in timeline articles
+- **Negative Years**: Option to enable/disable BC/BCE years (e.g., -100 for 100 BC)
+- Admin settings page under Settings > Timeline Calendar
 
 ### 🔗 Smart URL Structure
 - SEO-friendly URLs: `/timeline/year/month/day/article/`
 - Automatic breadcrumb navigation
 - Previous/next article navigation
 - Day-to-day and month-to-month navigation
+- **Admin permalink display**: Shows correct timeline URLs in WordPress admin
 
 ### 📝 Content Management
 - Custom post type: `timeline_article`
 - Meta fields for year, month, and day
 - Automatic permalink generation
 - Content organization by chronological order
+- **Real-time permalink preview**: See timeline URLs update as you edit
 
 ### 🎨 Responsive Design
 - Mobile-friendly interface
 - Modern, clean design
 - Consistent styling across all views
 - Customizable CSS variables
+- **Improved sparkline layout**: Year labels at top, sparklines at bottom
 
 ## Installation
 
 1. **Upload the plugin** to your `/wp-content/plugins/timeline-calendar/` directory
 2. **Activate the plugin** through the 'Plugins' menu in WordPress
 3. **Flush rewrite rules** by going to Settings > Permalinks and clicking "Save Changes"
+4. **Configure settings** at Settings > Timeline Calendar
+
+## Configuration
+
+### Plugin Settings
+
+Go to **Settings > Timeline Calendar** to configure:
+
+- **Reference Year for Day of Week Alignment**: Set the year used for calendar grid alignment (default: 1989)
+- **Allow Year 0**: Enable/disable Year 0 in timeline articles
+- **Allow Negative Years**: Enable/disable BC/BCE years (e.g., -100 for 100 BC)
+
+### Customizing Styles
+
+The plugin uses CSS custom properties for easy theming:
+
+```css
+:root {
+    --calendar-bg: #ffffff;
+    --calendar-border: #e1e5e9;
+    --calendar-text: #2c3e50;
+    --calendar-hover: #f8f9fa;
+    --calendar-article-highlight: #0066cc;
+    --calendar-article-highlight-hover: #0052a3;
+    --year-nav-text: #6c757d;
+    --year-nav-bg: #f8f9fa;
+    --year-nav-hover: #e9ecef;
+}
+```
 
 ## Usage
 
@@ -52,17 +92,24 @@ The Timeline Calendar plugin transforms WordPress into a powerful timeline manag
 2. Click **Add New**
 3. Fill in the article content as usual
 4. Set the **Timeline Year**, **Timeline Month**, and **Timeline Day** meta fields
-5. Publish your article
+   - Year range depends on your settings (1+, 0+, or negative years)
+5. **Watch the permalink update** in real-time as you change the timeline date
+6. Publish your article
 
 ### Displaying the Timeline
 
 #### Shortcodes
 
-**Sparkline Calendar:**
+**Sparkline Calendar (Recommended):**
 ```
 [timeline_sparkline]
 [timeline_sparkline start_year="0" end_year="10"]
 [timeline_sparkline years_per_view="5"]
+```
+
+**Legacy Sparkline Calendar:**
+```
+[timeline_sparkline_calendar]
 ```
 
 **Full Calendar:**
@@ -96,34 +143,6 @@ The plugin provides automatic navigation between:
 - Previous/next months
 - Previous/next years
 
-## Configuration
-
-### Customizing Styles
-
-The plugin uses CSS custom properties for easy theming:
-
-```css
-:root {
-    --calendar-bg: #ffffff;
-    --calendar-border: #e1e5e9;
-    --calendar-text: #2c3e50;
-    --calendar-hover: #f8f9fa;
-    --calendar-article-highlight: #0066cc;
-    --calendar-article-highlight-hover: #0052a3;
-    --year-nav-text: #6c757d;
-    --year-nav-bg: #f8f9fa;
-    --year-nav-hover: #e9ecef;
-}
-```
-
-### AJAX Endpoints
-
-The plugin provides several AJAX endpoints for dynamic content:
-
-- `timeline_calendar_articles` - Fetch articles for a specific year/month
-- `timeline_calendar_years` - Get available years
-- `timeline_sparkline_data` - Get sparkline data
-
 ## Technical Details
 
 ### File Structure
@@ -139,6 +158,8 @@ timeline-calendar/
 ├── templates/
 │   └── timeline-template.php
 ├── timeline-calendar.php
+├── uninstall.php
+├── LICENSE
 └── README.md
 ```
 
@@ -150,6 +171,9 @@ The plugin uses several WordPress hooks:
 - `template_redirect` - Load timeline templates
 - `redirect_canonical` - Prevent unwanted redirects
 - `wp_enqueue_scripts` - Load assets
+- `post_link` - Customize permalinks in admin
+- `get_permalink` - Customize permalink generation
+- `sample_permalink_html` - Update permalink preview
 
 ### Database
 
@@ -157,6 +181,16 @@ The plugin creates a custom post type `timeline_article` with meta fields:
 - `timeline_year` (integer)
 - `timeline_month` (integer, 1-12)
 - `timeline_day` (integer, 1-31)
+
+Settings are stored in `wp_options` table as `timeline_calendar_options`.
+
+### AJAX Endpoints
+
+The plugin provides several AJAX endpoints for dynamic content:
+
+- `timeline_calendar_articles` - Fetch articles for a specific year/month
+- `timeline_calendar_years` - Get available years
+- `timeline_sparkline_data` - Get sparkline data
 
 ## Troubleshooting
 
@@ -174,6 +208,11 @@ The plugin creates a custom post type `timeline_article` with meta fields:
 **Homepage issues:**
 - The plugin only affects `/timeline/` URLs
 - Other pages should work normally
+
+**Admin permalinks showing wrong URLs:**
+- Clear browser cache
+- Check that timeline date meta fields are set correctly
+- Verify plugin settings are saved
 
 ### Debug Mode
 
@@ -193,6 +232,14 @@ define('WP_DEBUG_DISPLAY', false);
 - Sparkline calendar
 - URL routing system
 - Navigation between articles
+
+### Recent Updates
+- **Configurable Settings**: Added admin settings page for reference year, Year 0, and negative years
+- **Dynamic Sparkline Heights**: Month heights now scale based on article count with global consistency
+- **Improved Layout**: Year labels aligned to top, sparklines to bottom
+- **Admin Permalink Fix**: Timeline URLs now display correctly in WordPress admin
+- **Real-time Permalink Preview**: See timeline URLs update as you edit articles
+- **Enhanced Navigation**: Better alignment and sizing for sparkline calendar elements
 
 ## Support
 
