@@ -880,7 +880,9 @@
 
 .timeline-sparkline-month {
     width: 12px;
-    height: 80px;
+    height: 20px;
+    min-height: 8px;
+    max-height: 80px;
     background: var(--calendar-bg);
     cursor: pointer;
     transition: all 0.2s ease;

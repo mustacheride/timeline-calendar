@@ -144,6 +144,9 @@ class TimelineSparklineCalendar {
         const sparkline = document.createElement('div');
         sparkline.className = 'timeline-sparkline-months';
         
+        // Calculate the maximum article count for this year to normalize heights
+        const maxArticles = Math.max(...Object.values(monthData));
+        
         for (let month = 1; month <= 12; month++) {
             const monthElement = document.createElement('div');
             monthElement.className = 'timeline-sparkline-month';
@@ -155,10 +158,23 @@ class TimelineSparklineCalendar {
                 monthElement.classList.add('has-articles');
                 monthElement.dataset.count = articleCount;
                 
+                // Calculate dynamic height based on article count
+                // Base height: 8px, Max height: 80px
+                const minHeight = 8;
+                const maxHeight = 80;
+                const height = maxArticles > 0 ? 
+                    minHeight + ((articleCount / maxArticles) * (maxHeight - minHeight)) : 
+                    minHeight;
+                
+                monthElement.style.height = `${height}px`;
+                
                 // Add tooltip
                 const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 monthElement.title = `${monthNames[month]} ${year}: ${articleCount} article${articleCount !== 1 ? 's' : ''}`;
+            } else {
+                // Set minimum height for months with no articles
+                monthElement.style.height = '8px';
             }
             
             sparkline.appendChild(monthElement);
