@@ -28,6 +28,7 @@ class TimelineSparklineCalendar {
         }
         
         this.data = {};
+        this.globalMaxArticles = 0;
         this.currentYearRange = { 
             start: this.options.startYear, 
             end: this.options.endYear 
@@ -58,6 +59,18 @@ class TimelineSparklineCalendar {
             
             if (data.success) {
                 this.data = data.data;
+                
+                // Calculate global maximum article count across all years and months
+                this.globalMaxArticles = 0;
+                Object.values(this.data).forEach(yearData => {
+                    Object.values(yearData).forEach(monthCount => {
+                        if (monthCount > this.globalMaxArticles) {
+                            this.globalMaxArticles = monthCount;
+                        }
+                    });
+                });
+                
+                console.log('SparklineCalendar: Global max articles:', this.globalMaxArticles);
                 this.render();
             } else {
                 console.error('SparklineCalendar: Failed to load data:', data);
@@ -144,9 +157,6 @@ class TimelineSparklineCalendar {
         const sparkline = document.createElement('div');
         sparkline.className = 'timeline-sparkline-months';
         
-        // Calculate the maximum article count for this year to normalize heights
-        const maxArticles = Math.max(...Object.values(monthData));
-        
         for (let month = 1; month <= 12; month++) {
             const monthElement = document.createElement('div');
             monthElement.className = 'timeline-sparkline-month';
@@ -158,12 +168,12 @@ class TimelineSparklineCalendar {
                 monthElement.classList.add('has-articles');
                 monthElement.dataset.count = articleCount;
                 
-                // Calculate dynamic height based on article count
+                // Calculate dynamic height based on global maximum article count
                 // Base height: 8px, Max height: 80px
                 const minHeight = 8;
                 const maxHeight = 80;
-                const height = maxArticles > 0 ? 
-                    minHeight + ((articleCount / maxArticles) * (maxHeight - minHeight)) : 
+                const height = this.globalMaxArticles > 0 ? 
+                    minHeight + ((articleCount / this.globalMaxArticles) * (maxHeight - minHeight)) : 
                     minHeight;
                 
                 monthElement.style.height = `${height}px`;
