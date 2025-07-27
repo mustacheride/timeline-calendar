@@ -151,12 +151,20 @@ echo "-->";
                     <article class="timeline-article">
                         <header class="timeline-article-header">
                             <div class="timeline-article-meta">
-                                <span class="timeline-date">
+                                <div class="timeline-article-meta-row">
+                                    <span class="timeline-date">
+                                        <?php 
+                                        $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
+                                        echo esc_html($month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year); 
+                                        ?>
+                                    </span>
                                     <?php 
-                                    $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                                    echo esc_html($month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year); 
+                                    $time_of_day = get_post_meta(get_the_ID(), 'timeline_time_of_day', true);
+                                    if (!empty($time_of_day)): 
                                     ?>
-                                </span>
+                                        <span class="timeline-article-time-of-day"><?php echo esc_html($time_of_day); ?></span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </header>
                         <div class="timeline-article-content">

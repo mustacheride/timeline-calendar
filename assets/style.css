@@ -564,6 +564,26 @@ body.timeline-calendar-page .page-title {
     gap: 1rem;
 }
 
+.timeline-article-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.timeline-article-time-of-day {
+    background: var(--timeline-calendar-highlight);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .timeline-date {
     font-size: 1.1rem;
     font-weight: 600;
