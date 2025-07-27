@@ -76,14 +76,11 @@ echo "timeline_article: " . ($timeline_article !== null ? $timeline_article : 'n
 echo "timeline_overview: " . ($timeline_overview !== null ? $timeline_overview : 'null') . "\n";
 echo "-->";
 
-// Enqueue timeline assets
-wp_enqueue_script('timeline-calendar-js');
-wp_enqueue_style('timeline-calendar-style');
-
-get_header();
+// Assets are now enqueued conditionally in the main plugin file
+// No need to call get_header() as this template is now integrated with the theme system
 ?>
 
-<div class="timeline-container">
+<div class="timeline-container wp-block-group">
     <div class="timeline-content">
         <?php if ($timeline_overview !== null): ?>
             <!-- Timeline Overview -->
@@ -804,22 +801,4 @@ get_header();
     </div>
 </div>
 
-<script>
-// Initialize sparkline calendar on overview page only
-document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize overview sparkline if we're on the overview page
-    if (document.getElementById('timeline-sparkline-calendar') && <?php echo $timeline_overview ? 'true' : 'false'; ?>) {
-        // This will be handled by the horizontal calendar JS
-        if (typeof TimelineSparklineCalendar !== 'undefined') {
-            console.log('Timeline template - Overview page initialization');
-            new TimelineSparklineCalendar('#timeline-sparkline-calendar', {
-                startYear: -2,
-                endYear: 4,
-                yearsPerView: 7
-            });
-        }
-    }
-});
-</script>
-
-<?php get_footer(); ?> 
+ 

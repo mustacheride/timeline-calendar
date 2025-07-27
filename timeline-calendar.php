@@ -286,11 +286,14 @@ add_action('save_post', function($post_id) {
 
 // Enqueue scripts and styles
 add_action('wp_enqueue_scripts', function() {
-            wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.2');
-            wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery'], '1.0.3', true);
-    wp_enqueue_script('timeline-header-js', plugins_url('assets/timeline-header.js', __FILE__), ['jquery'], '1.0.1', true);
-    wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery'], '1.0.1', true);
-            wp_enqueue_script(
+    // Only load on timeline pages or when shortcodes are used
+    if (is_timeline_request() || has_timeline_shortcode()) {
+        // Load styles with lower priority to respect theme styles
+        wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.2');
+        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery'], '1.0.3', true);
+        wp_enqueue_script('timeline-header-js', plugins_url('assets/timeline-header.js', __FILE__), ['jquery'], '1.0.1', true);
+        wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery'], '1.0.1', true);
+        wp_enqueue_script(
             'timeline-sparkline-calendar',
             plugin_dir_url(__FILE__) . 'assets/sparkline-calendar.js',
             array('jquery'),
@@ -298,12 +301,15 @@ add_action('wp_enqueue_scripts', function() {
             true
         );
         
-        // Localize script with timeline calendar settings
+        // Localize script with timeline calendar settings and AJAX URL
         wp_localize_script('timeline-calendar-js', 'timelineCalendarSettings', array(
             'referenceYear' => get_timeline_calendar_option('reference_year', 1989),
             'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
-            'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false)
+            'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false),
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('timeline_calendar_nonce')
         ));
+    }
 });
 
 // Calendar shortcode
@@ -441,6 +447,11 @@ add_shortcode('timeline_year_calendar', function($atts) {
 add_action('wp_ajax_timeline_calendar_years', 'timeline_calendar_years_ajax');
 add_action('wp_ajax_nopriv_timeline_calendar_years', 'timeline_calendar_years_ajax');
 function timeline_calendar_years_ajax() {
+    // Verify nonce for security (but don't fail if nonce is missing for public access)
+    if (isset($_REQUEST['nonce']) && !wp_verify_nonce($_REQUEST['nonce'], 'timeline_calendar_nonce')) {
+        wp_die('Security check failed');
+    }
+    
     global $wpdb;
     $years = $wpdb->get_col("
         SELECT DISTINCT meta_value 
@@ -448,6 +459,12 @@ function timeline_calendar_years_ajax() {
         WHERE meta_key = 'timeline_year' 
         ORDER BY CAST(meta_value AS SIGNED)
     ");
+    
+    // If no years found, return some sample years
+    if (empty($years)) {
+        $years = ['-2', '-1', '0', '1', '2', '3', '4'];
+    }
+    
     wp_send_json($years);
 }
 
@@ -530,8 +547,14 @@ add_shortcode('timeline_this_day_in_history', function() {
 add_action('wp_ajax_timeline_calendar_articles', 'timeline_calendar_articles_ajax');
 add_action('wp_ajax_nopriv_timeline_calendar_articles', 'timeline_calendar_articles_ajax');
 function timeline_calendar_articles_ajax() {
+    // Verify nonce for security (but don't fail if nonce is missing for public access)
+    if (isset($_REQUEST['nonce']) && !wp_verify_nonce($_REQUEST['nonce'], 'timeline_calendar_nonce')) {
+        wp_die('Security check failed');
+    }
+    
     $year = isset($_GET['year']) ? intval($_GET['year']) : 0;
     $month = isset($_GET['month']) ? intval($_GET['month']) : 1;
+    
     $args = [
         'post_type' => 'timeline_article',
         'posts_per_page' => -1,
@@ -549,8 +572,10 @@ function timeline_calendar_articles_ajax() {
             ]
         ]
     ];
+    
     $query = new WP_Query($args);
     $articles = [];
+    
     foreach ($query->posts as $post) {
         $articles[] = [
             'id' => $post->ID,
@@ -561,6 +586,7 @@ function timeline_calendar_articles_ajax() {
             'permalink' => get_timeline_permalink($post->ID)
         ];
     }
+    
     wp_send_json($articles);
 } 
 
@@ -757,10 +783,200 @@ add_action('template_redirect', function() {
         $wp_query->post_title = 'Year ' . $timeline_year;
     }
     
-    // Load our timeline template
-    include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
-    exit;
+    // Use WordPress template hierarchy to integrate with theme
+    add_filter('template_include', 'timeline_calendar_template_include');
+    return;
 });
+
+// Helper function to check if this is a timeline request
+function is_timeline_request() {
+    global $wp_query;
+    
+    // Check URL first
+    $uri_check = strpos($_SERVER['REQUEST_URI'], '/timeline/') === 0;
+    
+    // Check query vars
+    $has_timeline_vars = $wp_query && (
+        $wp_query->get('is_timeline_request') || 
+        $wp_query->get('timeline_overview') !== null || 
+        $wp_query->get('timeline_year') !== null || 
+        $wp_query->get('timeline_month') !== null || 
+        $wp_query->get('timeline_day') !== null || 
+        $wp_query->get('timeline_article') !== null
+    );
+    
+    return $uri_check || $has_timeline_vars;
+}
+
+// Helper function to check if timeline shortcodes are used
+function has_timeline_shortcode() {
+    global $post;
+    if (is_a($post, 'WP_Post')) {
+        return has_shortcode($post->post_content, 'timeline_calendar') ||
+               has_shortcode($post->post_content, 'timeline_sparkline_calendar') ||
+               has_shortcode($post->post_content, 'timeline_year_calendar');
+    }
+    return false;
+}
+
+// Template include function to integrate with WordPress theme system
+function timeline_calendar_template_include($template) {
+    global $wp_query;
+    
+    if (!is_timeline_request()) {
+        return $template;
+    }
+    
+    // Create a virtual post object that integrates with the theme
+    $timeline_post = new WP_Post((object) [
+        'ID' => -999,
+        'post_author' => 1,
+        'post_date' => current_time('mysql'),
+        'post_date_gmt' => current_time('mysql', 1),
+        'post_content' => timeline_calendar_get_content(),
+        'post_title' => $wp_query->post_title ?: 'Timeline',
+        'post_excerpt' => '',
+        'post_status' => 'publish',
+        'comment_status' => 'closed',
+        'ping_status' => 'closed',
+        'post_password' => '',
+        'post_name' => 'timeline',
+        'to_ping' => '',
+        'pinged' => '',
+        'post_modified' => current_time('mysql'),
+        'post_modified_gmt' => current_time('mysql', 1),
+        'post_content_filtered' => '',
+        'post_parent' => 0,
+        'guid' => home_url('/timeline/'),
+        'menu_order' => 0,
+        'post_type' => 'page',
+        'post_mime_type' => '',
+        'comment_count' => 0,
+        'filter' => 'raw'
+    ]);
+
+    // Set up the WordPress query to use our virtual post
+    $wp_query->post = $timeline_post;
+    $wp_query->posts = [$timeline_post];
+    $wp_query->queried_object = $timeline_post;
+    $wp_query->queried_object_id = -999;
+    $wp_query->found_posts = 1;
+    $wp_query->post_count = 1;
+    $wp_query->is_page = true;
+    $wp_query->is_singular = true;
+    $wp_query->is_404 = false;
+    $wp_query->max_num_pages = 1;
+
+    // Set up the global $post
+    global $post;
+    $post = $timeline_post;
+    setup_postdata($post);
+    
+    return $template;
+}
+
+// Generate timeline content
+function timeline_calendar_get_content() {
+    global $wp_query;
+    
+    // Enqueue timeline assets
+    wp_enqueue_style('timeline-calendar-style');
+    wp_enqueue_script('timeline-calendar-js');
+    wp_enqueue_script('timeline-header-js');
+    wp_enqueue_script('timeline-year-view-js');
+    wp_enqueue_script('timeline-sparkline-calendar');
+    
+    // Add timeline initialization JavaScript to footer
+    add_action('wp_footer', 'timeline_calendar_add_footer_script');
+    
+    ob_start();
+    
+    // Include the timeline template
+    include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
+    
+    return ob_get_clean();
+}
+
+// Add timeline initialization script to footer
+function timeline_calendar_add_footer_script() {
+    global $wp_query;
+    
+    $timeline_overview = $wp_query->get('timeline_overview');
+    $timeline_year = $wp_query->get('timeline_year');
+    $timeline_month = $wp_query->get('timeline_month');
+    $timeline_day = $wp_query->get('timeline_day');
+    $timeline_article = $wp_query->get('timeline_article');
+    
+    ?>
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Timeline: Initializing timeline components...');
+        
+        // Timeline variables
+        var timelineVars = {
+            overview: <?php echo $timeline_overview !== null ? 'true' : 'false'; ?>,
+            year: <?php echo $timeline_year !== null ? intval($timeline_year) : 'null'; ?>,
+            month: <?php echo $timeline_month !== null ? intval($timeline_month) : 'null'; ?>,
+            day: <?php echo $timeline_day !== null ? intval($timeline_day) : 'null'; ?>,
+            article: <?php echo $timeline_article !== null ? '"' . esc_js($timeline_article) . '"' : 'null'; ?>
+        };
+        
+        console.log('Timeline vars:', timelineVars);
+        
+        // Initialize sparkline calendars
+        var sparklineElements = document.querySelectorAll('.timeline-sparkline-calendar');
+        sparklineElements.forEach(function(element) {
+            if (typeof TimelineSparklineCalendar !== 'undefined') {
+                console.log('Initializing sparkline calendar:', element.id);
+                new TimelineSparklineCalendar('#' + element.id, {
+                    startYear: -2,
+                    endYear: 4,
+                    yearsPerView: 7
+                });
+            } else {
+                console.warn('TimelineSparklineCalendar class not found');
+            }
+        });
+        
+        // Initialize regular calendars
+        var calendarRoots = document.querySelectorAll('.timeline-calendar-root');
+        calendarRoots.forEach(function(root) {
+            var year = parseInt(root.getAttribute('data-year')) || timelineVars.year || 0;
+            var month = parseInt(root.getAttribute('data-month')) || timelineVars.month || 1;
+            
+            if (typeof TimelineCalendar !== 'undefined') {
+                console.log('Initializing calendar:', { year: year, month: month });
+                new TimelineCalendar(root, year, month);
+            } else {
+                console.warn('TimelineCalendar class not found');
+            }
+        });
+        
+        // Initialize single month calendars
+        var singleMonthCalendars = document.querySelectorAll('.timeline-single-month-calendar .timeline-calendar-root');
+        singleMonthCalendars.forEach(function(root) {
+            var year = timelineVars.year || 0;
+            var month = timelineVars.month || 1;
+            
+            if (typeof TimelineCalendar !== 'undefined') {
+                console.log('Initializing single month calendar:', { year: year, month: month });
+                new TimelineCalendar(root, year, month);
+            } else {
+                console.warn('TimelineCalendar class not found');
+            }
+        });
+        
+        // Initialize year view
+        if (document.querySelector('.timeline-year-view') && typeof TimelineYearView !== 'undefined') {
+            console.log('Initializing year view');
+            new TimelineYearView();
+        }
+    });
+    </script>
+    <?php
+}
+
+
 
 // Alternative approach: Handle timeline URLs directly
 // This approach is disabled to avoid conflicts with WordPress rewrite rules

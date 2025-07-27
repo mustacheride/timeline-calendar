@@ -1,34 +1,53 @@
+/* 
+ * Timeline Calendar Plugin Styles 
+ * Designed to work with any WordPress theme
+ * 
+ * This CSS has been optimized to:
+ * - Respect theme color schemes and variables
+ * - Use theme-friendly CSS custom properties
+ * - Inherit theme typography and spacing
+ * - Work within WordPress template hierarchy
+ * - Avoid aggressive style overrides
+ */
+
+/* Theme-aware CSS custom properties */
 :root {
-    --calendar-bg: #ffffff;
-    --calendar-border: #e1e5e9;
-    --calendar-text: #2c3e50;
-    --calendar-hover: #f8f9fa;
-    --calendar-article-highlight: #0066cc;
-    --calendar-article-highlight-hover: #0052a3;
-    --year-nav-text: #6c757d;
-    --year-nav-bg: #f8f9fa;
-    --year-nav-hover: #e9ecef;
+    /* Primary variables with theme fallbacks */
+    --timeline-calendar-bg: var(--wp--preset--color--background, var(--wp--color--background, #ffffff));
+    --timeline-calendar-border: var(--wp--preset--color--primary, var(--wp--color--border, #e1e5e9));
+    --timeline-calendar-text: var(--wp--preset--color--foreground, var(--wp--color--foreground, currentColor));
+    --timeline-calendar-hover: var(--wp--preset--color--tertiary, var(--wp--color--subtle-background, rgba(0,0,0,0.05)));
+    --timeline-calendar-highlight: var(--wp--preset--color--primary, var(--wp--color--primary, #0073aa));
+    --timeline-calendar-highlight-hover: var(--wp--preset--color--primary, var(--wp--color--primary-hover, #005a87));
 }
 
-/* Year View Styles */
+/* Ensure timeline elements respect theme context */
+.timeline-container {
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+/* Year View Styles - inherit theme fonts and spacing */
 .timeline-year-view {
-    max-width: 1200px;
+    max-width: min(1200px, 100%);
     margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: inherit; /* Use theme's font family */
 }
 
 /* Year Overview with Sparkline */
 .timeline-year-overview {
-    max-width: 1200px;
+    max-width: min(1200px, 100%);
     margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: inherit; /* Use theme's font family */
 }
 
 .timeline-year-sparkline,
 .timeline-month-sparkline {
     margin-bottom: 2rem;
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -39,21 +58,21 @@
     margin: 0;
 }
 
-/* Clickable Month Links */
+/* Clickable Month Links - inherit theme link styles */
 .timeline-month-block h4 a {
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .timeline-month-block h4 a:hover {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
 }
 
 /* Single Month Calendar View */
 .timeline-single-month-calendar {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -72,14 +91,14 @@
     align-items: center;
     margin-top: 2rem;
     padding: 1rem;
-    background: var(--year-nav-bg);
+    background: var(--timeline-calendar-hover);
     border-radius: 8px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-nav-prev,
 .timeline-nav-next {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 1rem;
@@ -89,7 +108,7 @@
 
 .timeline-nav-prev:hover,
 .timeline-nav-next:hover {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     text-decoration: none;
 }
@@ -101,9 +120,9 @@
     align-items: center;
     margin-top: 2rem;
     padding: 1rem;
-    background: var(--year-nav-bg);
+    background: var(--timeline-calendar-hover);
     border-radius: 8px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 
@@ -112,14 +131,14 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: var(--year-nav-bg);
+    background: var(--timeline-calendar-hover);
     padding: 1rem;
     border-radius: 8px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-year-nav-btn {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -130,14 +149,14 @@
 }
 
 .timeline-year-nav-btn:hover {
-    background: var(--calendar-article-highlight-hover);
+    background: var(--timeline-calendar-highlight-hover);
 }
 
 .timeline-year-scroll {
     flex: 1;
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--calendar-border) transparent;
+    scrollbar-color: var(--timeline-calendar-border) transparent;
 }
 
 .timeline-year-scroll::-webkit-scrollbar {
@@ -149,7 +168,7 @@
 }
 
 .timeline-year-scroll::-webkit-scrollbar-thumb {
-    background: var(--calendar-border);
+    background: var(--timeline-calendar-border);
     border-radius: 3px;
 }
 
@@ -160,31 +179,31 @@
 }
 
 .timeline-year-item {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
     font-weight: 500;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-year-item:hover {
-    background: var(--year-nav-hover);
-    border-color: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-hover);
+    border-color: var(--timeline-calendar-highlight);
 }
 
 .timeline-year-item.active {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
-    border-color: var(--calendar-article-highlight);
+    border-color: var(--timeline-calendar-highlight);
 }
 
 .timeline-year-calendar {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -202,8 +221,8 @@
 }
 
 .timeline-month-block {
-    background: var(--calendar-hover);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-hover);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
@@ -211,7 +230,7 @@
 
 .timeline-month-block h4 {
     margin: 0 0 1rem 0;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     font-size: 1.1rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -223,14 +242,14 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background: var(--calendar-border);
+    background: var(--timeline-calendar-border);
     border-radius: 4px;
     overflow: hidden;
     font-size: 0.9rem;
 }
 
 .calendar-day {
-    background: var(--calendar-bg);
+    background: var(--timeline-calendar-bg);
     padding: 0.5rem;
     min-height: 40px;
     display: flex;
@@ -242,17 +261,17 @@
 }
 
 .calendar-day:hover {
-    background: var(--calendar-hover);
+    background: var(--timeline-calendar-hover);
 }
 
 .calendar-day:empty,
 .calendar-day:not(:has(*)) {
-    background: var(--calendar-hover);
+    background: var(--timeline-calendar-hover);
     cursor: default;
 }
 
 .day-has-articles {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     font-weight: 600;
 }
@@ -305,7 +324,7 @@
 }
 
 .calendar-nav button {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -316,12 +335,12 @@
 }
 
 .calendar-nav button:hover {
-    background: var(--calendar-article-highlight-hover);
+    background: var(--timeline-calendar-highlight-hover);
 }
 
 .calendar-nav span {
     font-weight: 600;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     font-size: 1rem;
 }
 
@@ -338,7 +357,7 @@
 }
 
 #calendar-modal-content {
-    background-color: var(--calendar-bg);
+    background-color: var(--timeline-calendar-bg);
     margin: 5% auto;
     padding: 2rem;
     border-radius: 8px;
@@ -356,18 +375,18 @@
     font-size: 1.5rem;
     font-weight: bold;
     cursor: pointer;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     transition: color 0.2s ease;
 }
 
 #calendar-modal-close:hover {
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 #calendar-modal-list h3 {
     margin: 0 0 1rem 0;
-    color: var(--calendar-text);
-    border-bottom: 2px solid var(--calendar-article-highlight);
+    color: var(--timeline-calendar-text);
+    border-bottom: 2px solid var(--timeline-calendar-highlight);
     padding-bottom: 0.5rem;
 }
 
@@ -379,7 +398,7 @@
 
 #calendar-modal-list li {
     padding: 0.5rem 0;
-    border-bottom: 1px solid var(--calendar-border);
+    border-bottom: 1px solid var(--timeline-calendar-border);
 }
 
 #calendar-modal-list li:last-child {
@@ -387,14 +406,14 @@
 }
 
 #calendar-modal-list a {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
 #calendar-modal-list a:hover {
-    color: var(--calendar-article-highlight-hover);
+    color: var(--timeline-calendar-highlight-hover);
     text-decoration: underline;
 }
 
@@ -448,23 +467,23 @@
     margin: 1rem 0 2rem 0;
     padding: 0.5rem 0;
     font-size: 0.9rem;
-    color: var(--year-nav-text);
-    border-bottom: 1px solid var(--calendar-border);
+    color: var(--timeline-calendar-text);
+    border-bottom: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-breadcrumbs a {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .timeline-breadcrumbs a:hover {
-    color: var(--calendar-article-highlight-hover);
+    color: var(--timeline-calendar-highlight-hover);
     text-decoration: underline;
 }
 
 .timeline-breadcrumbs span {
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     font-weight: 500;
 }
 
@@ -477,8 +496,8 @@
 
 .timeline-article-overview .timeline-sparkline-calendar {
     margin-bottom: 2rem;
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -489,8 +508,8 @@
 }
 
 .timeline-article {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -500,7 +519,7 @@
 .timeline-article-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid var(--calendar-article-highlight);
+    border-bottom: 2px solid var(--timeline-calendar-highlight);
 }
 
 .timeline-article-meta {
@@ -514,16 +533,16 @@
 .timeline-date {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--calendar-text);
-    background: var(--year-nav-bg);
+    color: var(--timeline-calendar-text);
+    background: var(--timeline-calendar-hover);
     padding: 0.5rem 1rem;
     border-radius: 4px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-article-content {
     line-height: 1.6;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-article-content h1,
@@ -532,7 +551,7 @@
 .timeline-article-content h4,
 .timeline-article-content h5,
 .timeline-article-content h6 {
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     margin-top: 2rem;
     margin-bottom: 1rem;
 }
@@ -542,12 +561,12 @@
 }
 
 .timeline-article-content a {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
     text-decoration: none;
 }
 
 .timeline-article-content a:hover {
-    color: var(--calendar-article-highlight-hover);
+    color: var(--timeline-calendar-highlight-hover);
     text-decoration: underline;
 }
 
@@ -557,14 +576,14 @@
     align-items: center;
     margin: 2rem 0;
     padding: 1rem;
-    background: var(--year-nav-bg);
+    background: var(--timeline-calendar-hover);
     border-radius: 8px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-article-stats {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -572,14 +591,14 @@
 
 .timeline-article-stats h3 {
     margin: 0 0 1rem 0;
-    color: var(--calendar-text);
-    border-bottom: 2px solid var(--calendar-article-highlight);
+    color: var(--timeline-calendar-text);
+    border-bottom: 2px solid var(--timeline-calendar-highlight);
     padding-bottom: 0.5rem;
 }
 
 .timeline-article-stats p {
     margin: 0.5rem 0;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 /* This Day in History Styles */
@@ -587,8 +606,8 @@
     max-width: 800px;
     margin: 2rem auto;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -598,9 +617,9 @@
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
     font-weight: 700;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     text-align: center;
-    border-bottom: 2px solid var(--calendar-article-highlight);
+    border-bottom: 2px solid var(--timeline-calendar-highlight);
     padding-bottom: 1rem;
 }
 
@@ -608,14 +627,14 @@
     text-align: center;
     margin: 0 0 2rem 0;
     font-size: 1.1rem;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     font-style: italic;
 }
 
 .timeline-this-day-empty {
     text-align: center;
     padding: 3rem 1rem;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     font-size: 1.1rem;
 }
 
@@ -629,20 +648,20 @@
     display: flex;
     gap: 1.5rem;
     padding: 1.5rem;
-    background: var(--calendar-hover);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-hover);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     transition: all 0.2s ease;
 }
 
 .timeline-this-day-item:hover {
-    border-color: var(--calendar-article-highlight);
+    border-color: var(--timeline-calendar-highlight);
     box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
 }
 
 .timeline-this-day-year {
     flex-shrink: 0;
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     padding: 0.75rem 1rem;
     border-radius: 6px;
@@ -666,17 +685,17 @@
 }
 
 .timeline-this-day-article-title a {
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .timeline-this-day-article-title a:hover {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
 }
 
 .timeline-this-day-excerpt {
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     line-height: 1.6;
     font-size: 0.95rem;
 }
@@ -727,8 +746,8 @@
     max-width: 1200px;
     margin: 2rem auto;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -740,13 +759,13 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid var(--calendar-border);
+    border-bottom: 2px solid var(--timeline-calendar-border);
 }
 
 .timeline-sparkline-header h2 {
     margin: 0;
     font-size: 1.5rem;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-sparkline-controls {
@@ -756,7 +775,7 @@
 }
 
 .timeline-sparkline-nav {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -767,7 +786,7 @@
 }
 
 .timeline-sparkline-nav:hover {
-    background: var(--calendar-article-highlight-hover);
+    background: var(--timeline-calendar-highlight-hover);
 }
 
 /* Sparkline Calendar Container with Side Navigation */
@@ -780,8 +799,8 @@
 /* Sparkline Calendar Side Navigation */
 .timeline-sparkline-nav-left,
 .timeline-sparkline-nav-right {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 0;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -792,7 +811,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     position: relative;
     z-index: 2;
 }
@@ -811,25 +830,25 @@
 
 .timeline-sparkline-nav-left:hover,
 .timeline-sparkline-nav-right:hover {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
 }
 
 .timeline-sparkline-nav-left:active,
 .timeline-sparkline-nav-right:active {
-    background: var(--calendar-article-highlight-hover);
+    background: var(--timeline-calendar-highlight-hover);
 }
 
 .timeline-sparkline-range {
     font-size: 0.9rem;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     font-weight: 500;
 }
 
 .timeline-sparkline-scroll {
     overflow-x: hidden;
     margin-bottom: 2rem;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 0;
     flex: 1;
     height: 120px;
@@ -859,7 +878,7 @@
 .timeline-sparkline-year-label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     cursor: pointer;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
@@ -869,14 +888,14 @@
 }
 
 .timeline-sparkline-year-label:hover {
-    background: var(--calendar-hover);
-    color: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-hover);
+    color: var(--timeline-calendar-highlight);
 }
 
 .timeline-sparkline-months {
     display: flex;
     gap: 1px;
-    background: var(--calendar-border);
+    background: var(--timeline-calendar-border);
     border-radius: 4px;
     overflow: hidden;
     vertical-align: bottom;
@@ -889,23 +908,23 @@
     height: 20px;
     min-height: 8px;
     max-height: 80px;
-    background: var(--calendar-bg);
+    background: var(--timeline-calendar-bg);
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
 }
 
 .timeline-sparkline-month:hover {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     transform: scaleY(1.1);
 }
 
 .timeline-sparkline-month.has-articles {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
 }
 
 .timeline-sparkline-month.has-articles:hover {
-    background: var(--calendar-article-highlight-hover);
+    background: var(--timeline-calendar-highlight-hover);
     transform: scaleY(1.1);
 }
 
@@ -914,7 +933,7 @@
     justify-content: center;
     gap: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--calendar-border);
+    border-top: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-sparkline-legend-item {
@@ -922,7 +941,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.85rem;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-sparkline-legend-box {
@@ -932,12 +951,12 @@
 }
 
 .timeline-sparkline-legend-box.empty {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-sparkline-legend-box.has-articles {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
 }
 
 /* Timeline Container Styles */
@@ -951,33 +970,33 @@
 .timeline-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid var(--calendar-border);
+    border-bottom: 2px solid var(--timeline-calendar-border);
 }
 
 .timeline-title {
     margin: 0 0 1rem 0;
     font-size: 2rem;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-breadcrumb {
     font-size: 0.9rem;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-breadcrumb a {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .timeline-breadcrumb a:hover {
-    color: var(--calendar-article-highlight-hover);
+    color: var(--timeline-calendar-highlight-hover);
 }
 
 .timeline-content {
-    background: var(--calendar-bg);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-bg);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -986,48 +1005,48 @@
 .timeline-overview-stats {
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--calendar-border);
+    border-top: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-overview-stats h2 {
     margin: 0 0 1rem 0;
     font-size: 1.25rem;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-overview-stats p {
     margin: 0.5rem 0;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-not-found {
     text-align: center;
     padding: 3rem 1rem;
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-not-found h2 {
     margin: 0 0 1rem 0;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 /* Month Overview Styles */
 .timeline-month-overview h2 {
     margin: 0 0 2rem 0;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-month-calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background: var(--calendar-border);
+    background: var(--timeline-calendar-border);
     border-radius: 8px;
     overflow: hidden;
 }
 
 .timeline-month-day {
-    background: var(--calendar-bg);
+    background: var(--timeline-calendar-bg);
     padding: 0.5rem;
     min-height: 60px;
     display: flex;
@@ -1035,13 +1054,13 @@
 }
 
 .timeline-month-day.has-articles {
-    background: var(--calendar-hover);
+    background: var(--timeline-calendar-hover);
 }
 
 .timeline-day-number {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     margin-bottom: 0.25rem;
 }
 
@@ -1055,7 +1074,7 @@
 
 .timeline-day-article a {
     font-size: 0.75rem;
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
     text-decoration: none;
     line-height: 1.2;
 }
@@ -1067,7 +1086,7 @@
 /* Day Overview Styles */
 .timeline-day-articles h2 {
     margin: 0 0 2rem 0;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-articles-list {
@@ -1078,14 +1097,14 @@
 
 .timeline-article-preview {
     padding: 1.5rem;
-    background: var(--calendar-hover);
-    border: 1px solid var(--calendar-border);
+    background: var(--timeline-calendar-hover);
+    border: 1px solid var(--timeline-calendar-border);
     border-radius: 8px;
     transition: all 0.2s ease;
 }
 
 .timeline-article-preview:hover {
-    border-color: var(--calendar-article-highlight);
+    border-color: var(--timeline-calendar-highlight);
     box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
 }
 
@@ -1095,17 +1114,17 @@
 }
 
 .timeline-article-preview h3 a {
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .timeline-article-preview h3 a:hover {
-    color: var(--calendar-article-highlight);
+    color: var(--timeline-calendar-highlight);
 }
 
 .timeline-article-excerpt {
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     line-height: 1.6;
     font-size: 0.95rem;
 }
@@ -1119,17 +1138,17 @@
 .timeline-article-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid var(--calendar-border);
+    border-bottom: 2px solid var(--timeline-calendar-border);
 }
 
 .timeline-article-header h1 {
     margin: 0 0 1rem 0;
     font-size: 2rem;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
 }
 
 .timeline-article-meta {
-    color: var(--year-nav-text);
+    color: var(--timeline-calendar-text);
     font-size: 0.9rem;
     display: flex;
     justify-content: space-between;
@@ -1139,7 +1158,7 @@
 }
 
 .timeline-date {
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 4px;
@@ -1152,15 +1171,15 @@
     align-items: center;
     margin-top: 0.5rem;
     padding: 1rem;
-    background: var(--year-nav-bg);
+    background: var(--timeline-calendar-hover);
     border-radius: 8px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 }
 
 .timeline-back-to-day {
     display: inline-block;
     padding: 0.5rem 1rem;
-    background: var(--calendar-article-highlight);
+    background: var(--timeline-calendar-highlight);
     color: white;
     text-decoration: none;
     border-radius: 4px;
@@ -1176,7 +1195,7 @@
 
 .timeline-article-content {
     line-height: 1.8;
-    color: var(--calendar-text);
+    color: var(--timeline-calendar-text);
     font-size: 1.1rem;
 }
 
@@ -1271,7 +1290,7 @@
     align-items: center;
     margin-top: 2rem;
     padding: 1rem;
-    background: var(--year-nav-bg);
+    background: var(--timeline-calendar-hover);
     border-radius: 8px;
-    border: 1px solid var(--calendar-border);
+    border: 1px solid var(--timeline-calendar-border);
 } 
