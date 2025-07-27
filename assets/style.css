@@ -649,6 +649,23 @@
     font-size: 1.1rem;
 }
 
+.timeline-this-day-loading {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--timeline-calendar-text);
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.timeline-this-day-error {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #dc3545;
+    font-size: 1rem;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 4px;
+}
+
 .timeline-this-day-list {
     display: flex;
     flex-direction: column;

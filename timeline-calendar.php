@@ -470,75 +470,65 @@ function timeline_calendar_years_ajax() {
 
 // This Day in History shortcode
 add_shortcode('timeline_this_day_in_history', function() {
-    $current_month = date('n'); // Current month (1-12)
-    $current_day = date('j');   // Current day (1-31)
-    
-    $args = [
-        'post_type' => 'timeline_article',
-        'posts_per_page' => -1,
-        'post_status' => 'publish',
-        'orderby' => 'title',
-        'order' => 'ASC',
-        'meta_query' => [
-            [
-                'key' => 'timeline_month',
-                'value' => $current_month,
-                'compare' => '='
-            ],
-            [
-                'key' => 'timeline_day',
-                'value' => $current_day,
-                'compare' => '='
-            ]
-        ]
-    ];
-    
-    $query = new WP_Query($args);
-    $articles = [];
-    
-    foreach ($query->posts as $post) {
-        $year = get_post_meta($post->ID, 'timeline_year', true);
-        $articles[] = [
-            'id' => $post->ID,
-            'title' => get_the_title($post),
-            'timeline_year' => $year,
-            'permalink' => get_timeline_permalink($post->ID),
-            'excerpt' => get_the_excerpt($post)
-        ];
-    }
-    
     ob_start();
     ?>
-    <div class="timeline-this-day-in-history">
+    <div class="timeline-this-day-in-history" id="timeline-this-day-container">
         <h2 class="timeline-this-day-title">This Day in History</h2>
-        <p class="timeline-this-day-subtitle"><?php echo date('F j'); ?> throughout the timeline</p>
-        
-        <?php if (empty($articles)): ?>
-            <div class="timeline-this-day-empty">
-                <p>No timeline articles found for <?php echo date('F j'); ?>.</p>
+        <p class="timeline-this-day-subtitle" id="timeline-this-day-subtitle">Loading...</p>
+        <div class="timeline-this-day-content" id="timeline-this-day-content">
+            <div class="timeline-this-day-loading">
+                <p>Loading today's timeline articles...</p>
             </div>
-        <?php else: ?>
-            <div class="timeline-this-day-list">
-                <?php foreach ($articles as $article): ?>
-                    <div class="timeline-this-day-item">
-                        <div class="timeline-this-day-year">Year <?php echo esc_html($article['timeline_year']); ?></div>
-                        <div class="timeline-this-day-content">
-                            <h3 class="timeline-this-day-article-title">
-                                <a href="<?php echo esc_url($article['permalink']); ?>">
-                                    <?php echo esc_html($article['title']); ?>
-                                </a>
-                            </h3>
-                            <?php if (!empty($article['excerpt'])): ?>
-                                <div class="timeline-this-day-excerpt">
-                                    <?php echo wp_kses_post($article['excerpt']); ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
+        </div>
     </div>
+    
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        function loadThisDayInHistory() {
+            const now = new Date();
+            const month = now.getMonth() + 1; // JavaScript months are 0-based
+            const day = now.getDate();
+            
+            // Update subtitle with local date
+            const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('timeline-this-day-subtitle').textContent = 
+                monthNames[month] + ' ' + day + ' throughout the timeline';
+            
+            // Fetch articles for this date
+            const formData = new FormData();
+            formData.append('action', 'timeline_this_day_in_history');
+            formData.append('month', month);
+            formData.append('day', day);
+            
+            if (typeof timelineCalendarAjax !== 'undefined' && timelineCalendarAjax.nonce) {
+                formData.append('nonce', timelineCalendarAjax.nonce);
+            }
+            
+            fetch(timelineCalendarAjax.ajaxurl || '<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('timeline-this-day-content').innerHTML = data.data.html;
+                } else {
+                    document.getElementById('timeline-this-day-content').innerHTML = 
+                        '<div class="timeline-this-day-empty"><p>No timeline articles found for ' + 
+                        monthNames[month] + ' ' + day + '.</p></div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading This Day in History:', error);
+                document.getElementById('timeline-this-day-content').innerHTML = 
+                    '<div class="timeline-this-day-error"><p>Error loading timeline articles.</p></div>';
+            });
+        }
+        
+        loadThisDayInHistory();
+    });
+    </script>
     <?php
     return ob_get_clean();
 });
@@ -588,7 +578,94 @@ function timeline_calendar_articles_ajax() {
     }
     
     wp_send_json($articles);
-} 
+}
+
+// This Day in History AJAX handler
+add_action('wp_ajax_timeline_this_day_in_history', 'timeline_this_day_in_history_ajax');
+add_action('wp_ajax_nopriv_timeline_this_day_in_history', 'timeline_this_day_in_history_ajax');
+function timeline_this_day_in_history_ajax() {
+    // Verify nonce if available (lenient check for public access)
+    if (isset($_REQUEST['nonce']) && !wp_verify_nonce($_REQUEST['nonce'], 'timeline_calendar_nonce')) {
+        wp_send_json_error('Invalid nonce');
+        return;
+    }
+    
+    $month = intval($_POST['month']);
+    $day = intval($_POST['day']);
+    
+    // Validate input
+    if ($month < 1 || $month > 12 || $day < 1 || $day > 31) {
+        wp_send_json_error('Invalid date');
+        return;
+    }
+    
+    $args = [
+        'post_type' => 'timeline_article',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'orderby' => 'meta_value_num title',
+        'order' => 'ASC',
+        'meta_key' => 'timeline_year',
+        'meta_query' => [
+            [
+                'key' => 'timeline_month',
+                'value' => $month,
+                'compare' => '='
+            ],
+            [
+                'key' => 'timeline_day',
+                'value' => $day,
+                'compare' => '='
+            ]
+        ]
+    ];
+    
+    $query = new WP_Query($args);
+    $articles = [];
+    
+    foreach ($query->posts as $post) {
+        $year = get_post_meta($post->ID, 'timeline_year', true);
+        $articles[] = [
+            'id' => $post->ID,
+            'title' => get_the_title($post),
+            'timeline_year' => $year,
+            'permalink' => get_timeline_permalink($post->ID),
+            'excerpt' => get_the_excerpt($post)
+        ];
+    }
+    
+    if (empty($articles)) {
+        wp_send_json_error('No articles found');
+        return;
+    }
+    
+    // Generate HTML
+    ob_start();
+    ?>
+    <div class="timeline-this-day-list">
+        <?php foreach ($articles as $article): ?>
+            <div class="timeline-this-day-item">
+                <div class="timeline-this-day-year">Year <?php echo esc_html($article['timeline_year']); ?></div>
+                <div class="timeline-this-day-content">
+                    <h3 class="timeline-this-day-article-title">
+                        <a href="<?php echo esc_url($article['permalink']); ?>">
+                            <?php echo esc_html($article['title']); ?>
+                        </a>
+                    </h3>
+                    <?php if (!empty($article['excerpt'])): ?>
+                        <div class="timeline-this-day-excerpt">
+                            <?php echo wp_kses_post($article['excerpt']); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <?php
+    $html = ob_get_clean();
+    
+    wp_send_json_success(['html' => $html]);
+}
 
 // Add rewrite rules for timeline URLs with higher priority
 add_action('init', function() {
