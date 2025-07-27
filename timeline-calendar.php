@@ -215,6 +215,17 @@ add_action('add_meta_boxes', function() {
                 echo '<option value="' . $d . '"' . selected($day, $d, false) . '>' . $d . '</option>';
             }
             echo '</select></label>';
+            
+            // Time of Day field
+            $time_of_day = get_post_meta($post->ID, 'timeline_time_of_day', true);
+            echo '<br><br><label>Time of Day: <select name="timeline_time_of_day" id="timeline_time_of_day">';
+            echo '<option value="">No specific time</option>';
+            $time_options = ['Morning', 'Day', 'Afternoon', 'Evening', 'Night'];
+            foreach ($time_options as $time) {
+                echo '<option value="' . $time . '"' . selected($time_of_day, $time, false) . '>' . $time . '</option>';
+            }
+            echo '</select></label>';
+            
             echo '<p><em>Changing these values will update the permalink below.</em></p>';
             ?>
             <script>
@@ -281,6 +292,9 @@ add_action('save_post', function($post_id) {
     }
     if (isset($_POST['timeline_day'])) {
         update_post_meta($post_id, 'timeline_day', intval($_POST['timeline_day']));
+    }
+    if (isset($_POST['timeline_time_of_day'])) {
+        update_post_meta($post_id, 'timeline_time_of_day', sanitize_text_field($_POST['timeline_time_of_day']));
     }
 });
 
@@ -573,6 +587,7 @@ function timeline_calendar_articles_ajax() {
             'timeline_year' => get_post_meta($post->ID, 'timeline_year', true),
             'timeline_month' => get_post_meta($post->ID, 'timeline_month', true),
             'timeline_day' => get_post_meta($post->ID, 'timeline_day', true),
+            'timeline_time_of_day' => get_post_meta($post->ID, 'timeline_time_of_day', true),
             'permalink' => get_timeline_permalink($post->ID)
         ];
     }
@@ -625,10 +640,12 @@ function timeline_this_day_in_history_ajax() {
     
     foreach ($query->posts as $post) {
         $year = get_post_meta($post->ID, 'timeline_year', true);
+        $time_of_day = get_post_meta($post->ID, 'timeline_time_of_day', true);
         $articles[] = [
             'id' => $post->ID,
             'title' => get_the_title($post),
             'timeline_year' => $year,
+            'timeline_time_of_day' => $time_of_day,
             'permalink' => get_timeline_permalink($post->ID),
             'excerpt' => get_the_excerpt($post)
         ];
@@ -639,13 +656,49 @@ function timeline_this_day_in_history_ajax() {
         return;
     }
     
+    // Sort articles by time of day, then by year, then by title
+    $time_order = ['Morning', 'Day', 'Afternoon', 'Evening', 'Night'];
+    usort($articles, function($a, $b) use ($time_order) {
+        $a_time_index = $a['timeline_time_of_day'] ? array_search($a['timeline_time_of_day'], $time_order) : -1;
+        $b_time_index = $b['timeline_time_of_day'] ? array_search($b['timeline_time_of_day'], $time_order) : -1;
+        
+        // Articles without time of day come first
+        if ($a_time_index === -1 && $b_time_index !== -1) return -1;
+        if ($a_time_index !== -1 && $b_time_index === -1) return 1;
+        if ($a_time_index === -1 && $b_time_index === -1) {
+            // Then sort by year
+            if ($a['timeline_year'] !== $b['timeline_year']) {
+                return $a['timeline_year'] - $b['timeline_year'];
+            }
+            return strcasecmp($a['title'], $b['title']);
+        }
+        
+        // Then sort by time of day order
+        if ($a_time_index !== $b_time_index) {
+            return $a_time_index - $b_time_index;
+        }
+        
+        // Then by year
+        if ($a['timeline_year'] !== $b['timeline_year']) {
+            return $a['timeline_year'] - $b['timeline_year'];
+        }
+        
+        // Finally by title
+        return strcasecmp($a['title'], $b['title']);
+    });
+    
     // Generate HTML
     ob_start();
     ?>
     <div class="timeline-this-day-list">
         <?php foreach ($articles as $article): ?>
             <div class="timeline-this-day-item">
-                <div class="timeline-this-day-year">Year <?php echo esc_html($article['timeline_year']); ?></div>
+                <div class="timeline-this-day-header">
+                    <div class="timeline-this-day-year">Year <?php echo esc_html($article['timeline_year']); ?></div>
+                    <?php if (!empty($article['timeline_time_of_day'])): ?>
+                        <span class="timeline-this-day-time"><?php echo esc_html($article['timeline_time_of_day']); ?></span>
+                    <?php endif; ?>
+                </div>
                 <div class="timeline-this-day-content">
                     <h3 class="timeline-this-day-article-title">
                         <a href="<?php echo esc_url($article['permalink']); ?>">

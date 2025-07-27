@@ -223,8 +223,27 @@ class TimelineCalendar {
         const modal = document.getElementById('calendar-hover-modal');
         const listDiv = document.getElementById('calendar-hover-modal-list');
         
-        // Sort articles alphabetically
-        articlesForDay.sort((a, b) => a.title.localeCompare(b.title));
+        // Sort articles by time of day, then alphabetically
+        const timeOrder = ['Morning', 'Day', 'Afternoon', 'Evening', 'Night'];
+        articlesForDay.sort((a, b) => {
+            const aTimeIndex = a.timeline_time_of_day ? timeOrder.indexOf(a.timeline_time_of_day) : -1;
+            const bTimeIndex = b.timeline_time_of_day ? timeOrder.indexOf(b.timeline_time_of_day) : -1;
+            
+            // Articles without time of day come first
+            if (aTimeIndex === -1 && bTimeIndex !== -1) return -1;
+            if (aTimeIndex !== -1 && bTimeIndex === -1) return 1;
+            if (aTimeIndex === -1 && bTimeIndex === -1) {
+                return a.title.localeCompare(b.title);
+            }
+            
+            // Then sort by time of day order
+            if (aTimeIndex !== bTimeIndex) {
+                return aTimeIndex - bTimeIndex;
+            }
+            
+            // Finally by title
+            return a.title.localeCompare(b.title);
+        });
         
         // Format the date properly
         const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -234,7 +253,11 @@ class TimelineCalendar {
         let html = `<h4 style='margin: 0 0 0.5rem 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;'><a href='/timeline/${this.currentYear}/${this.currentMonth}/${day}/' style='color: #333; text-decoration: none;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${dateTitle}</a></h4>`;
         html += '<ul style="list-style: none; padding: 0; margin: 0;">';
         for (const art of articlesForDay) {
-            html += `<li style='padding: 0.25rem 0; border-bottom: 1px solid #f0f0f0;'><a href='${art.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${art.title}</a></li>`;
+            const timeBadge = art.timeline_time_of_day ? `<span style='background: #0066cc; color: white; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;'>${art.timeline_time_of_day}</span>` : '';
+            html += `<li style='padding: 0.25rem 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;'>
+                <a href='${art.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; flex: 1;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${art.title}</a>
+                ${timeBadge}
+            </li>`;
         }
         html += '</ul>';
         listDiv.innerHTML = html;

@@ -356,13 +356,32 @@ class TimelineSparklineCalendar {
             return;
         }
         
-        // Sort articles by day, then by title
+        // Sort articles by day, then by time of day, then by title
+        const timeOrder = ['Morning', 'Day', 'Afternoon', 'Evening', 'Night'];
         articles.sort((a, b) => {
             const dayA = parseInt(a.timeline_day) || 0;
             const dayB = parseInt(b.timeline_day) || 0;
             if (dayA !== dayB) {
                 return dayA - dayB;
             }
+            
+            // Within the same day, sort by time of day
+            const aTimeIndex = a.timeline_time_of_day ? timeOrder.indexOf(a.timeline_time_of_day) : -1;
+            const bTimeIndex = b.timeline_time_of_day ? timeOrder.indexOf(b.timeline_time_of_day) : -1;
+            
+            // Articles without time of day come first
+            if (aTimeIndex === -1 && bTimeIndex !== -1) return -1;
+            if (aTimeIndex !== -1 && bTimeIndex === -1) return 1;
+            if (aTimeIndex === -1 && bTimeIndex === -1) {
+                return a.title.localeCompare(b.title);
+            }
+            
+            // Then sort by time of day order
+            if (aTimeIndex !== bTimeIndex) {
+                return aTimeIndex - bTimeIndex;
+            }
+            
+            // Finally by title
             return a.title.localeCompare(b.title);
         });
         
@@ -397,6 +416,8 @@ class TimelineSparklineCalendar {
             const dayArticles = articlesByDay[day];
             
             dayArticles.forEach((article, index) => {
+                const timeBadge = article.timeline_time_of_day ? `<span style='background: #0066cc; color: white; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;'>${article.timeline_time_of_day}</span>` : '';
+                
                 html += `<div style='padding: 0.4rem 0; border-bottom: 1px solid #f5f5f5; display: flex; align-items: flex-start; gap: 0.75rem;'>`;
                 
                 // Date column (fixed width)
@@ -406,9 +427,10 @@ class TimelineSparklineCalendar {
                     </a>
                 </div>`;
                 
-                // Article title column (flexible width)
-                html += `<div style='flex: 1; min-width: 0;'>
-                    <a href='${article.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; line-height: 1.3; display: block;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${article.title}</a>
+                // Article title column (flexible width) with time badge
+                html += `<div style='flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center;'>
+                    <a href='${article.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; line-height: 1.3; flex: 1;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${article.title}</a>
+                    ${timeBadge}
                 </div>`;
                 
                 html += '</div>';

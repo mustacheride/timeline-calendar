@@ -382,17 +382,56 @@ echo "-->";
                 $query = new WP_Query($args);
                 
                 if ($query->have_posts()):
+                    // Collect articles and sort by time of day
+                    $articles = [];
+                    while ($query->have_posts()): $query->the_post();
+                        $time_of_day = get_post_meta(get_the_ID(), 'timeline_time_of_day', true);
+                        $articles[] = [
+                            'id' => get_the_ID(),
+                            'title' => get_the_title(),
+                            'excerpt' => get_the_excerpt(),
+                            'time_of_day' => $time_of_day
+                        ];
+                    endwhile;
+                    wp_reset_postdata();
+                    
+                    // Sort articles by time of day order, then by title
+                    $time_order = ['Morning', 'Day', 'Afternoon', 'Evening', 'Night'];
+                    usort($articles, function($a, $b) use ($time_order) {
+                        $a_time_index = $a['time_of_day'] ? array_search($a['time_of_day'], $time_order) : -1;
+                        $b_time_index = $b['time_of_day'] ? array_search($b['time_of_day'], $time_order) : -1;
+                        
+                        // Articles without time of day come first
+                        if ($a_time_index === -1 && $b_time_index !== -1) return -1;
+                        if ($a_time_index !== -1 && $b_time_index === -1) return 1;
+                        if ($a_time_index === -1 && $b_time_index === -1) {
+                            return strcasecmp($a['title'], $b['title']);
+                        }
+                        
+                        // Then sort by time of day order
+                        if ($a_time_index !== $b_time_index) {
+                            return $a_time_index - $b_time_index;
+                        }
+                        
+                        // Finally by title
+                        return strcasecmp($a['title'], $b['title']);
+                    });
                 ?>
                     <div class="timeline-day-articles">
                         <div class="timeline-articles-list">
-                            <?php while ($query->have_posts()): $query->the_post(); ?>
+                            <?php foreach ($articles as $article): ?>
                                 <article class="timeline-article-preview">
-                                    <h3><a href="<?php echo get_timeline_permalink(get_the_ID()); ?>"><?php the_title(); ?></a></h3>
-                                    <?php if (has_excerpt()): ?>
-                                        <div class="timeline-article-excerpt"><?php the_excerpt(); ?></div>
+                                    <div class="timeline-article-header-row">
+                                        <h3><a href="<?php echo get_timeline_permalink($article['id']); ?>"><?php echo esc_html($article['title']); ?></a></h3>
+                                        <?php if (!empty($article['time_of_day'])): ?>
+                                            <span class="timeline-time-of-day"><?php echo esc_html($article['time_of_day']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (!empty($article['excerpt'])): ?>
+                                        <div class="timeline-article-excerpt"><?php echo wp_kses_post($article['excerpt']); ?></div>
                                     <?php endif; ?>
                                 </article>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 <?php else: ?>

@@ -711,6 +711,14 @@ body.timeline-calendar-page .page-title {
     box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
 }
 
+.timeline-this-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
 .timeline-this-day-year {
     flex-shrink: 0;
     background: var(--timeline-calendar-highlight);
@@ -724,6 +732,20 @@ body.timeline-calendar-page .page-title {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
+}
+
+.timeline-this-day-time {
+    background: var(--timeline-calendar-highlight);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .timeline-this-day-content {
@@ -766,6 +788,11 @@ body.timeline-calendar-page .page-title {
     .timeline-this-day-item {
         flex-direction: column;
         gap: 1rem;
+    }
+    
+    .timeline-this-day-header {
+        flex-direction: column;
+        gap: 0.5rem;
     }
     
     .timeline-this-day-year {
@@ -1205,6 +1232,33 @@ body.timeline-calendar-page .page-title {
     color: var(--timeline-calendar-text);
     line-height: 1.6;
     font-size: 0.95rem;
+}
+
+/* Time of Day Styles */
+.timeline-article-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.timeline-article-header-row h3 {
+    margin: 0;
+    flex: 1;
+}
+
+.timeline-time-of-day {
+    background: var(--timeline-calendar-highlight);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 /* Article View Styles */
