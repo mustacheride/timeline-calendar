@@ -32,7 +32,16 @@ body[class*="timeline"] .wp-block-post-title,
 .timeline-day-view .wp-block-post-title,
 .timeline-article-view .wp-block-post-title,
 .timeline-sparkline-calendar .wp-block-post-title,
-.timeline-single-month-calendar .wp-block-post-title {
+.timeline-single-month-calendar .wp-block-post-title,
+/* Also hide various theme-generated post title elements */
+body.timeline-page .entry-title,
+body.timeline-calendar-page .entry-title,
+body.timeline-page h1.post-title,
+body.timeline-calendar-page h1.post-title,
+body.timeline-page h2.post-title,
+body.timeline-calendar-page h2.post-title,
+body.timeline-page .page-title,
+body.timeline-calendar-page .page-title {
     display: none !important;
 }
 

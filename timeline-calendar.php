@@ -847,7 +847,7 @@ add_action('template_redirect', function() {
     
     // Set the page title
     if ($timeline_overview !== null) {
-        $wp_query->post_title = 'Timeline Overview';
+        $wp_query->post_title = '';
     } elseif ($timeline_article !== null) {
         $wp_query->post_title = $timeline_article;
     } elseif ($timeline_day !== null) {
@@ -911,7 +911,7 @@ function timeline_calendar_template_include($template) {
         'post_date' => current_time('mysql'),
         'post_date_gmt' => current_time('mysql', 1),
         'post_content' => timeline_calendar_get_content(),
-        'post_title' => $wp_query->post_title ?: 'Timeline',
+        'post_title' => $wp_query->post_title ?: '',
         'post_excerpt' => '',
         'post_status' => 'publish',
         'comment_status' => 'closed',
@@ -1107,7 +1107,7 @@ add_action('init', function() {
             } elseif ($year) {
                 $wp_query->post_title = 'Year ' . $year;
             } else {
-                $wp_query->post_title = 'Timeline Overview';
+                $wp_query->post_title = '';
             }
             
             // Load our timeline template
