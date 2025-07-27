@@ -94,12 +94,11 @@ class TimelineSparklineCalendar {
         
         if (this.options.showNavigation) {
             header.innerHTML = `
-                <h2>Timeline Overview</h2>
                 <span class="timeline-sparkline-range">Years ${this.currentYearRange.start} - ${this.currentYearRange.end}</span>
             `;
         } else {
             header.innerHTML = `
-                <h2>Year ${this.currentYearRange.start} Overview</h2>
+                <span class="timeline-sparkline-range">Year ${this.currentYearRange.start}</span>
             `;
         }
         this.element.appendChild(header);
