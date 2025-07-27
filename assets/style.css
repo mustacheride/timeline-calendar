@@ -107,11 +107,13 @@
 }
 
 .timeline-nav-prev {
-    margin-right: auto !important;
+    grid-area: prev;
+    justify-self: start;
 }
 
 .timeline-nav-next {
-    margin-left: auto !important;
+    grid-area: next;
+    justify-self: end;
 }
 
 .timeline-nav-prev:hover,
@@ -579,8 +581,9 @@
 }
 
 .timeline-article-navigation {
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "prev next";
     align-items: center;
     margin: 2rem 0;
     padding: 1rem;
