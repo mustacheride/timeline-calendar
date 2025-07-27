@@ -21,6 +21,21 @@
     --timeline-calendar-highlight-hover: var(--wp--preset--color--primary, var(--wp--color--primary-hover, #005a87));
 }
 
+/* Hide WordPress post title blocks on timeline pages */
+body.timeline-page .wp-block-post-title,
+body.timeline-calendar-page .wp-block-post-title,
+body[class*="timeline"] .wp-block-post-title,
+.timeline-container .wp-block-post-title,
+.entry-title.wp-block-post-title,
+.timeline-year-view .wp-block-post-title,
+.timeline-month-view .wp-block-post-title,
+.timeline-day-view .wp-block-post-title,
+.timeline-article-view .wp-block-post-title,
+.timeline-sparkline-calendar .wp-block-post-title,
+.timeline-single-month-calendar .wp-block-post-title {
+    display: none !important;
+}
+
 /* Ensure timeline elements respect theme context */
 .timeline-container {
     color: inherit;

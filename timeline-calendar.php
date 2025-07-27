@@ -949,6 +949,13 @@ function timeline_calendar_template_include($template) {
     $post = $timeline_post;
     setup_postdata($post);
     
+    // Add timeline-specific body class
+    add_filter('body_class', function($classes) {
+        $classes[] = 'timeline-page';
+        $classes[] = 'timeline-calendar-page';
+        return $classes;
+    });
+    
     return $template;
 }
 
