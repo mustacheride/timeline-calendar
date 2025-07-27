@@ -182,7 +182,10 @@ add_action('init', function() {
         'label' => 'Timeline Articles',
         'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
         'has_archive' => true,
-        'menu_icon' => 'dashicons-calendar-alt'
+        'menu_icon' => 'dashicons-calendar-alt',
+        'show_in_rest' => true,
+        'rest_base' => 'timeline_article',
+        'rest_controller_class' => 'WP_REST_Posts_Controller'
     ]);
 });
 
