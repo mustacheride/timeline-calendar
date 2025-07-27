@@ -106,6 +106,14 @@
     transition: all 0.2s ease;
 }
 
+.timeline-nav-prev {
+    margin-right: auto;
+}
+
+.timeline-nav-next {
+    margin-left: auto;
+}
+
 .timeline-nav-prev:hover,
 .timeline-nav-next:hover {
     background: var(--timeline-calendar-highlight);
