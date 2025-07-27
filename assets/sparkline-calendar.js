@@ -88,21 +88,6 @@ class TimelineSparklineCalendar {
     render() {
         this.element.innerHTML = '';
         
-        // Create header (without navigation controls)
-        const header = document.createElement('div');
-        header.className = 'timeline-sparkline-header';
-        
-        if (this.options.showNavigation) {
-            header.innerHTML = `
-                <span class="timeline-sparkline-range">Years ${this.currentYearRange.start} to ${this.currentYearRange.end}</span>
-            `;
-        } else {
-            header.innerHTML = `
-                <span class="timeline-sparkline-range">Year ${this.currentYearRange.start}</span>
-            `;
-        }
-        this.element.appendChild(header);
-        
         // Create main sparkline container with side navigation
         const sparklineContainer = document.createElement('div');
         sparklineContainer.className = 'timeline-sparkline-container';
