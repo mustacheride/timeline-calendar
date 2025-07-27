@@ -107,11 +107,11 @@
 }
 
 .timeline-nav-prev {
-    margin-right: auto;
+    margin-right: auto !important;
 }
 
 .timeline-nav-next {
-    margin-left: auto;
+    margin-left: auto !important;
 }
 
 .timeline-nav-prev:hover,
@@ -580,7 +580,7 @@
 
 .timeline-article-navigation {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin: 2rem 0;
     padding: 1rem;
