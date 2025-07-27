@@ -226,6 +226,11 @@ add_action('add_meta_boxes', function() {
             }
             echo '</select></label>';
             
+            // Reference field
+            $reference = get_post_meta($post->ID, 'timeline_reference', true);
+            echo '<br><br><label>Reference: <input type="text" name="timeline_reference" id="timeline_reference" value="' . esc_attr($reference) . '" placeholder="e.g., Wikipedia, Book Title, or URL" style="width: 100%; max-width: 400px;" /></label>';
+            echo '<p><em>Add a research reference or source link (optional).</em></p>';
+            
             echo '<p><em>Changing these values will update the permalink below.</em></p>';
             ?>
             <script>
@@ -295,6 +300,9 @@ add_action('save_post', function($post_id) {
     }
     if (isset($_POST['timeline_time_of_day'])) {
         update_post_meta($post_id, 'timeline_time_of_day', sanitize_text_field($_POST['timeline_time_of_day']));
+    }
+    if (isset($_POST['timeline_reference'])) {
+        update_post_meta($post_id, 'timeline_reference', sanitize_text_field($_POST['timeline_reference']));
     }
 });
 

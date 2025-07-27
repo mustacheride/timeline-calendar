@@ -584,6 +584,38 @@ body.timeline-calendar-page .page-title {
     white-space: nowrap;
 }
 
+/* Reference Styles */
+.timeline-article-reference {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: var(--timeline-calendar-hover);
+    border: 1px solid var(--timeline-calendar-border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--timeline-calendar-text);
+}
+
+.timeline-reference-label {
+    font-weight: 600;
+    color: var(--timeline-calendar-highlight);
+    margin-right: 0.5rem;
+}
+
+.timeline-reference-link {
+    color: var(--timeline-calendar-highlight);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.timeline-reference-link:hover {
+    text-decoration: underline;
+    color: var(--timeline-calendar-highlight-hover);
+}
+
+.timeline-reference-text {
+    font-style: italic;
+}
+
 .timeline-date {
     font-size: 1.1rem;
     font-weight: 600;

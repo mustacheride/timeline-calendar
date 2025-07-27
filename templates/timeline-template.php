@@ -170,6 +170,23 @@ echo "-->";
                         <div class="timeline-article-content">
                             <?php the_content(); ?>
                         </div>
+                        
+                        <?php 
+                        $reference = get_post_meta(get_the_ID(), 'timeline_reference', true);
+                        if (!empty($reference)): 
+                        ?>
+                            <div class="timeline-article-reference">
+                                <span class="timeline-reference-label">Reference:</span>
+                                <?php 
+                                // Check if the reference looks like a URL
+                                if (filter_var($reference, FILTER_VALIDATE_URL) || strpos($reference, 'http') === 0) {
+                                    echo '<a href="' . esc_url($reference) . '" target="_blank" rel="noopener noreferrer" class="timeline-reference-link">' . esc_html($reference) . '</a>';
+                                } else {
+                                    echo '<span class="timeline-reference-text">' . esc_html($reference) . '</span>';
+                                }
+                                ?>
+                            </div>
+                        <?php endif; ?>
                     </article>
                     
                     <!-- Article Navigation -->

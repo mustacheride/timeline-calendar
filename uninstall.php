@@ -28,6 +28,7 @@ $wpdb->delete($wpdb->postmeta, ['meta_key' => 'timeline_year']);
 $wpdb->delete($wpdb->postmeta, ['meta_key' => 'timeline_month']);
 $wpdb->delete($wpdb->postmeta, ['meta_key' => 'timeline_day']);
 $wpdb->delete($wpdb->postmeta, ['meta_key' => 'timeline_time_of_day']);
+$wpdb->delete($wpdb->postmeta, ['meta_key' => 'timeline_reference']);
 
 // Flush rewrite rules
 flush_rewrite_rules(); 
