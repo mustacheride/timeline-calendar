@@ -846,33 +846,37 @@
 }
 
 .timeline-sparkline-scroll {
-    overflow-x: hidden;
+    overflow: hidden;
     margin-bottom: 2rem;
     border: 1px solid var(--timeline-calendar-border);
     border-radius: 0;
     flex: 1;
     height: 120px;
     display: flex;
-    align-items: center;
+    align-items: stretch;
 }
 
 .timeline-sparkline-years {
     display: flex;
     gap: 0;
     width: 100%;
+    height: 100%;
     padding: 0 1rem;
     justify-content: space-between;
-    align-items: center;
+    align-items: stretch;
+    overflow: hidden;
 }
 
 .timeline-sparkline-year {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
     flex: 1;
     min-width: 0;
     height: 100%;
+    padding: 0.5rem 0;
 }
 
 .timeline-sparkline-year-label {
@@ -883,8 +887,8 @@
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     transition: background-color 0.2s ease;
-    vertical-align: top;
-    align-self: flex-start;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 .timeline-sparkline-year-label:hover {
@@ -898,9 +902,9 @@
     background: var(--timeline-calendar-border);
     border-radius: 4px;
     overflow: hidden;
-    vertical-align: bottom;
-    align-self: flex-end;
-    margin-top: auto;
+    align-items: flex-end;
+    flex-shrink: 0;
+    height: 60px;
 }
 
 .timeline-sparkline-month {
@@ -912,6 +916,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    align-self: flex-end;
 }
 
 .timeline-sparkline-month:hover {
@@ -1275,6 +1280,11 @@
     
     .timeline-sparkline-year {
         min-width: 80px;
+        justify-content: space-between;
+    }
+    
+    .timeline-sparkline-months {
+        height: 50px;
     }
     
     .timeline-month-calendar {
@@ -1314,6 +1324,11 @@
     
     .timeline-sparkline-year {
         min-width: 60px;
+        justify-content: space-between;
+    }
+    
+    .timeline-sparkline-months {
+        height: 40px;
     }
     
     .timeline-sparkline-month {

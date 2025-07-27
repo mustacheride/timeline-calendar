@@ -239,17 +239,26 @@ echo "-->";
                         // Get previous and next articles
                         $prev_article = ($current_index > 0) ? $articles[$current_index - 1] : null;
                         $next_article = ($current_index < count($articles) - 1) ? $articles[$current_index + 1] : null;
+                        
+                        // Month names for date formatting
+                        $month_names = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
                         ?>
                         
                         <?php if ($prev_article): ?>
+                            <?php 
+                            $prev_date = $month_names[$prev_article['month']] . ' ' . $prev_article['day'] . ', Year ' . $prev_article['year'];
+                            ?>
                             <a href="<?php echo get_timeline_permalink($prev_article['id']); ?>" class="timeline-nav-prev">
-                                &larr; <?php echo esc_html($prev_article['title']); ?>
+                                &larr; <?php echo esc_html($prev_date); ?>
                             </a>
                         <?php endif; ?>
                         
                         <?php if ($next_article): ?>
+                            <?php 
+                            $next_date = $month_names[$next_article['month']] . ' ' . $next_article['day'] . ', Year ' . $next_article['year'];
+                            ?>
                             <a href="<?php echo get_timeline_permalink($next_article['id']); ?>" class="timeline-nav-next">
-                                <?php echo esc_html($next_article['title']); ?> &rarr;
+                                <?php echo esc_html($next_date); ?> &rarr;
                             </a>
                         <?php endif; ?>
                     </div>
