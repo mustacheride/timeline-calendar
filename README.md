@@ -1,10 +1,10 @@
 # Timeline Calendar WordPress Plugin
 
-A comprehensive WordPress plugin for creating and managing timeline-based content with interactive calendar views, sparkline visualizations, and hierarchical navigation.
+A comprehensive WordPress plugin for creating and managing timeline-based content with interactive calendar views, sparkline visualizations, and hierarchical navigation. Fully integrates with any WordPress theme.
 
 ## Description
 
-The Timeline Calendar plugin transforms WordPress into a powerful timeline management system, allowing you to create historical content organized by years, months, and days. Perfect for historical blogs, project timelines, or any content that needs chronological organization.
+The Timeline Calendar plugin transforms WordPress into a powerful timeline management system, allowing you to create historical content organized by years, months, and days. Perfect for historical blogs, project timelines, or any content that needs chronological organization. The plugin seamlessly integrates with your WordPress theme, respecting your site's design, colors, and layout.
 
 ## Features
 
@@ -14,19 +14,28 @@ The Timeline Calendar plugin transforms WordPress into a powerful timeline manag
 - **Day View**: Detailed view of articles for a specific day
 - **Article View**: Individual article display with navigation
 
-### 📊 Dynamic Sparkline Calendar
+### 📊 Dynamic Sparkline Calendar with Interactive Modals
 - Archive.org-style sparkline visualization
+- **Interactive month modals**: Hover or click on months to see all articles in a compact popup
+- **Chronological article listing**: Articles organized by day within each month
 - **Dynamic height scaling**: Month heights scale based on article count
 - **Global consistency**: Heights remain consistent across all timeline views
 - **Visual data representation**: Quickly identify busy periods and patterns
-- Interactive navigation between years
+- **Smart navigation**: Ctrl+click for direct navigation, regular click for modal preview
 - Customizable date ranges and display options
+
+### 🎨 Full Theme Integration
+- **Seamless theme compatibility**: All views respect your site's design and branding
+- **WordPress template hierarchy**: Proper integration with your theme's layout system
+- **Theme-aware styling**: Automatically adapts to your theme's colors and fonts
+- **Responsive design**: Works with your theme's responsive breakpoints
+- **Header and footer integration**: Timeline pages include your site's navigation and branding
 
 ### ⚙️ Configurable Settings
 - **Reference Year**: Configure which year to use for day-of-week alignment
 - **Year 0 Support**: Option to enable/disable Year 0 in timeline articles
 - **Negative Years**: Option to enable/disable BC/BCE years (e.g., -100 for 100 BC)
-- Admin settings page under Settings > Timeline Calendar
+- Admin settings page under Timeline Articles > Settings
 
 ### 🔗 Smart URL Structure
 - SEO-friendly URLs: `/timeline/year/month/day/article/`
@@ -42,45 +51,37 @@ The Timeline Calendar plugin transforms WordPress into a powerful timeline manag
 - Content organization by chronological order
 - **Real-time permalink preview**: See timeline URLs update as you edit
 
-### 🎨 Responsive Design
-- Mobile-friendly interface
-- Modern, clean design
-- Consistent styling across all views
-- Customizable CSS variables
-- **Improved sparkline layout**: Year labels at top, sparklines at bottom
-
 ## Installation
 
 1. **Upload the plugin** to your `/wp-content/plugins/timeline-calendar/` directory
 2. **Activate the plugin** through the 'Plugins' menu in WordPress
 3. **Flush rewrite rules** by going to Settings > Permalinks and clicking "Save Changes"
-4. **Configure settings** at Settings > Timeline Calendar
+4. **Configure settings** at Timeline Articles > Settings
 
 ## Configuration
 
 ### Plugin Settings
 
-Go to **Settings > Timeline Calendar** to configure:
+Go to **Timeline Articles > Settings** to configure:
 
 - **Reference Year for Day of Week Alignment**: Set the year used for calendar grid alignment (default: 1989)
 - **Allow Year 0**: Enable/disable Year 0 in timeline articles
 - **Allow Negative Years**: Enable/disable BC/BCE years (e.g., -100 for 100 BC)
+- **Flush Rewrite Rules**: Manual option to refresh URL routing if needed
 
-### Customizing Styles
+### Theme Customization
 
-The plugin uses CSS custom properties for easy theming:
+The plugin automatically respects your WordPress theme's styling through CSS custom properties:
 
 ```css
 :root {
-    --calendar-bg: #ffffff;
-    --calendar-border: #e1e5e9;
-    --calendar-text: #2c3e50;
-    --calendar-hover: #f8f9fa;
-    --calendar-article-highlight: #0066cc;
-    --calendar-article-highlight-hover: #0052a3;
-    --year-nav-text: #6c757d;
-    --year-nav-bg: #f8f9fa;
-    --year-nav-hover: #e9ecef;
+    /* Plugin uses theme-aware variables that adapt to your site */
+    --timeline-calendar-bg: var(--wp--preset--color--background, #ffffff);
+    --timeline-calendar-border: var(--wp--preset--color--primary, #e1e5e9);
+    --timeline-calendar-text: var(--wp--preset--color--foreground, currentColor);
+    --timeline-calendar-hover: var(--wp--preset--color--tertiary, rgba(0,0,0,0.05));
+    --timeline-calendar-highlight: var(--wp--preset--color--primary, #0073aa);
+    --timeline-calendar-highlight-hover: var(--wp--preset--color--primary, #005a87);
 }
 ```
 
@@ -100,26 +101,21 @@ The plugin uses CSS custom properties for easy theming:
 
 #### Shortcodes
 
-**Sparkline Calendar (Recommended):**
-```
-[timeline_sparkline]
-[timeline_sparkline start_year="0" end_year="10"]
-[timeline_sparkline years_per_view="5"]
-```
-
-**Legacy Sparkline Calendar:**
+**Sparkline Calendar (Primary):**
 ```
 [timeline_sparkline_calendar]
+[timeline_sparkline_calendar start_year="0" end_year="10"]
+[timeline_sparkline_calendar years_per_view="5"]
 ```
 
-**Full Calendar:**
-```
-[timeline_calendar]
-```
-
-**Year Calendar:**
+**Full Year Calendar:**
 ```
 [timeline_year_calendar year="3"]
+```
+
+**Single Month Calendar:**
+```
+[timeline_calendar]
 ```
 
 **This Day in History:**
@@ -129,17 +125,27 @@ The plugin uses CSS custom properties for easy theming:
 
 #### URL Structure
 
-- **Overview**: `/timeline/`
-- **Year**: `/timeline/3/`
-- **Month**: `/timeline/3/8/` (August, Year 3)
-- **Day**: `/timeline/3/8/15/` (August 15, Year 3)
-- **Article**: `/timeline/3/8/15/article-name/`
+- **Overview**: `/timeline/` - Shows sparkline calendar with modal previews
+- **Year**: `/timeline/3/` - 12-month grid view for Year 3
+- **Month**: `/timeline/3/8/` - Calendar view for August, Year 3
+- **Day**: `/timeline/3/8/15/` - Article list for August 15, Year 3
+- **Article**: `/timeline/3/8/15/article-name/` - Individual article view
 
-### Navigation
+### Interactive Features
 
+#### Sparkline Modal System
+- **Hover Preview**: Hover over any month with articles to see a preview modal
+- **Click for Details**: Click on months to see all articles organized by day
+- **Compact Layout**: Dates and article titles displayed on the same row for efficiency
+- **Smart Navigation**: 
+  - Regular click: Show modal preview
+  - Ctrl/Cmd+click: Navigate directly to month page
+  - Right-click: Access browser context menu for new tabs
+
+#### Calendar Navigation
 The plugin provides automatic navigation between:
 - Previous/next articles (sorted by year, month, day, title)
-- Previous/next days
+- Previous/next days with article hover previews
 - Previous/next months
 - Previous/next years
 
@@ -150,30 +156,28 @@ The plugin provides automatic navigation between:
 ```
 timeline-calendar/
 ├── assets/
-│   ├── style.css
-│   ├── calendar.js
-│   ├── sparkline-calendar.js
-│   ├── year-view.js
-│   └── timeline-header.js
+│   ├── style.css              # Theme-aware styling
+│   ├── calendar.js            # Month/day calendar functionality
+│   ├── sparkline-calendar.js  # Sparkline + modal system
+│   ├── year-view.js           # Year overview functionality
+│   └── timeline-header.js     # Navigation enhancements
 ├── templates/
-│   └── timeline-template.php
-├── timeline-calendar.php
-├── uninstall.php
+│   ├── timeline-template.php  # Main template integrated with themes
+│   └── calendar.php          # Calendar shortcode template
+├── timeline-calendar.php      # Main plugin file
+├── uninstall.php             # Clean uninstall
 ├── LICENSE
 └── README.md
 ```
 
-### Hooks and Filters
+### WordPress Integration
 
-The plugin uses several WordPress hooks:
+The plugin uses proper WordPress integration patterns:
 
-- `parse_request` - Handle timeline URL parsing
-- `template_redirect` - Load timeline templates
-- `redirect_canonical` - Prevent unwanted redirects
-- `wp_enqueue_scripts` - Load assets
-- `post_link` - Customize permalinks in admin
-- `get_permalink` - Customize permalink generation
-- `sample_permalink_html` - Update permalink preview
+- **Template Hierarchy**: Uses `template_include` filter for theme compatibility
+- **Asset Management**: Conditional loading of CSS/JS only when needed
+- **Query Integration**: Creates virtual posts that work with theme systems
+- **Hook System**: Proper use of WordPress actions and filters
 
 ### Database
 
@@ -186,33 +190,35 @@ Settings are stored in `wp_options` table as `timeline_calendar_options`.
 
 ### AJAX Endpoints
 
-The plugin provides several AJAX endpoints for dynamic content:
+The plugin provides AJAX endpoints for dynamic content:
 
-- `timeline_calendar_articles` - Fetch articles for a specific year/month
-- `timeline_calendar_years` - Get available years
-- `timeline_sparkline_data` - Get sparkline data
+- `timeline_calendar_articles` - Fetch articles for sparkline modals
+- `timeline_calendar_years` - Get available years for navigation
+- Includes proper nonce security and error handling
 
 ## Troubleshooting
 
 ### Common Issues
 
 **Timeline URLs not working:**
-- Flush rewrite rules: Settings > Permalinks > Save Changes
+- Flush rewrite rules: Timeline Articles > Settings > "Flush Rewrite Rules"
+- Alternative: Settings > Permalinks > Save Changes
 - Check that the plugin is activated
 
-**Sparkline not displaying:**
+**Timeline pages don't match site design:**
+- Ensure you're using the latest version with theme integration
+- Check that your theme supports WordPress standards
+- Clear any caching plugins
+
+**Sparkline modal not displaying:**
 - Ensure JavaScript is enabled
 - Check browser console for errors
-- Verify the shortcode is correct: `[timeline_sparkline]`
+- Verify timeline articles exist for the year/month
 
-**Homepage issues:**
-- The plugin only affects `/timeline/` URLs
-- Other pages should work normally
-
-**Admin permalinks showing wrong URLs:**
-- Clear browser cache
-- Check that timeline date meta fields are set correctly
-- Verify plugin settings are saved
+**Modal shows "No articles found":**
+- Check that articles have proper timeline meta fields set
+- Verify articles are published (not draft)
+- Ensure the year/month combinations match your articles
 
 ### Debug Mode
 
@@ -226,24 +232,38 @@ define('WP_DEBUG_DISPLAY', false);
 
 ## Changelog
 
-### Version 1.0.0
-- Initial release
+### Version 1.0.0 - Initial Release
 - Basic timeline functionality
-- Sparkline calendar
+- Sparkline calendar visualization
 - URL routing system
-- Navigation between articles
+- Timeline article management
 
-### Recent Updates
-- **Configurable Settings**: Added admin settings page for reference year, Year 0, and negative years
-- **Dynamic Sparkline Heights**: Month heights now scale based on article count with global consistency
-- **Improved Layout**: Year labels aligned to top, sparklines to bottom
-- **Admin Permalink Fix**: Timeline URLs now display correctly in WordPress admin
-- **Real-time Permalink Preview**: See timeline URLs update as you edit articles
-- **Enhanced Navigation**: Better alignment and sizing for sparkline calendar elements
+### Recent Major Updates
+
+#### Theme Integration & JavaScript Improvements
+- **Full WordPress theme integration**: Timeline pages now properly integrate with any WordPress theme
+- **Template hierarchy support**: Uses WordPress `template_include` filter for seamless theme compatibility
+- **Theme-aware styling**: CSS variables automatically adapt to WordPress theme colors and fonts
+- **JavaScript initialization fixes**: Resolved syntax errors and improved asset loading
+- **Conditional asset loading**: Better performance by only loading assets when needed
+
+#### Interactive Sparkline Modal System
+- **Hover-to-preview modals**: Interactive month previews on sparkline calendar
+- **Compact article display**: Dates and titles on same row for space efficiency
+- **Chronological organization**: Articles sorted by day within each month
+- **Smart navigation options**: Click for modal, Ctrl+click for direct navigation
+- **Enhanced visual feedback**: Improved hover effects and animations
+- **AJAX-powered content**: Dynamic loading of month articles with proper security
+
+#### User Experience Enhancements
+- **Improved accessibility**: Better keyboard and screen reader support
+- **Mobile responsiveness**: Enhanced mobile experience with theme integration
+- **Performance optimization**: Faster loading and better caching compatibility
+- **Debug improvements**: Better error logging and troubleshooting information
 
 ## Support
 
-For support, feature requests, or bug reports, please contact the plugin author.
+For support, feature requests, or bug reports, please visit the plugin's GitHub repository or contact the plugin author.
 
 ## License
 
@@ -251,4 +271,4 @@ This plugin is licensed under the GPL v2 or later.
 
 ## Credits
 
-Developed by mustacheride for WordPress timeline management. 
+Developed by mustacheride for comprehensive WordPress timeline management with modern theme integration and interactive user experience. 

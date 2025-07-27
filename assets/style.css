@@ -928,6 +928,45 @@
     transform: scaleY(1.1);
 }
 
+/* Interactive sparkline month styles for modal functionality */
+.timeline-sparkline-month.timeline-sparkline-interactive {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.timeline-sparkline-month.timeline-sparkline-interactive:hover {
+    transform: scaleY(1.1) scaleX(1.05);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Sparkline modal styles */
+#sparkline-hover-modal {
+    font-family: inherit;
+    color: var(--timeline-calendar-text);
+}
+
+#sparkline-hover-modal h4 {
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#sparkline-hover-modal h5 {
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+#sparkline-hover-modal a {
+    color: var(--timeline-calendar-highlight);
+    transition: color 0.2s ease;
+}
+
+#sparkline-hover-modal a:hover {
+    color: var(--timeline-calendar-highlight-hover);
+}
+
 .timeline-sparkline-legend {
     display: flex;
     justify-content: center;
