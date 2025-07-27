@@ -106,12 +106,12 @@
     transition: all 0.2s ease;
 }
 
-.timeline-nav-prev {
+.timeline-nav-prev-container {
     grid-area: prev;
     justify-self: start;
 }
 
-.timeline-nav-next {
+.timeline-nav-next-container {
     grid-area: next;
     justify-self: end;
 }

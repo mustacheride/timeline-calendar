@@ -241,17 +241,21 @@ echo "-->";
                         $next_article = ($current_index < count($articles) - 1) ? $articles[$current_index + 1] : null;
                         ?>
                         
-                        <?php if ($prev_article): ?>
-                            <a href="<?php echo get_timeline_permalink($prev_article['id']); ?>" class="timeline-nav-prev">
-                                &larr; Previous
-                            </a>
-                        <?php endif; ?>
+                        <div class="timeline-nav-prev-container">
+                            <?php if ($prev_article): ?>
+                                <a href="<?php echo get_timeline_permalink($prev_article['id']); ?>" class="timeline-nav-prev">
+                                    &larr; Previous
+                                </a>
+                            <?php endif; ?>
+                        </div>
                         
-                        <?php if ($next_article): ?>
-                            <a href="<?php echo get_timeline_permalink($next_article['id']); ?>" class="timeline-nav-next">
-                                Next &rarr;
-                            </a>
-                        <?php endif; ?>
+                        <div class="timeline-nav-next-container">
+                            <?php if ($next_article): ?>
+                                <a href="<?php echo get_timeline_permalink($next_article['id']); ?>" class="timeline-nav-next">
+                                    Next &rarr;
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     
                     <!-- Timeline Statistics -->
