@@ -800,11 +800,11 @@ add_shortcode('timeline_this_day_in_history', function() {
             formData.append('month', month);
             formData.append('day', day);
             
-            if (typeof timelineCalendarAjax !== 'undefined' && timelineCalendarAjax.nonce) {
-                formData.append('nonce', timelineCalendarAjax.nonce);
+            if (typeof timelineCalendarSettings !== 'undefined' && timelineCalendarSettings.nonce) {
+                formData.append('nonce', timelineCalendarSettings.nonce);
             }
             
-            fetch(timelineCalendarAjax.ajaxurl || '<?php echo admin_url('admin-ajax.php'); ?>', {
+            fetch(timelineCalendarSettings.ajaxUrl || '<?php echo admin_url('admin-ajax.php'); ?>', {
                 method: 'POST',
                 body: formData
             })
