@@ -1248,6 +1248,15 @@ function timeline_calendar_template_include($template) {
         'comment_count' => 0,
         'filter' => 'raw'
     ]);
+    
+    // Prevent content filters from being applied to this virtual post
+    add_filter('the_content', function($content) use ($timeline_post) {
+        global $post;
+        if ($post && $post->ID === $timeline_post->ID) {
+            return $timeline_post->post_content;
+        }
+        return $content;
+    }, 1);
 
     // Set up the WordPress query to use our virtual post
     $wp_query->post = $timeline_post;
@@ -1290,12 +1299,13 @@ function timeline_calendar_get_content() {
     // Add timeline initialization JavaScript to footer
     add_action('wp_footer', 'timeline_calendar_add_footer_script');
     
+    // Capture the template output without content filters
     ob_start();
-    
-    // Include the timeline template
     include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
+    $content = ob_get_clean();
     
-    return ob_get_clean();
+    // Return the content directly without applying content filters
+    return $content;
 }
 
 // Add timeline initialization script to footer
@@ -1329,9 +1339,26 @@ function timeline_calendar_add_footer_script() {
         sparklineElements.forEach(function(element) {
             if (typeof TimelineSparklineCalendar !== 'undefined') {
                 console.log('Initializing sparkline calendar:', element.id);
+                
+                // Get plugin settings for year restrictions
+                var allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
+                var allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
+                
+                var startYear, endYear;
+                if (allowNegativeYears) {
+                    startYear = -2;
+                    endYear = 4;
+                } else if (allowYearZero) {
+                    startYear = 0;
+                    endYear = 6;
+                } else {
+                    startYear = 1;
+                    endYear = 7;
+                }
+                
                 new TimelineSparklineCalendar('#' + element.id, {
-                    startYear: -2,
-                    endYear: 4,
+                    startYear: startYear,
+                    endYear: endYear,
                     yearsPerView: 7
                 });
             } else {

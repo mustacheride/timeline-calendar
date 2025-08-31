@@ -915,81 +915,12 @@ echo "-->";
                 </div>
             </div>
             
-            <script>
-            function initializeSparklineCalendar() {
-                console.log('Timeline template - initializeSparklineCalendar called');
-                console.log('Timeline template - TimelineSparklineCalendar available:', typeof TimelineSparklineCalendar !== 'undefined');
-                console.log('Timeline template - TimelineCalendar available:', typeof TimelineCalendar !== 'undefined');
-                
-                // Initialize sparkline calendar with year range based on plugin settings
-                if (typeof TimelineSparklineCalendar !== 'undefined') {
-                    const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
-                    console.log('Timeline template - Current year:', currentYear);
-                    
-                    // Get plugin settings for year restrictions
-                    const allowYearZero = <?php echo $allow_year_zero ? 'true' : 'false'; ?>;
-                    const allowNegativeYears = <?php echo $allow_negative_years ? 'true' : 'false'; ?>;
-                    const minYear = <?php echo $min_year; ?>;
-                    
-                    // Calculate year range based on settings and current year
-                    let startYear, endYear;
-                    if (currentYear === 0 && allowYearZero) {
-                        // For Year 0, show years -3 to 3 (if negative years allowed)
-                        startYear = allowNegativeYears ? -3 : 0;
-                        endYear = 3;
-                    } else if (currentYear < 0 && allowNegativeYears) {
-                        // For negative years, center the view with 3 years before and 3 years after
-                        startYear = Math.max(minYear, currentYear - 3);
-                        endYear = currentYear + 3;
-                    } else {
-                        // For positive years, center the view with 3 years before and 3 years after
-                        startYear = Math.max(minYear, currentYear - 3);
-                        endYear = currentYear + 3;
-                    }
-                    
-                    console.log('Timeline template - Year view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear, 'minYear:', minYear);
-                    console.log('Timeline template - Calculated range:', startYear, 'to', endYear);
-                    console.log('Timeline template - Creating sparkline calendar with selector: #timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>');
-                    
-                    const element = document.querySelector('#timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>');
-                    console.log('Timeline template - Element found:', element);
-                    
-                    new TimelineSparklineCalendar('#timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>', {
-                        startYear: startYear,
-                        endYear: endYear,
-                        showNavigation: true,
-                        yearsPerView: 7
-                    });
-                    
-                    // Initialize individual month calendars
-                    console.log('Timeline template - Found calendar roots:', document.querySelectorAll('.timeline-calendar-root').length);
-                    document.querySelectorAll('.timeline-calendar-root').forEach(function(root) {
-                        const year = parseInt(root.getAttribute('data-year'));
-                        const month = parseInt(root.getAttribute('data-month'));
-                        console.log('Timeline template - Initializing calendar for year', year, 'month', month);
-                        new TimelineCalendar(root, year, month);
-                    });
-                } else {
-                    console.log('Timeline template - TimelineSparklineCalendar not available, retrying in 100ms');
-                    setTimeout(initializeSparklineCalendar, 100);
-                }
-            }
-            
-            // Try to initialize when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initializeSparklineCalendar);
-            } else {
-                // DOM is already ready, try to initialize immediately
-                initializeSparklineCalendar();
-            }
-            
-            // Also try to initialize when window loads (in case scripts load after DOMContentLoaded)
-            window.addEventListener('load', function() {
-                if (typeof TimelineSparklineCalendar === 'undefined') {
-                    console.log('Timeline template - TimelineSparklineCalendar still not available on window load');
-                }
-            });
-            </script>
+            <div id="timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-init" 
+                 data-current-year="<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>"
+                 data-allow-year-zero="<?php echo $allow_year_zero ? 'true' : 'false'; ?>"
+                 data-allow-negative-years="<?php echo $allow_negative_years ? 'true' : 'false'; ?>"
+                 data-min-year="<?php echo $min_year; ?>">
+            </div>
         <?php endif; ?>
     </div>
 </div>
