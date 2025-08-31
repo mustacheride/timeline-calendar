@@ -66,8 +66,10 @@ class TimelineSparklineCalendar {
         // Get plugin settings from localized script data
         if (window.timelineCalendarSettings) {
             const { allowYearZero, allowNegativeYears } = window.timelineCalendarSettings;
-            if (allowNegativeYears) {
+            if (allowNegativeYears && allowYearZero) {
                 return 4;
+            } else if (allowNegativeYears && !allowYearZero) {
+                return 5; // Extend to 5 to compensate for skipping Year 0
             } else if (allowYearZero) {
                 return 6;
             } else {

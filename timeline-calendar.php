@@ -1360,9 +1360,12 @@ function timeline_calendar_add_footer_script() {
                 var allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
                 
                 var startYear, endYear;
-                if (allowNegativeYears) {
+                if (allowNegativeYears && allowYearZero) {
                     startYear = -2;
                     endYear = 4;
+                } else if (allowNegativeYears && !allowYearZero) {
+                    startYear = -2;
+                    endYear = 5; // Extend to 5 to compensate for skipping Year 0
                 } else if (allowYearZero) {
                     startYear = 0;
                     endYear = 6;
