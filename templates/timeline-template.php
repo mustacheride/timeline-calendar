@@ -65,7 +65,41 @@ function get_timeline_breadcrumbs( $year = null, $month = null, $day = null, $ar
 				$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' . $month . '/' . $day . '/' ) ) . '">' . esc_html( $day ) . '</a>';
 				
 				if ( $article !== null ) {
-					$breadcrumbs[] = '<span>' . esc_html( $article ) . '</span>';
+					// Fetch the actual post title instead of using the slug
+					$article_title = $article; // Default to slug if we can't find the post
+					
+					// Try to get the post by slug and year/month/day meta
+					$args = array(
+						'post_type' => 'timeline_article',
+						'name' => $article,
+						'meta_query' => array(
+							array(
+								'key' => 'timeline_year',
+								'value' => $year,
+								'compare' => '='
+							),
+							array(
+								'key' => 'timeline_month',
+								'value' => $month,
+								'compare' => '='
+							),
+							array(
+								'key' => 'timeline_day',
+								'value' => $day,
+								'compare' => '='
+							)
+						),
+						'posts_per_page' => 1
+					);
+					
+					$query = new WP_Query( $args );
+					if ( $query->have_posts() ) {
+						$query->the_post();
+						$article_title = get_the_title();
+						wp_reset_postdata();
+					}
+					
+					$breadcrumbs[] = '<span>' . esc_html( $article_title ) . '</span>';
 				}
 			}
 		}
