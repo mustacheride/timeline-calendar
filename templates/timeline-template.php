@@ -366,28 +366,33 @@ echo "-->";
                     console.log('Timeline template - initializeArticleSparklineCalendar called');
                     console.log('Timeline template - TimelineSparklineCalendar available:', typeof TimelineSparklineCalendar !== 'undefined');
                     
-                    // Initialize sparkline calendar with 7-year view centered on current year
+                    // Initialize sparkline calendar with year range based on plugin settings
                     if (typeof TimelineSparklineCalendar !== 'undefined') {
                         const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                         console.log('Timeline template - Current year:', currentYear);
                         
-                        // Ensure we always show 7 years, with current year centered
+                        // Get plugin settings for year restrictions
+                        const allowYearZero = <?php echo $allow_year_zero ? 'true' : 'false'; ?>;
+                        const allowNegativeYears = <?php echo $allow_negative_years ? 'true' : 'false'; ?>;
+                        const minYear = <?php echo $min_year; ?>;
+                        
+                        // Calculate year range based on settings and current year
                         let startYear, endYear;
-                        if (currentYear === 0) {
-                            // For Year 0, show years -3 to 3
-                            startYear = -3;
+                        if (currentYear === 0 && allowYearZero) {
+                            // For Year 0, show years -3 to 3 (if negative years allowed)
+                            startYear = allowNegativeYears ? -3 : 0;
                             endYear = 3;
-                        } else if (currentYear < 0) {
+                        } else if (currentYear < 0 && allowNegativeYears) {
                             // For negative years, center the view with 3 years before and 3 years after
-                            startYear = currentYear - 3;
+                            startYear = Math.max(minYear, currentYear - 3);
                             endYear = currentYear + 3;
                         } else {
                             // For positive years, center the view with 3 years before and 3 years after
-                            startYear = currentYear - 3;
+                            startYear = Math.max(minYear, currentYear - 3);
                             endYear = currentYear + 3;
                         }
                         
-                        console.log('Timeline template - Article view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
+                        console.log('Timeline template - Article view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear, 'minYear:', minYear);
                         
                         new TimelineSparklineCalendar('#timeline-article-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>-<?php echo $timeline_day !== null ? intval($timeline_day) : 0; ?>-<?php echo $timeline_article; ?>', {
                             startYear: startYear,
@@ -613,28 +618,33 @@ echo "-->";
                 console.log('Timeline template - initializeDaySparklineCalendar called');
                 console.log('Timeline template - TimelineSparklineCalendar available:', typeof TimelineSparklineCalendar !== 'undefined');
                 
-                // Initialize sparkline calendar with 7-year view centered on current year
+                // Initialize sparkline calendar with year range based on plugin settings
                 if (typeof TimelineSparklineCalendar !== 'undefined') {
                     const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                     console.log('Timeline template - Current year:', currentYear);
                     
-                    // Ensure we always show 7 years, with current year centered
+                    // Get plugin settings for year restrictions
+                    const allowYearZero = <?php echo $allow_year_zero ? 'true' : 'false'; ?>;
+                    const allowNegativeYears = <?php echo $allow_negative_years ? 'true' : 'false'; ?>;
+                    const minYear = <?php echo $min_year; ?>;
+                    
+                    // Calculate year range based on settings and current year
                     let startYear, endYear;
-                    if (currentYear === 0) {
-                        // For Year 0, show years -3 to 3
-                        startYear = -3;
+                    if (currentYear === 0 && allowYearZero) {
+                        // For Year 0, show years -3 to 3 (if negative years allowed)
+                        startYear = allowNegativeYears ? -3 : 0;
                         endYear = 3;
-                    } else if (currentYear < 0) {
+                    } else if (currentYear < 0 && allowNegativeYears) {
                         // For negative years, center the view with 3 years before and 3 years after
-                        startYear = currentYear - 3;
+                        startYear = Math.max(minYear, currentYear - 3);
                         endYear = currentYear + 3;
                     } else {
                         // For positive years, center the view with 3 years before and 3 years after
-                        startYear = currentYear - 3;
+                        startYear = Math.max(minYear, currentYear - 3);
                         endYear = currentYear + 3;
                     }
                     
-                    console.log('Timeline template - Day view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
+                    console.log('Timeline template - Day view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear, 'minYear:', minYear);
                     
                     new TimelineSparklineCalendar('#timeline-day-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>-<?php echo $timeline_day !== null ? intval($timeline_day) : 0; ?>', {
                         startYear: startYear,
@@ -757,28 +767,33 @@ echo "-->";
                 console.log('Timeline template - initializeMonthSparklineCalendar called');
                 console.log('Timeline template - TimelineSparklineCalendar available:', typeof TimelineSparklineCalendar !== 'undefined');
                 
-                // Initialize sparkline calendar with 8-year view centered on current year
+                // Initialize sparkline calendar with year range based on plugin settings
                 if (typeof TimelineSparklineCalendar !== 'undefined') {
                     const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                     console.log('Timeline template - Current year:', currentYear);
                     
-                    // Ensure we always show 7 years, with current year centered
+                    // Get plugin settings for year restrictions
+                    const allowYearZero = <?php echo $allow_year_zero ? 'true' : 'false'; ?>;
+                    const allowNegativeYears = <?php echo $allow_negative_years ? 'true' : 'false'; ?>;
+                    const minYear = <?php echo $min_year; ?>;
+                    
+                    // Calculate year range based on settings and current year
                     let startYear, endYear;
-                    if (currentYear === 0) {
-                        // For Year 0, show years -3 to 3
-                        startYear = -3;
+                    if (currentYear === 0 && allowYearZero) {
+                        // For Year 0, show years -3 to 3 (if negative years allowed)
+                        startYear = allowNegativeYears ? -3 : 0;
                         endYear = 3;
-                    } else if (currentYear < 0) {
+                    } else if (currentYear < 0 && allowNegativeYears) {
                         // For negative years, center the view with 3 years before and 3 years after
-                        startYear = currentYear - 3;
+                        startYear = Math.max(minYear, currentYear - 3);
                         endYear = currentYear + 3;
                     } else {
                         // For positive years, center the view with 3 years before and 3 years after
-                        startYear = currentYear - 3;
+                        startYear = Math.max(minYear, currentYear - 3);
                         endYear = currentYear + 3;
                     }
                     
-                    console.log('Timeline template - Month view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
+                    console.log('Timeline template - Month view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear, 'minYear:', minYear);
                     
                     new TimelineSparklineCalendar('#timeline-month-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>-<?php echo $timeline_month !== null ? intval($timeline_month) : 0; ?>', {
                         startYear: startYear,
@@ -906,28 +921,33 @@ echo "-->";
                 console.log('Timeline template - TimelineSparklineCalendar available:', typeof TimelineSparklineCalendar !== 'undefined');
                 console.log('Timeline template - TimelineCalendar available:', typeof TimelineCalendar !== 'undefined');
                 
-                // Initialize sparkline calendar with 8-year view centered on current year
+                // Initialize sparkline calendar with year range based on plugin settings
                 if (typeof TimelineSparklineCalendar !== 'undefined') {
                     const currentYear = <?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>;
                     console.log('Timeline template - Current year:', currentYear);
                     
-                    // Ensure we always show 7 years, with current year centered
+                    // Get plugin settings for year restrictions
+                    const allowYearZero = <?php echo $allow_year_zero ? 'true' : 'false'; ?>;
+                    const allowNegativeYears = <?php echo $allow_negative_years ? 'true' : 'false'; ?>;
+                    const minYear = <?php echo $min_year; ?>;
+                    
+                    // Calculate year range based on settings and current year
                     let startYear, endYear;
-                    if (currentYear === 0) {
-                        // For Year 0, show years -3 to 3
-                        startYear = -3;
+                    if (currentYear === 0 && allowYearZero) {
+                        // For Year 0, show years -3 to 3 (if negative years allowed)
+                        startYear = allowNegativeYears ? -3 : 0;
                         endYear = 3;
-                    } else if (currentYear < 0) {
+                    } else if (currentYear < 0 && allowNegativeYears) {
                         // For negative years, center the view with 3 years before and 3 years after
-                        startYear = currentYear - 3;
+                        startYear = Math.max(minYear, currentYear - 3);
                         endYear = currentYear + 3;
                     } else {
                         // For positive years, center the view with 3 years before and 3 years after
-                        startYear = currentYear - 3;
+                        startYear = Math.max(minYear, currentYear - 3);
                         endYear = currentYear + 3;
                     }
                     
-                    console.log('Timeline template - Year view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear);
+                    console.log('Timeline template - Year view debug - currentYear:', currentYear, 'startYear:', startYear, 'endYear:', endYear, 'minYear:', minYear);
                     console.log('Timeline template - Calculated range:', startYear, 'to', endYear);
                     console.log('Timeline template - Creating sparkline calendar with selector: #timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>');
                     

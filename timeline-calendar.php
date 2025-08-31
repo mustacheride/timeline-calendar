@@ -557,9 +557,25 @@ add_shortcode('timeline_sparkline_calendar', function() {
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof TimelineSparklineCalendar !== 'undefined') {
+            // Get plugin settings for year restrictions
+            const allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
+            const allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
+            
+            let startYear, endYear;
+            if (allowNegativeYears) {
+                startYear = -2;
+                endYear = 4;
+            } else if (allowYearZero) {
+                startYear = 0;
+                endYear = 6;
+            } else {
+                startYear = 1;
+                endYear = 7;
+            }
+            
             new TimelineSparklineCalendar('#timeline-sparkline-calendar', {
-                startYear: <?php echo get_timeline_calendar_option('allow_negative_years', false) ? '-2' : '1'; ?>,
-                endYear: 4,
+                startYear: startYear,
+                endYear: endYear,
                 yearsPerView: 7
             });
         }
@@ -593,6 +609,21 @@ add_shortcode('timeline_sparkline', function($atts) {
             
             <?php if ($atts['start_year'] !== null): ?>
             config.startYear = <?php echo intval($atts['start_year']); ?>;
+            <?php else: ?>
+            // Use plugin settings for default year range
+            const allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
+            const allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
+            
+            if (allowNegativeYears) {
+                config.startYear = -2;
+                config.endYear = 4;
+            } else if (allowYearZero) {
+                config.startYear = 0;
+                config.endYear = 6;
+            } else {
+                config.startYear = 1;
+                config.endYear = 7;
+            }
             <?php endif; ?>
             
             <?php if ($atts['end_year'] !== null): ?>
