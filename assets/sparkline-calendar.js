@@ -49,8 +49,10 @@ class TimelineSparklineCalendar {
         // Get plugin settings from localized script data
         if (window.timelineCalendarSettings) {
             const { allowYearZero, allowNegativeYears } = window.timelineCalendarSettings;
-            if (allowNegativeYears) {
+            if (allowNegativeYears && allowYearZero) {
                 return -2;
+            } else if (allowNegativeYears && !allowYearZero) {
+                return -2; // Start at -2, but we'll filter out Year 0 in the render
             } else if (allowYearZero) {
                 return 0;
             } else {
@@ -73,6 +75,22 @@ class TimelineSparklineCalendar {
             }
         }
         return 7; // Default to year 7 if settings not available
+    }
+    
+    isYearAllowed(year) {
+        // Get plugin settings from localized script data
+        if (window.timelineCalendarSettings) {
+            const { allowYearZero, allowNegativeYears } = window.timelineCalendarSettings;
+            
+            if (year === 0) {
+                return allowYearZero;
+            } else if (year < 0) {
+                return allowNegativeYears;
+            } else {
+                return true; // Positive years are always allowed
+            }
+        }
+        return year >= 1; // Default: only positive years allowed
     }
     
     async init() {
@@ -147,9 +165,13 @@ class TimelineSparklineCalendar {
         const yearsContainer = document.createElement('div');
         yearsContainer.className = 'timeline-sparkline-years';
         
-        // Render each year in numerical order
+        // Render each year in numerical order, filtering out restricted years
         const sortedYears = Object.keys(this.data).sort((a, b) => parseInt(a) - parseInt(b));
         sortedYears.forEach(year => {
+            // Filter out Year 0 if not allowed
+            if (year === '0' && !this.isYearAllowed(0)) {
+                return; // Skip Year 0
+            }
             const yearElement = this.createYearElement(year, this.data[year]);
             yearsContainer.appendChild(yearElement);
         });

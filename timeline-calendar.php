@@ -192,9 +192,18 @@ function is_timeline_year_allowed( $year ) {
     $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
     $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
     
-    $min_year = $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
+    // Special case for Year 0
+    if ( $year === 0 ) {
+        return $allow_year_zero;
+    }
     
-    return $year >= $min_year;
+    // For negative years
+    if ( $year < 0 ) {
+        return $allow_negative_years;
+    }
+    
+    // For positive years (always allowed)
+    return true;
 }
 
 /**
@@ -206,7 +215,13 @@ function get_timeline_min_year() {
     $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
     $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
     
-    return $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
+    if ( $allow_negative_years ) {
+        return -9999;
+    } elseif ( $allow_year_zero ) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 /**
