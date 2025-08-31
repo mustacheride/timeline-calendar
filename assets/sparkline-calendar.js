@@ -10,8 +10,8 @@ class TimelineSparklineCalendar {
         // Default options - spread options first, then apply defaults for missing properties
         this.options = {
             ...options,
-            startYear: options.startYear ?? -2,
-            endYear: options.endYear ?? 4,
+            startYear: options.startYear ?? this.getDefaultStartYear(),
+            endYear: options.endYear ?? this.getDefaultEndYear(),
             yearsPerView: options.yearsPerView ?? 7,
             showNavigation: options.showNavigation ?? true
         };
@@ -43,6 +43,36 @@ class TimelineSparklineCalendar {
         
         // Initialize
         this.init();
+    }
+    
+    getDefaultStartYear() {
+        // Get plugin settings from localized script data
+        if (window.timelineCalendarSettings) {
+            const { allowYearZero, allowNegativeYears } = window.timelineCalendarSettings;
+            if (allowNegativeYears) {
+                return -2;
+            } else if (allowYearZero) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+        return 1; // Default to year 1 if settings not available
+    }
+    
+    getDefaultEndYear() {
+        // Get plugin settings from localized script data
+        if (window.timelineCalendarSettings) {
+            const { allowYearZero, allowNegativeYears } = window.timelineCalendarSettings;
+            if (allowNegativeYears) {
+                return 4;
+            } else if (allowYearZero) {
+                return 6;
+            } else {
+                return 7;
+            }
+        }
+        return 7; // Default to year 7 if settings not available
     }
     
     async init() {
@@ -98,6 +128,14 @@ class TimelineSparklineCalendar {
             leftNav.className = 'timeline-sparkline-nav-left';
             leftNav.innerHTML = '←';
             leftNav.dataset.direction = 'prev';
+            
+            // Check if navigation should be disabled
+            const minAllowedYear = this.getDefaultStartYear();
+            if (this.currentYearRange.start <= minAllowedYear) {
+                leftNav.disabled = true;
+                leftNav.classList.add('timeline-nav-disabled');
+                leftNav.title = `Years before ${minAllowedYear} are not allowed with current settings`;
+            }
             sparklineContainer.appendChild(leftNav);
         }
         
@@ -125,6 +163,8 @@ class TimelineSparklineCalendar {
             rightNav.className = 'timeline-sparkline-nav-right';
             rightNav.innerHTML = '→';
             rightNav.dataset.direction = 'next';
+            
+            // Note: Right navigation is always enabled as we can always go forward in time
             sparklineContainer.appendChild(rightNav);
         }
         
@@ -493,15 +533,26 @@ class TimelineSparklineCalendar {
         const yearsPerView = this.yearsPerView; // Use the configured years per view
         
         if (direction === 'prev') {
-            this.currentYearRange.start -= yearsPerView;
-            this.currentYearRange.end -= yearsPerView;
+            const newStart = this.currentYearRange.start - yearsPerView;
+            const newEnd = this.currentYearRange.end - yearsPerView;
+            
+            // Check if navigation would go below minimum allowed year
+            const minAllowedYear = this.getDefaultStartYear();
+            if (newStart >= minAllowedYear) {
+                this.currentYearRange.start = newStart;
+                this.currentYearRange.end = newEnd;
+                await this.loadData();
+                this.render();
+            } else {
+                // Show feedback that we can't go further back
+                console.log(`Cannot navigate before year ${minAllowedYear} with current settings`);
+            }
         } else {
             this.currentYearRange.start += yearsPerView;
             this.currentYearRange.end += yearsPerView;
+            await this.loadData();
+            this.render();
         }
-        
-        await this.loadData();
-        this.render();
     }
     
     navigateToYear(year) {

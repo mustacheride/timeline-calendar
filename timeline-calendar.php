@@ -182,6 +182,70 @@ function get_timeline_calendar_option( $key, $default = null ) {
     return isset( $options[ $key ] ) ? $options[ $key ] : $default;
 }
 
+/**
+ * Check if a year is allowed based on plugin settings
+ *
+ * @param int $year The year to check.
+ * @return bool True if the year is allowed, false otherwise.
+ */
+function is_timeline_year_allowed( $year ) {
+    $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
+    $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+    
+    $min_year = $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
+    
+    return $year >= $min_year;
+}
+
+/**
+ * Get the minimum allowed year based on plugin settings
+ *
+ * @return int The minimum allowed year.
+ */
+function get_timeline_min_year() {
+    $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
+    $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+    
+    return $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
+}
+
+/**
+ * Filter timeline articles query to respect year restrictions
+ *
+ * @param WP_Query $query The query to filter.
+ */
+function filter_timeline_query_by_settings( $query ) {
+    // Only filter timeline article queries
+    if ( 'timeline_article' !== $query->get( 'post_type' ) ) {
+        return;
+    }
+    
+    // Don't filter admin queries
+    if ( is_admin() ) {
+        return;
+    }
+    
+    $min_year = get_timeline_min_year();
+    
+    // Add meta query to filter by minimum year
+    $meta_query = $query->get( 'meta_query' );
+    if ( ! is_array( $meta_query ) ) {
+        $meta_query = array();
+    }
+    
+    $meta_query[] = array(
+        'key' => 'timeline_year',
+        'value' => $min_year,
+        'compare' => '>=',
+        'type' => 'NUMERIC'
+    );
+    
+    $query->set( 'meta_query', $meta_query );
+}
+
+// Apply filter to timeline queries
+add_action( 'pre_get_posts', 'filter_timeline_query_by_settings' );
+
 // Flush rewrite rules on plugin activation
 register_activation_hook( __FILE__, function() {
     // Flush rewrite rules to ensure our rules are registered
@@ -373,10 +437,27 @@ add_action( 'save_post', function( $post_id ) {
         return;
     }
     
-    // Sanitize and save timeline year
+    // Get plugin settings for validation
+    $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
+    $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+    
+    // Sanitize and validate timeline year
     if ( isset( $_POST['timeline_year'] ) ) {
-        $year = absint( $_POST['timeline_year'] );
-        update_post_meta( $post_id, 'timeline_year', $year );
+        $year = intval( $_POST['timeline_year'] );
+        
+        // Validate year based on settings
+        $min_year = $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
+        
+        if ( $year >= $min_year ) {
+            update_post_meta( $post_id, 'timeline_year', $year );
+        } else {
+            // Add admin notice for invalid year
+            add_action( 'admin_notices', function() use ( $year, $min_year ) {
+                echo '<div class="notice notice-error is-dismissible"><p>' . 
+                     esc_html( sprintf( __( 'Timeline year %d is not allowed. Minimum allowed year is %d.', 'timeline-calendar' ), $year, $min_year ) ) . 
+                     '</p></div>';
+            } );
+        }
     }
     
     // Sanitize and save timeline month
@@ -605,17 +686,30 @@ function timeline_calendar_years_ajax() {
     
     global $wpdb;
     
-    // Use prepared statement for security
+    // Get minimum allowed year based on settings
+    $min_year = get_timeline_min_year();
+    
+    // Use prepared statement for security with year restriction
     $years = $wpdb->get_col( $wpdb->prepare( "
         SELECT DISTINCT meta_value 
         FROM {$wpdb->postmeta} 
         WHERE meta_key = %s 
+        AND CAST(meta_value AS SIGNED) >= %d
         ORDER BY CAST(meta_value AS SIGNED)
-    ", 'timeline_year' ) );
+    ", 'timeline_year', $min_year ) );
     
-    // If no years found, return some sample years
+    // If no years found, return sample years based on settings
     if ( empty( $years ) ) {
-        $years = array( '-2', '-1', '0', '1', '2', '3', '4' );
+        $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
+        $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+        
+        if ( $allow_negative_years ) {
+            $years = array( '-2', '-1', '0', '1', '2', '3', '4' );
+        } elseif ( $allow_year_zero ) {
+            $years = array( '0', '1', '2', '3', '4', '5', '6' );
+        } else {
+            $years = array( '1', '2', '3', '4', '5', '6', '7' );
+        }
     }
     
     wp_send_json( $years );

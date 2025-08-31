@@ -147,6 +147,21 @@ body.timeline-calendar-page .page-title {
     text-decoration: none;
 }
 
+/* Disabled Navigation */
+.timeline-nav-disabled {
+    background: #ccc !important;
+    color: #666 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.timeline-nav-disabled:hover {
+    background: #ccc !important;
+    color: #666 !important;
+    text-decoration: none;
+}
+
 /* Year Navigation */
 .timeline-year-navigation {
     display: flex;
