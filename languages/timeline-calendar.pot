@@ -1,0 +1,277 @@
+# Copyright (C) 2024 mustacheride
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Timeline Calendar 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/mustacheride/timeline-calendar\n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2024-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: timeline-calendar.php:45
+msgid "Timeline Calendar Settings"
+msgstr ""
+
+#: timeline-calendar.php:46
+msgid "Timeline Calendar"
+msgstr ""
+
+#: timeline-calendar.php:55
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: timeline-calendar.php:70
+msgid "Calendar Configuration"
+msgstr ""
+
+#: timeline-calendar.php:75
+msgid "Reference Year for Day of Week Alignment"
+msgstr ""
+
+#: timeline-calendar.php:82
+msgid "Allow Year 0"
+msgstr ""
+
+#: timeline-calendar.php:89
+msgid "Allow Negative Years"
+msgstr ""
+
+#: timeline-calendar.php:120
+msgid "Configure the timeline calendar settings below:"
+msgstr ""
+
+#: timeline-calendar.php:125
+msgid "The year to use as reference for aligning days of the week in the calendar. This affects how the calendar grid is displayed."
+msgstr ""
+
+#: timeline-calendar.php:132
+msgid "Allow Year 0 in timeline articles"
+msgstr ""
+
+#: timeline-calendar.php:133
+msgid "When enabled, you can set timeline articles to Year 0."
+msgstr ""
+
+#: timeline-calendar.php:140
+msgid "Allow negative years (BC/BCE) in timeline articles"
+msgstr ""
+
+#: timeline-calendar.php:141
+msgid "When enabled, you can set timeline articles to negative years (e.g., -100 for 100 BC)."
+msgstr ""
+
+#: timeline-calendar.php:170
+msgid "Timeline Articles"
+msgstr ""
+
+#: timeline-calendar.php:172
+msgid "Timeline Article"
+msgstr ""
+
+#: timeline-calendar.php:173
+msgid "Add New"
+msgstr ""
+
+#: timeline-calendar.php:174
+msgid "Add New Timeline Article"
+msgstr ""
+
+#: timeline-calendar.php:175
+msgid "Edit Timeline Article"
+msgstr ""
+
+#: timeline-calendar.php:176
+msgid "New Timeline Article"
+msgstr ""
+
+#: timeline-calendar.php:177
+msgid "View Timeline Article"
+msgstr ""
+
+#: timeline-calendar.php:178
+msgid "Search Timeline Articles"
+msgstr ""
+
+#: timeline-calendar.php:179
+msgid "No timeline articles found"
+msgstr ""
+
+#: timeline-calendar.php:180
+msgid "No timeline articles found in trash"
+msgstr ""
+
+#: timeline-calendar.php:200
+msgid "Timeline Date Settings"
+msgstr ""
+
+#: timeline-calendar.php:215
+msgid "Year:"
+msgstr ""
+
+#: timeline-calendar.php:217
+msgid "Month:"
+msgstr ""
+
+#: timeline-calendar.php:220
+msgid "January"
+msgstr ""
+
+#: timeline-calendar.php:221
+msgid "February"
+msgstr ""
+
+#: timeline-calendar.php:222
+msgid "March"
+msgstr ""
+
+#: timeline-calendar.php:223
+msgid "April"
+msgstr ""
+
+#: timeline-calendar.php:224
+msgid "May"
+msgstr ""
+
+#: timeline-calendar.php:225
+msgid "June"
+msgstr ""
+
+#: timeline-calendar.php:226
+msgid "July"
+msgstr ""
+
+#: timeline-calendar.php:227
+msgid "August"
+msgstr ""
+
+#: timeline-calendar.php:228
+msgid "September"
+msgstr ""
+
+#: timeline-calendar.php:229
+msgid "October"
+msgstr ""
+
+#: timeline-calendar.php:230
+msgid "November"
+msgstr ""
+
+#: timeline-calendar.php:231
+msgid "December"
+msgstr ""
+
+#: timeline-calendar.php:234
+msgid "Day:"
+msgstr ""
+
+#: timeline-calendar.php:240
+msgid "Time of Day:"
+msgstr ""
+
+#: timeline-calendar.php:241
+msgid "No specific time"
+msgstr ""
+
+#: timeline-calendar.php:243
+msgid "Morning"
+msgstr ""
+
+#: timeline-calendar.php:244
+msgid "Day"
+msgstr ""
+
+#: timeline-calendar.php:245
+msgid "Afternoon"
+msgstr ""
+
+#: timeline-calendar.php:246
+msgid "Evening"
+msgstr ""
+
+#: timeline-calendar.php:247
+msgid "Night"
+msgstr ""
+
+#: timeline-calendar.php:252
+msgid "Reference:"
+msgstr ""
+
+#: timeline-calendar.php:253
+msgid "e.g., Wikipedia, Book Title, or URL"
+msgstr ""
+
+#: timeline-calendar.php:254
+msgid "Add a research reference or source link (optional)."
+msgstr ""
+
+#: timeline-calendar.php:256
+msgid "Changing these values will update the permalink below."
+msgstr ""
+
+#: timeline-calendar.php:320
+msgid "Security check failed"
+msgstr ""
+
+#: templates/timeline-template.php:25
+msgid "Timeline"
+msgstr ""
+
+#: templates/timeline-template.php:30
+msgid "Year %s"
+msgstr ""
+
+#: templates/timeline-template.php:85
+msgid "Total Articles:"
+msgstr ""
+
+#: templates/timeline-template.php:87
+msgid "Year Range:"
+msgstr ""
+
+#: templates/timeline-template.php:150
+msgid "%s %s, Year %s"
+msgstr ""
+
+#: templates/timeline-template.php:180
+msgid "Reference:"
+msgstr ""
+
+#: templates/timeline-template.php:220
+msgid "Article Not Found"
+msgstr ""
+
+#: templates/timeline-template.php:221
+msgid "The requested article could not be found."
+msgstr ""
+
+#: templates/timeline-template.php:250
+msgid "No Articles Found"
+msgstr ""
+
+#: templates/timeline-template.php:251
+msgid "No articles found for %s %s, Year %s."
+msgstr ""
+
+#: templates/timeline-template.php:320
+msgid "Articles on %s %s, Year %s: %s"
+msgstr ""
+
+#: templates/timeline-template.php:380
+msgid "Articles in %s, Year %s: %s"
+msgstr ""
+
+#: templates/timeline-template.php:381
+msgid "Days with Articles: %s"
+msgstr ""
+
+#: templates/timeline-template.php:450
+msgid "Articles in Year %s: %s"
+msgstr ""
+
+#: templates/timeline-template.php:451
+msgid "Months with Articles: %s"
+msgstr ""

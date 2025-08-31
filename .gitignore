@@ -1,6 +1,6 @@
-# WordPress Plugin .gitignore
+# WordPress Plugin Development .gitignore
 
-# OS generated files
+# Operating System Files
 .DS_Store
 .DS_Store?
 ._*
@@ -9,22 +9,96 @@
 ehthumbs.db
 Thumbs.db
 
-# IDE and editor files
+# IDE and Editor Files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Temporary files
-*.tmp
-*.temp
-*.log
+# Node.js (if using build tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Backup files
-*.bak
-*.backup
-*.old
+# Build artifacts
+build/
+dist/
+*.zip
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
 
 # WordPress specific
 wp-config.php
@@ -39,44 +113,11 @@ wp-content/mu-plugins/
 wp-content/wp-cache-config.php
 wp-content/plugins/hello.php
 
-# Development and build files
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
+# Plugin specific
+languages/*.po
+languages/*.mo
+!languages/timeline-calendar.pot
 
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Testing
-/tests/
-/phpunit.xml
-.phpunit.result.cache
-
-# Documentation build
-/docs/
-/build/
-
-# Composer
-/vendor/
-composer.lock
-
-# WordPress core (if accidentally included)
-wp-admin/
-wp-includes/
-wp-*.php
-xmlrpc.php
-index.php
-license.txt
-readme.html
-
-# Plugin specific ignores
-# Uncomment if you have any of these
-# /languages/*.mo
-# /languages/*.po~ 
+# Temporary files
+*.tmp
+*.temp 

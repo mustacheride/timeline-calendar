@@ -1,79 +1,104 @@
 <?php
 /**
  * Timeline Template
+ * 
  * Handles all timeline URL structures:
  * /timeline/ - Overview with sparkline calendar
  * /timeline/{year}/ - Year overview (12 months)
  * /timeline/{year}/{month}/ - Month overview (all days in that month)
  * /timeline/{year}/{month}/{day}/ - Day overview (all articles for that day)
  * /timeline/{year}/{month}/{day}/{article}/ - Article view
+ *
+ * @package TimelineCalendar
+ * @since 1.0.0
  */
 
 // Prevent direct access
-if (!defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 // DEBUG: Output timeline context at the top of the template
-$debug_vars = [
-    'timeline_year' => isset($timeline_year) ? $timeline_year : 'unset',
-    'timeline_month' => isset($timeline_month) ? $timeline_month : 'unset',
-    'timeline_day' => isset($timeline_day) ? $timeline_day : 'unset',
-    'timeline_article' => isset($timeline_article) ? $timeline_article : 'unset',
-    'timeline_overview' => isset($timeline_overview) ? $timeline_overview : 'unset',
-];
-echo '<!-- Timeline template loaded: ' . htmlspecialchars(json_encode($debug_vars)) . ' -->';
+$debug_vars = array(
+	'timeline_year' => isset( $timeline_year ) ? $timeline_year : 'unset',
+	'timeline_month' => isset( $timeline_month ) ? $timeline_month : 'unset',
+	'timeline_day' => isset( $timeline_day ) ? $timeline_day : 'unset',
+	'timeline_article' => isset( $timeline_article ) ? $timeline_article : 'unset',
+	'timeline_overview' => isset( $timeline_overview ) ? $timeline_overview : 'unset',
+);
+echo '<!-- Timeline template loaded: ' . esc_html( wp_json_encode( $debug_vars ) ) . ' -->';
 
-// Function to generate breadcrumbs
-function get_timeline_breadcrumbs($year = null, $month = null, $day = null, $article = null) {
-    $breadcrumbs = [];
-    $breadcrumbs[] = '<a href="' . home_url('/timeline/') . '">Timeline</a>';
-    
-    if ($year !== null) {
-        $breadcrumbs[] = '<a href="' . home_url('/timeline/' . $year . '/') . '">Year ' . $year . '</a>';
-        
-        if ($month !== null) {
-            $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-            $breadcrumbs[] = '<a href="' . home_url('/timeline/' . $year . '/' . $month . '/') . '">' . $month_names[$month] . '</a>';
-            
-            if ($day !== null) {
-                $breadcrumbs[] = '<a href="' . home_url('/timeline/' . $year . '/' . $month . '/' . $day . '/') . '">' . $day . '</a>';
-                
-                if ($article !== null) {
-                    $breadcrumbs[] = '<span>' . $article . '</span>';
-                }
-            }
-        }
-    }
-    
-    return '<div class="timeline-breadcrumbs">' . implode(' &raquo; ', $breadcrumbs) . '</div>';
+/**
+ * Generate breadcrumb navigation for timeline pages
+ *
+ * @param int|null    $year    The timeline year.
+ * @param int|null    $month   The timeline month.
+ * @param int|null    $day     The timeline day.
+ * @param string|null $article The article slug.
+ * @return string HTML for breadcrumb navigation.
+ */
+function get_timeline_breadcrumbs( $year = null, $month = null, $day = null, $article = null ) {
+	$breadcrumbs = array();
+	$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' ) ) . '">' . esc_html__( 'Timeline', 'timeline-calendar' ) . '</a>';
+	
+	if ( $year !== null ) {
+		$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' ) ) . '">' . esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $year ) ) . '</a>';
+		
+		if ( $month !== null ) {
+			$month_names = array(
+				1 => __( 'January', 'timeline-calendar' ),
+				2 => __( 'February', 'timeline-calendar' ),
+				3 => __( 'March', 'timeline-calendar' ),
+				4 => __( 'April', 'timeline-calendar' ),
+				5 => __( 'May', 'timeline-calendar' ),
+				6 => __( 'June', 'timeline-calendar' ),
+				7 => __( 'July', 'timeline-calendar' ),
+				8 => __( 'August', 'timeline-calendar' ),
+				9 => __( 'September', 'timeline-calendar' ),
+				10 => __( 'October', 'timeline-calendar' ),
+				11 => __( 'November', 'timeline-calendar' ),
+				12 => __( 'December', 'timeline-calendar' )
+			);
+			$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' . $month . '/' ) ) . '">' . esc_html( $month_names[ $month ] ) . '</a>';
+			
+			if ( $day !== null ) {
+				$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' . $month . '/' . $day . '/' ) ) . '">' . esc_html( $day ) . '</a>';
+				
+				if ( $article !== null ) {
+					$breadcrumbs[] = '<span>' . esc_html( $article ) . '</span>';
+				}
+			}
+		}
+	}
+	
+	return '<div class="timeline-breadcrumbs">' . implode( ' &raquo; ', $breadcrumbs ) . '</div>';
 }
 
 // Get URL parameters
-$timeline_year = get_query_var('timeline_year', null);
-$timeline_month = get_query_var('timeline_month', null);
-$timeline_day = get_query_var('timeline_day', null);
-$timeline_article = get_query_var('timeline_article', null);
-$timeline_overview = get_query_var('timeline_overview', null);
+$timeline_year = get_query_var( 'timeline_year', null );
+$timeline_month = get_query_var( 'timeline_month', null );
+$timeline_day = get_query_var( 'timeline_day', null );
+$timeline_article = get_query_var( 'timeline_article', null );
+$timeline_overview = get_query_var( 'timeline_overview', null );
 
 // Debug output
-if (isset($_GET['debug'])) {
-    echo "<!-- Debug Info:\n";
-    echo "timeline_year: " . ($timeline_year !== null ? $timeline_year : 'null') . "\n";
-    echo "timeline_month: " . ($timeline_month !== null ? $timeline_month : 'null') . "\n";
-    echo "timeline_day: " . ($timeline_day !== null ? $timeline_day : 'null') . "\n";
-    echo "timeline_article: " . ($timeline_article !== null ? $timeline_article : 'null') . "\n";
-    echo "timeline_overview: " . ($timeline_overview !== null ? $timeline_overview : 'null') . "\n";
-    echo "-->\n";
+if ( isset( $_GET['debug'] ) ) {
+	echo "<!-- Debug Info:\n";
+	echo "timeline_year: " . ( $timeline_year !== null ? esc_html( $timeline_year ) : 'null' ) . "\n";
+	echo "timeline_month: " . ( $timeline_month !== null ? esc_html( $timeline_month ) : 'null' ) . "\n";
+	echo "timeline_day: " . ( $timeline_day !== null ? esc_html( $timeline_day ) : 'null' ) . "\n";
+	echo "timeline_article: " . ( $timeline_article !== null ? esc_html( $timeline_article ) : 'null' ) . "\n";
+	echo "timeline_overview: " . ( $timeline_overview !== null ? esc_html( $timeline_overview ) : 'null' ) . "\n";
+	echo "-->\n";
 }
 
 // Always show debug info for now
 echo "<!-- Debug Info:\n";
-echo "timeline_year: " . ($timeline_year !== null ? $timeline_year : 'null') . "\n";
-echo "timeline_month: " . ($timeline_month !== null ? $timeline_month : 'null') . "\n";
-echo "timeline_day: " . ($timeline_day !== null ? $timeline_day : 'null') . "\n";
-echo "timeline_article: " . ($timeline_article !== null ? $timeline_article : 'null') . "\n";
-echo "timeline_overview: " . ($timeline_overview !== null ? $timeline_overview : 'null') . "\n";
+echo "timeline_year: " . ( $timeline_year !== null ? esc_html( $timeline_year ) : 'null' ) . "\n";
+echo "timeline_month: " . ( $timeline_month !== null ? esc_html( $timeline_month ) : 'null' ) . "\n";
+echo "timeline_day: " . ( $timeline_day !== null ? esc_html( $timeline_day ) : 'null' ) . "\n";
+echo "timeline_article: " . ( $timeline_article !== null ? esc_html( $timeline_article ) : 'null' ) . "\n";
+echo "timeline_overview: " . ( $timeline_overview !== null ? esc_html( $timeline_overview ) : 'null' ) . "\n";
 echo "-->";
 
 // Assets are now enqueued conditionally in the main plugin file
@@ -90,24 +115,24 @@ echo "-->";
                     <h2>Timeline Statistics</h2>
                     <?php
                     global $wpdb;
-                    $total_articles = $wpdb->get_var("
+                    $total_articles = $wpdb->get_var( $wpdb->prepare( "
                         SELECT COUNT(*) FROM {$wpdb->posts} 
-                        WHERE post_type = 'timeline_article' AND post_status = 'publish'
-                    ");
-                    $year_range = $wpdb->get_row("
+                        WHERE post_type = %s AND post_status = %s
+                    ", 'timeline_article', 'publish' ) );
+                    $year_range = $wpdb->get_row( $wpdb->prepare( "
                         SELECT 
                             MIN(CAST(pm.meta_value AS SIGNED)) as min_year,
                             MAX(CAST(pm.meta_value AS SIGNED)) as max_year
                         FROM {$wpdb->posts} p
                         JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id 
-                        WHERE p.post_type = 'timeline_article' 
-                        AND p.post_status = 'publish'
-                        AND pm.meta_key = 'timeline_year'
-                    ");
+                        WHERE p.post_type = %s 
+                        AND p.post_status = %s
+                        AND pm.meta_key = %s
+                    ", 'timeline_article', 'publish', 'timeline_year' ) );
                     ?>
-                    <p>Total Articles: <?php echo esc_html($total_articles); ?></p>
-                    <?php if ($year_range): ?>
-                        <p>Year Range: <?php echo esc_html($year_range->min_year); ?> - <?php echo esc_html($year_range->max_year); ?></p>
+                    <p><?php echo esc_html__( 'Total Articles:', 'timeline-calendar' ); ?> <?php echo esc_html( $total_articles ); ?></p>
+                    <?php if ( $year_range ) : ?>
+                        <p><?php echo esc_html__( 'Year Range:', 'timeline-calendar' ); ?> <?php echo esc_html( $year_range->min_year ); ?> - <?php echo esc_html( $year_range->max_year ); ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -115,28 +140,28 @@ echo "-->";
         <?php elseif ($timeline_article !== null): ?>
             <!-- Individual Article View -->
             <?php
-            $args = [
+            $args = array(
                 'post_type' => 'timeline_article',
                 'name' => $timeline_article,
-                'meta_query' => [
-                    [
+                'meta_query' => array(
+                    array(
                         'key' => 'timeline_year',
                         'value' => $timeline_year,
                         'compare' => '='
-                    ],
-                    [
+                    ),
+                    array(
                         'key' => 'timeline_month',
                         'value' => $timeline_month,
                         'compare' => '='
-                    ],
-                    [
+                    ),
+                    array(
                         'key' => 'timeline_day',
                         'value' => $timeline_day,
                         'compare' => '='
-                    ]
-                ]
-            ];
-            $query = new WP_Query($args);
+                    )
+                )
+            );
+            $query = new WP_Query( $args );
             
             if ($query->have_posts()):
                 while ($query->have_posts()): $query->the_post();
@@ -154,8 +179,21 @@ echo "-->";
                                 <div class="timeline-article-meta-row">
                                     <span class="timeline-date">
                                         <?php 
-                                        $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                                        echo esc_html($month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year); 
+                                        $month_names = array(
+                                            1 => __( 'January', 'timeline-calendar' ),
+                                            2 => __( 'February', 'timeline-calendar' ),
+                                            3 => __( 'March', 'timeline-calendar' ),
+                                            4 => __( 'April', 'timeline-calendar' ),
+                                            5 => __( 'May', 'timeline-calendar' ),
+                                            6 => __( 'June', 'timeline-calendar' ),
+                                            7 => __( 'July', 'timeline-calendar' ),
+                                            8 => __( 'August', 'timeline-calendar' ),
+                                            9 => __( 'September', 'timeline-calendar' ),
+                                            10 => __( 'October', 'timeline-calendar' ),
+                                            11 => __( 'November', 'timeline-calendar' ),
+                                            12 => __( 'December', 'timeline-calendar' )
+                                        );
+                                        echo esc_html( sprintf( __( '%s %s, Year %s', 'timeline-calendar' ), $month_names[ $timeline_month ], $timeline_day, $timeline_year ) ); 
                                         ?>
                                     </span>
                                     <?php 
