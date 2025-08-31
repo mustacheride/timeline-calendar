@@ -328,8 +328,7 @@ body.timeline-calendar-page .page-title {
     background: var(--timeline-calendar-hover);
 }
 
-.calendar-day:empty,
-.calendar-day:not(:has(*)) {
+.calendar-day:empty {
     background: var(--timeline-calendar-hover);
     cursor: default;
 }

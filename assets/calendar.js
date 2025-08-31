@@ -85,6 +85,14 @@ class TimelineCalendar {
             const dataAttr = articleCount ? ` data-article-count="${articleCount}"` : '';
             html += `<div class='calendar-day${dayClass}' data-day='${d}'${dataAttr}>${d}</div>`;
         }
+        
+        // Add empty cells to complete the 6-week grid (42 cells total)
+        const totalCells = firstDayOfWeek + days.length;
+        const remainingCells = 42 - totalCells;
+        for (let i = 0; i < remainingCells; i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
+        
         html += "</div>";
         root.innerHTML = html;
         this.attachDayHandlers();
