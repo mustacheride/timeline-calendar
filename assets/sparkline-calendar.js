@@ -527,17 +527,24 @@ class TimelineSparklineCalendar {
                 html += `<div style='padding: 0.4rem 0; border-bottom: 1px solid #f5f5f5; display: flex; align-items: flex-start; gap: 0.75rem;'>`;
                 
                 // Date column (fixed width)
-                html += `<div style='flex-shrink: 0; width: 60px; font-size: 0.85rem; color: #666; font-weight: 500;'>
+                html += `<div style='flex-shrink: 0; width: 70px; font-size: 0.85rem; color: #666; font-weight: 500;'>
                     <a href='/timeline/${year}/${month}/${day}/' style='color: #666; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#666"'>
                         ${monthName} ${day}
                     </a>
                 </div>`;
                 
-                // Article title column (flexible width) with time badge
-                html += `<div style='flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center;'>
-                    <a href='${article.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; line-height: 1.3; flex: 1;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${article.title}</a>
-                    ${timeBadge}
-                </div>`;
+                // Article title and time badge container
+                html += `<div style='flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem;'>`;
+                
+                // Article title (full width)
+                html += `<a href='${article.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; line-height: 1.3; word-wrap: break-word; overflow-wrap: break-word;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${article.title}</a>`;
+                
+                // Time badge (if exists)
+                if (timeBadge) {
+                    html += `<div style='display: flex; justify-content: flex-start;'>${timeBadge}</div>`;
+                }
+                
+                html += `</div>`;
                 
                 html += '</div>';
             });
