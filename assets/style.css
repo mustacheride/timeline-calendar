@@ -1092,8 +1092,8 @@ body.timeline-calendar-page .page-title {
 #sparkline-hover-modal {
     font-family: inherit;
     color: var(--timeline-calendar-text);
-    min-width: 350px;
-    max-width: 550px;
+    min-width: 400px;
+    max-width: 600px;
 }
 
 #sparkline-hover-modal h4 {
@@ -1142,6 +1142,30 @@ body.timeline-calendar-page .page-title {
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+}
+
+/* Modal responsive improvements */
+@media (max-width: 768px) {
+    #sparkline-hover-modal {
+        min-width: 300px;
+        max-width: 90vw;
+    }
+    
+    #sparkline-hover-modal-list > div {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    #sparkline-hover-modal-list > div > div:first-child {
+        width: auto;
+        flex-shrink: 0;
+    }
+    
+    #sparkline-hover-modal-list > div > div:last-child {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
 }
 
 .timeline-sparkline-legend {
