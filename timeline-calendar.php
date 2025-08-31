@@ -577,9 +577,12 @@ add_shortcode('timeline_sparkline_calendar', function() {
             const allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
             
             let startYear, endYear;
-            if (allowNegativeYears) {
+            if (allowNegativeYears && allowYearZero) {
                 startYear = -2;
                 endYear = 4;
+            } else if (allowNegativeYears && !allowYearZero) {
+                startYear = -2;
+                endYear = 5; // Extend to 5 to compensate for skipping Year 0
             } else if (allowYearZero) {
                 startYear = 0;
                 endYear = 6;
@@ -629,9 +632,12 @@ add_shortcode('timeline_sparkline', function($atts) {
             const allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
             const allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
             
-            if (allowNegativeYears) {
+            if (allowNegativeYears && allowYearZero) {
                 config.startYear = -2;
                 config.endYear = 4;
+            } else if (allowNegativeYears && !allowYearZero) {
+                config.startYear = -2;
+                config.endYear = 5; // Extend to 5 to compensate for skipping Year 0
             } else if (allowYearZero) {
                 config.startYear = 0;
                 config.endYear = 6;
