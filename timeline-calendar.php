@@ -785,7 +785,13 @@ add_shortcode('timeline_year_calendar', function($atts) {
     });
     </script>
     <?php
-    return ob_get_clean();
+    $output = ob_get_clean();
+    
+    // Remove any auto-paragraph tags that WordPress might add
+    $output = preg_replace('/<p[^>]*>\s*<\/p>/', '', $output);
+    $output = preg_replace('/<p[^>]*>\s*<p[^>]*>\s*<\/p>\s*<\/p>/', '', $output);
+    
+    return $output;
 });
 
 // AJAX: Fetch available years
