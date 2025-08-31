@@ -1212,6 +1212,21 @@ body.timeline-calendar-page .page-title {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Hide unwanted paragraph tags that WordPress adds */
+.timeline-year-view p:empty,
+.timeline-year-view p:blank,
+.timeline-year-view p:not(:has(*)),
+.timeline-year-view p:only-child:empty,
+.timeline-year-view p[class=""],
+.timeline-year-view p:not(:has(text-content)) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+}
+
 .timeline-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;

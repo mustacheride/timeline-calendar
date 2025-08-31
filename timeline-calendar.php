@@ -794,6 +794,23 @@ add_shortcode('timeline_year_calendar', function($atts) {
     return $output;
 });
 
+// Add filter to prevent wpautop from processing timeline calendar shortcodes
+add_filter('the_content', function($content) {
+    // Check if this content contains our timeline calendar shortcodes
+    if (strpos($content, 'timeline_year_calendar') !== false || 
+        strpos($content, 'timeline_calendar') !== false || 
+        strpos($content, 'timeline_sparkline') !== false) {
+        
+        // Temporarily remove wpautop filter
+        remove_filter('the_content', 'wpautop');
+        
+        // Re-add it after processing
+        add_filter('the_content', 'wpautop', 99);
+    }
+    
+    return $content;
+}, 9);
+
 // AJAX: Fetch available years
 add_action('wp_ajax_timeline_calendar_years', 'timeline_calendar_years_ajax');
 add_action('wp_ajax_nopriv_timeline_calendar_years', 'timeline_calendar_years_ajax');
