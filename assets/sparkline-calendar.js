@@ -526,8 +526,8 @@ class TimelineSparklineCalendar {
                 
                 html += `<div style='padding: 0.4rem 0; border-bottom: 1px solid #f5f5f5; display: flex; align-items: flex-start; gap: 0.75rem;'>`;
                 
-                // Date column (fixed width)
-                html += `<div style='flex-shrink: 0; width: 70px; font-size: 0.85rem; color: #666; font-weight: 500;'>
+                // Date column (fixed width) - increased for longer month names
+                html += `<div style='flex-shrink: 0; width: 90px; font-size: 0.85rem; color: #666; font-weight: 500;'>
                     <a href='/timeline/${year}/${month}/${day}/' style='color: #666; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#666"'>
                         ${monthName} ${day}
                     </a>

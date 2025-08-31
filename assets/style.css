@@ -1092,8 +1092,8 @@ body.timeline-calendar-page .page-title {
 #sparkline-hover-modal {
     font-family: inherit;
     color: var(--timeline-calendar-text);
-    min-width: 300px;
-    max-width: 500px;
+    min-width: 350px;
+    max-width: 550px;
 }
 
 #sparkline-hover-modal h4 {
@@ -1135,6 +1135,13 @@ body.timeline-calendar-page .page-title {
 
 #sparkline-hover-modal-list > div:last-child {
     margin-bottom: 0;
+}
+
+/* Ensure date column text doesn't overflow */
+#sparkline-hover-modal-list > div > div:first-child {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .timeline-sparkline-legend {
