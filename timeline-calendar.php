@@ -1,77 +1,65 @@
 <?php
-/**
- * Plugin Name: Timeline Calendar
- * Plugin URI: https://github.com/mustacheride/timeline-calendar
- * Description: A comprehensive WordPress plugin for creating and managing timeline-based content with interactive calendar views, sparkline visualizations, and hierarchical navigation. Perfect for historical blogs, project timelines, or any content that needs chronological organization.
- * Version: 1.0.0
- * Requires at least: 5.0
- * Tested up to: 6.4
- * Requires PHP: 7.4
- * Author: mustacheride
- * Author URI: https://github.com/mustacheride
- * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: timeline-calendar
- * Domain Path: /languages
- * Network: false
- *
- * @package TimelineCalendar
- * @version 1.0.0
- * @author mustacheride
- * @license GPL v2 or later
- *
- * Timeline Calendar is a powerful WordPress plugin that transforms your site into a timeline management system. 
- * Create historical content organized by years, months, and days with interactive calendar views, 
- * sparkline visualizations, and smart navigation.
- */
+/*
+Plugin Name: Timeline Calendar
+Plugin URI: https://github.com/mustacheride/timeline-calendar
+Description: A comprehensive WordPress plugin for creating and managing timeline-based content with interactive calendar views, sparkline visualizations, and hierarchical navigation. Perfect for historical blogs, project timelines, or any content that needs chronological organization.
+Version: 1.0.0
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.4
+Author: mustacheride
+Author URI: https://github.com/mustacheride
+License: GPL v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: timeline-calendar
+Domain Path: /languages
+Network: false
 
-// Prevent direct access
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+Timeline Calendar is a powerful WordPress plugin that transforms your site into a timeline management system. 
+Create historical content organized by years, months, and days with interactive calendar views, 
+sparkline visualizations, and smart navigation.
+*/
+
+if (!defined('ABSPATH')) exit;
 
 // Define plugin constants
-define( 'TIMELINE_CALENDAR_VERSION', '1.0.0' );
-define( 'TIMELINE_CALENDAR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'TIMELINE_CALENDAR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'TIMELINE_CALENDAR_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+define('TIMELINE_CALENDAR_VERSION', '1.0.0');
+define('TIMELINE_CALENDAR_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('TIMELINE_CALENDAR_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('TIMELINE_CALENDAR_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 // Plugin settings
 class TimelineCalendarSettings {
     private $options;
     
     public function __construct() {
-        add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
-        add_action( 'admin_init', array( $this, 'page_init' ) );
-        $this->options = get_option( 'timeline_calendar_options', array(
+        add_action('admin_menu', array($this, 'add_plugin_page'));
+        add_action('admin_init', array($this, 'page_init'));
+        $this->options = get_option('timeline_calendar_options', array(
             'reference_year' => 1989,
             'allow_year_zero' => false,
             'allow_negative_years' => false
-        ) );
+        ));
     }
     
     public function add_plugin_page() {
         add_options_page(
-            __( 'Timeline Calendar Settings', 'timeline-calendar' ),
-            __( 'Timeline Calendar', 'timeline-calendar' ),
+            'Timeline Calendar Settings',
+            'Timeline Calendar',
             'manage_options',
             'timeline-calendar-settings',
-            array( $this, 'create_admin_page' )
+            array($this, 'create_admin_page')
         );
     }
     
     public function create_admin_page() {
-        // Verify user capabilities
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'You do not have sufficient permissions to access this page.', 'timeline-calendar' ) );
-        }
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html( __( 'Timeline Calendar Settings', 'timeline-calendar' ) ); ?></h1>
+            <h1>Timeline Calendar Settings</h1>
             <form method="post" action="options.php">
                 <?php
-                settings_fields( 'timeline_calendar_options_group' );
-                do_settings_sections( 'timeline-calendar-settings' );
+                settings_fields('timeline_calendar_options_group');
+                do_settings_sections('timeline-calendar-settings');
                 submit_button();
                 ?>
             </form>
@@ -83,53 +71,53 @@ class TimelineCalendarSettings {
         register_setting(
             'timeline_calendar_options_group',
             'timeline_calendar_options',
-            array( $this, 'sanitize' )
+            array($this, 'sanitize')
         );
         
         add_settings_section(
             'timeline_calendar_setting_section',
-            __( 'Calendar Configuration', 'timeline-calendar' ),
-            array( $this, 'section_info' ),
+            'Calendar Configuration',
+            array($this, 'section_info'),
             'timeline-calendar-settings'
         );
         
         add_settings_field(
             'reference_year',
-            __( 'Reference Year for Day of Week Alignment', 'timeline-calendar' ),
-            array( $this, 'reference_year_callback' ),
+            'Reference Year for Day of Week Alignment',
+            array($this, 'reference_year_callback'),
             'timeline-calendar-settings',
             'timeline_calendar_setting_section'
         );
         
         add_settings_field(
             'allow_year_zero',
-            __( 'Allow Year 0', 'timeline-calendar' ),
-            array( $this, 'allow_year_zero_callback' ),
+            'Allow Year 0',
+            array($this, 'allow_year_zero_callback'),
             'timeline-calendar-settings',
             'timeline_calendar_setting_section'
         );
         
         add_settings_field(
             'allow_negative_years',
-            __( 'Allow Negative Years', 'timeline-calendar' ),
-            array( $this, 'allow_negative_years_callback' ),
+            'Allow Negative Years',
+            array($this, 'allow_negative_years_callback'),
             'timeline-calendar-settings',
             'timeline_calendar_setting_section'
         );
     }
     
-    public function sanitize( $input ) {
+    public function sanitize($input) {
         $new_input = array();
         
-        if ( isset( $input['reference_year'] ) ) {
-            $new_input['reference_year'] = absint( $input['reference_year'] );
+        if (isset($input['reference_year'])) {
+            $new_input['reference_year'] = intval($input['reference_year']);
         }
         
-        if ( isset( $input['allow_year_zero'] ) ) {
+        if (isset($input['allow_year_zero'])) {
             $new_input['allow_year_zero'] = (bool) $input['allow_year_zero'];
         }
         
-        if ( isset( $input['allow_negative_years'] ) ) {
+        if (isset($input['allow_negative_years'])) {
             $new_input['allow_negative_years'] = (bool) $input['allow_negative_years'];
         }
         
@@ -137,49 +125,49 @@ class TimelineCalendarSettings {
     }
     
     public function section_info() {
-        echo '<p>' . esc_html__( 'Configure the timeline calendar settings below:', 'timeline-calendar' ) . '</p>';
+        echo '<p>Configure the timeline calendar settings below:</p>';
     }
     
     public function reference_year_callback() {
         printf(
             '<input type="number" id="reference_year" name="timeline_calendar_options[reference_year]" value="%s" step="1" />',
-            isset( $this->options['reference_year'] ) ? esc_attr( $this->options['reference_year'] ) : 1989
+            isset($this->options['reference_year']) ? esc_attr($this->options['reference_year']) : 1989
         );
-        echo '<p class="description">' . esc_html__( 'The year to use as reference for aligning days of the week in the calendar. This affects how the calendar grid is displayed.', 'timeline-calendar' ) . '</p>';
+        echo '<p class="description">The year to use as reference for aligning days of the week in the calendar. This affects how the calendar grid is displayed.</p>';
     }
     
     public function allow_year_zero_callback() {
         printf(
             '<input type="checkbox" id="allow_year_zero" name="timeline_calendar_options[allow_year_zero]" value="1" %s />',
-            ( isset( $this->options['allow_year_zero'] ) && $this->options['allow_year_zero'] ) ? 'checked' : ''
+            (isset($this->options['allow_year_zero']) && $this->options['allow_year_zero']) ? 'checked' : ''
         );
-        echo '<label for="allow_year_zero">' . esc_html__( 'Allow Year 0 in timeline articles', 'timeline-calendar' ) . '</label>';
-        echo '<p class="description">' . esc_html__( 'When enabled, you can set timeline articles to Year 0.', 'timeline-calendar' ) . '</p>';
+        echo '<label for="allow_year_zero"> Allow Year 0 in timeline articles</label>';
+        echo '<p class="description">When enabled, you can set timeline articles to Year 0.</p>';
     }
     
     public function allow_negative_years_callback() {
         printf(
             '<input type="checkbox" id="allow_negative_years" name="timeline_calendar_options[allow_negative_years]" value="1" %s />',
-            ( isset( $this->options['allow_negative_years'] ) && $this->options['allow_negative_years'] ) ? 'checked' : ''
+            (isset($this->options['allow_negative_years']) && $this->options['allow_negative_years']) ? 'checked' : ''
         );
-        echo '<label for="allow_negative_years">' . esc_html__( 'Allow negative years (BC/BCE) in timeline articles', 'timeline-calendar' ) . '</label>';
-        echo '<p class="description">' . esc_html__( 'When enabled, you can set timeline articles to negative years (e.g., -100 for 100 BC).', 'timeline-calendar' ) . '</p>';
+        echo '<label for="allow_negative_years"> Allow negative years (BC/BCE) in timeline articles</label>';
+        echo '<p class="description">When enabled, you can set timeline articles to negative years (e.g., -100 for 100 BC).</p>';
     }
 }
 
 // Initialize settings
-if ( is_admin() ) {
+if (is_admin()) {
     new TimelineCalendarSettings();
 }
 
 // Helper function to get plugin options
-function get_timeline_calendar_option( $key, $default = null ) {
-    $options = get_option( 'timeline_calendar_options', array(
+function get_timeline_calendar_option($key, $default = null) {
+    $options = get_option('timeline_calendar_options', array(
         'reference_year' => 1989,
         'allow_year_zero' => false,
         'allow_negative_years' => false
-    ) );
-    return isset( $options[ $key ] ) ? $options[ $key ] : $default;
+    ));
+    return isset($options[$key]) ? $options[$key] : $default;
 }
 
 /**
@@ -188,17 +176,17 @@ function get_timeline_calendar_option( $key, $default = null ) {
  * @param int $year The year to check.
  * @return bool True if the year is allowed, false otherwise.
  */
-function is_timeline_year_allowed( $year ) {
-    $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
-    $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+function is_timeline_year_allowed($year) {
+    $allow_year_zero = get_timeline_calendar_option('allow_year_zero', false);
+    $allow_negative_years = get_timeline_calendar_option('allow_negative_years', false);
     
     // Special case for Year 0
-    if ( $year === 0 ) {
+    if ($year === 0) {
         return $allow_year_zero;
     }
     
     // For negative years
-    if ( $year < 0 ) {
+    if ($year < 0) {
         return $allow_negative_years;
     }
     
@@ -212,12 +200,12 @@ function is_timeline_year_allowed( $year ) {
  * @return int The minimum allowed year.
  */
 function get_timeline_min_year() {
-    $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
-    $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+    $allow_year_zero = get_timeline_calendar_option('allow_year_zero', false);
+    $allow_negative_years = get_timeline_calendar_option('allow_negative_years', false);
     
-    if ( $allow_negative_years ) {
+    if ($allow_negative_years) {
         return -9999;
-    } elseif ( $allow_year_zero ) {
+    } elseif ($allow_year_zero) {
         return 0;
     } else {
         return 1;
@@ -229,22 +217,22 @@ function get_timeline_min_year() {
  *
  * @param WP_Query $query The query to filter.
  */
-function filter_timeline_query_by_settings( $query ) {
+function filter_timeline_query_by_settings($query) {
     // Only filter timeline article queries
-    if ( 'timeline_article' !== $query->get( 'post_type' ) ) {
+    if ('timeline_article' !== $query->get('post_type')) {
         return;
     }
     
     // Don't filter admin queries
-    if ( is_admin() ) {
+    if (is_admin()) {
         return;
     }
     
     $min_year = get_timeline_min_year();
     
     // Add meta query to filter by minimum year
-    $meta_query = $query->get( 'meta_query' );
-    if ( ! is_array( $meta_query ) ) {
+    $meta_query = $query->get('meta_query');
+    if (!is_array($meta_query)) {
         $meta_query = array();
     }
     
@@ -255,134 +243,91 @@ function filter_timeline_query_by_settings( $query ) {
         'type' => 'NUMERIC'
     );
     
-    $query->set( 'meta_query', $meta_query );
+    $query->set('meta_query', $meta_query);
 }
 
 // Apply filter to timeline queries
-add_action( 'pre_get_posts', 'filter_timeline_query_by_settings' );
+add_action('pre_get_posts', 'filter_timeline_query_by_settings');
 
 // Flush rewrite rules on plugin activation
-register_activation_hook( __FILE__, function() {
+register_activation_hook(__FILE__, function() {
     // Flush rewrite rules to ensure our rules are registered
     flush_rewrite_rules();
-} );
+});
 
 // Flush rewrite rules on plugin deactivation
-register_deactivation_hook( __FILE__, function() {
+register_deactivation_hook(__FILE__, function() {
     flush_rewrite_rules();
-} );
+});
 
 // Register custom post type
-add_action( 'init', function() {
-    register_post_type( 'timeline_article', array(
+add_action('init', function() {
+    register_post_type('timeline_article', [
         'public' => true,
-        'label' => __( 'Timeline Articles', 'timeline-calendar' ),
-        'labels' => array(
-            'name' => __( 'Timeline Articles', 'timeline-calendar' ),
-            'singular_name' => __( 'Timeline Article', 'timeline-calendar' ),
-            'add_new' => __( 'Add New', 'timeline-calendar' ),
-            'add_new_item' => __( 'Add New Timeline Article', 'timeline-calendar' ),
-            'edit_item' => __( 'Edit Timeline Article', 'timeline-calendar' ),
-            'new_item' => __( 'New Timeline Article', 'timeline-calendar' ),
-            'view_item' => __( 'View Timeline Article', 'timeline-calendar' ),
-            'search_items' => __( 'Search Timeline Articles', 'timeline-calendar' ),
-            'not_found' => __( 'No timeline articles found', 'timeline-calendar' ),
-            'not_found_in_trash' => __( 'No timeline articles found in trash', 'timeline-calendar' ),
-        ),
-        'supports' => array( 'title', 'editor', 'thumbnail', 'custom-fields', 'excerpt' ),
+        'label' => 'Timeline Articles',
+        'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
         'has_archive' => true,
         'menu_icon' => 'dashicons-calendar-alt',
         'show_in_rest' => true,
         'rest_base' => 'timeline_article',
-        'rest_controller_class' => 'WP_REST_Posts_Controller',
-        'capability_type' => 'post',
-        'map_meta_cap' => true,
-        'hierarchical' => false,
-        'rewrite' => array( 'slug' => 'timeline-article' ),
-        'query_var' => true,
-        'show_in_menu' => true,
-        'show_in_admin_bar' => true,
-        'can_export' => true,
-        'delete_with_user' => false,
-    ) );
-} );
+        'rest_controller_class' => 'WP_REST_Posts_Controller'
+    ]);
+});
 
 // Add meta box for timeline year/month/day
-add_action( 'add_meta_boxes', function() {
+add_action('add_meta_boxes', function() {
     add_meta_box(
         'timeline_date',
-        __( 'Timeline Date Settings', 'timeline-calendar' ),
-        function( $post ) {
-            // Add nonce for security
-            wp_nonce_field( 'timeline_calendar_meta_box', 'timeline_calendar_meta_box_nonce' );
-            
-            $year = get_post_meta( $post->ID, 'timeline_year', true );
-            $month = get_post_meta( $post->ID, 'timeline_month', true );
-            $day = get_post_meta( $post->ID, 'timeline_day', true );
+        'Timeline Date Settings',
+        function($post) {
+            $year = get_post_meta($post->ID, 'timeline_year', true);
+            $month = get_post_meta($post->ID, 'timeline_month', true);
+            $day = get_post_meta($post->ID, 'timeline_day', true);
             
             // Get plugin settings
-            $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
-            $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
+            $allow_year_zero = get_timeline_calendar_option('allow_year_zero', false);
+            $allow_negative_years = get_timeline_calendar_option('allow_negative_years', false);
             
             // Set min value based on settings
-            $min_year = $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
+            $min_year = $allow_negative_years ? -9999 : ($allow_year_zero ? 0 : 1);
             
-            echo '<label>' . esc_html__( 'Year:', 'timeline-calendar' ) . ' <input type="number" name="timeline_year" id="timeline_year" value="' . esc_attr( $year ) . '" step="1" min="' . esc_attr( $min_year ) . '" /></label> ';
-            echo '<label>' . esc_html__( 'Month:', 'timeline-calendar' ) . ' <select name="timeline_month" id="timeline_month">';
-            $months = array(
-                1 => __( 'January', 'timeline-calendar' ),
-                2 => __( 'February', 'timeline-calendar' ),
-                3 => __( 'March', 'timeline-calendar' ),
-                4 => __( 'April', 'timeline-calendar' ),
-                5 => __( 'May', 'timeline-calendar' ),
-                6 => __( 'June', 'timeline-calendar' ),
-                7 => __( 'July', 'timeline-calendar' ),
-                8 => __( 'August', 'timeline-calendar' ),
-                9 => __( 'September', 'timeline-calendar' ),
-                10 => __( 'October', 'timeline-calendar' ),
-                11 => __( 'November', 'timeline-calendar' ),
-                12 => __( 'December', 'timeline-calendar' )
-            );
-            foreach ( $months as $num => $name ) {
-                echo '<option value="' . esc_attr( $num ) . '"' . selected( $month, $num, false ) . '>' . esc_html( $name ) . '</option>';
+            echo '<label>Year: <input type="number" name="timeline_year" id="timeline_year" value="' . esc_attr($year) . '" step="1" min="' . $min_year . '" /></label> ';
+            echo '<label>Month: <select name="timeline_month" id="timeline_month">';
+            $months = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
+            foreach ($months as $num=>$name) {
+                echo '<option value="' . $num . '"' . selected($month, $num, false) . '>' . $name . '</option>';
             }
             echo '</select></label> ';
-            echo '<label>' . esc_html__( 'Day:', 'timeline-calendar' ) . ' <select name="timeline_day" id="timeline_day">';
-            for ( $d = 1; $d <= 31; $d++ ) {
-                echo '<option value="' . esc_attr( $d ) . '"' . selected( $day, $d, false ) . '>' . esc_html( $d ) . '</option>';
+            echo '<label>Day: <select name="timeline_day" id="timeline_day">';
+            for ($d=1; $d<=31; $d++) {
+                echo '<option value="' . $d . '"' . selected($day, $d, false) . '>' . $d . '</option>';
             }
             echo '</select></label>';
             
             // Time of Day field
-            $time_of_day = get_post_meta( $post->ID, 'timeline_time_of_day', true );
-            echo '<br><br><label>' . esc_html__( 'Time of Day:', 'timeline-calendar' ) . ' <select name="timeline_time_of_day" id="timeline_time_of_day">';
-            echo '<option value="">' . esc_html__( 'No specific time', 'timeline-calendar' ) . '</option>';
-            $time_options = array(
-                __( 'Morning', 'timeline-calendar' ),
-                __( 'Day', 'timeline-calendar' ),
-                __( 'Afternoon', 'timeline-calendar' ),
-                __( 'Evening', 'timeline-calendar' ),
-                __( 'Night', 'timeline-calendar' )
-            );
-            foreach ( $time_options as $time ) {
-                echo '<option value="' . esc_attr( $time ) . '"' . selected( $time_of_day, $time, false ) . '>' . esc_html( $time ) . '</option>';
+            $time_of_day = get_post_meta($post->ID, 'timeline_time_of_day', true);
+            echo '<br><br><label>Time of Day: <select name="timeline_time_of_day" id="timeline_time_of_day">';
+            echo '<option value="">No specific time</option>';
+            $time_options = ['Morning', 'Day', 'Afternoon', 'Evening', 'Night'];
+            foreach ($time_options as $time) {
+                echo '<option value="' . $time . '"' . selected($time_of_day, $time, false) . '>' . $time . '</option>';
             }
             echo '</select></label>';
             
             // Reference field
-            $reference = get_post_meta( $post->ID, 'timeline_reference', true );
-            echo '<br><br><label>' . esc_html__( 'Reference:', 'timeline-calendar' ) . ' <input type="text" name="timeline_reference" id="timeline_reference" value="' . esc_attr( $reference ) . '" placeholder="' . esc_attr__( 'e.g., Wikipedia, Book Title, or URL', 'timeline-calendar' ) . '" style="width: 100%; max-width: 400px;" /></label>';
-            echo '<p><em>' . esc_html__( 'Add a research reference or source link (optional).', 'timeline-calendar' ) . '</em></p>';
+            $reference = get_post_meta($post->ID, 'timeline_reference', true);
+            echo '<br><br><label>Reference: <input type="text" name="timeline_reference" id="timeline_reference" value="' . esc_attr($reference) . '" placeholder="e.g., Wikipedia, Book Title, or URL" style="width: 100%; max-width: 400px;" /></label>';
+            echo '<p><em>Add a research reference or source link (optional).</em></p>';
             
-            echo '<p><em>' . esc_html__( 'Changing these values will update the permalink below.', 'timeline-calendar' ) . '</em></p>';
+            echo '<p><em>Changing these values will update the permalink below.</em></p>';
             ?>
             <script>
             jQuery(document).ready(function($) {
                 // Get timeline calendar settings
-                var timelineSettings = <?php echo wp_json_encode( array(
-                    'allowYearZero' => get_timeline_calendar_option( 'allow_year_zero', false ),
-                    'allowNegativeYears' => get_timeline_calendar_option( 'allow_negative_years', false )
-                ) ); ?>;
+                var timelineSettings = <?php echo json_encode(array(
+                    'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
+                    'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false)
+                )); ?>;
                 
                 function updatePermalink() {
                     var year = $('#timeline_year').val();
@@ -391,12 +336,12 @@ add_action( 'add_meta_boxes', function() {
                     var postName = $('#post_name').val() || $('#title').val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
                     
                     if (year && month && day && postName) {
-                        var newPermalink = '<?php echo esc_js( home_url( '/' ) ); ?>timeline/' + year + '/' + month + '/' + day + '/' + postName + '/';
+                        var newPermalink = '<?php echo home_url('/'); ?>timeline/' + year + '/' + month + '/' + day + '/' + postName + '/';
                         
                         // Update the permalink display
                         var permalinkLink = $('.permalink a');
                         if (permalinkLink.length) {
-                            permalinkLink.attr('href', newPermalink).text(newPermalink.replace('<?php echo esc_js( home_url( '/' ) ); ?>', ''));
+                            permalinkLink.attr('href', newPermalink).text(newPermalink.replace('<?php echo home_url('/'); ?>', ''));
                         }
                         
                         // Update the sample permalink input
@@ -428,132 +373,288 @@ add_action( 'add_meta_boxes', function() {
         },
         'timeline_article'
     );
-} );
+});
 
 // Save meta box data for year/month/day
-add_action( 'save_post', function( $post_id ) {
-    // Check if nonce is valid
-    if ( ! isset( $_POST['timeline_calendar_meta_box_nonce'] ) || ! wp_verify_nonce( $_POST['timeline_calendar_meta_box_nonce'], 'timeline_calendar_meta_box' ) ) {
-        return;
+add_action('save_post', function($post_id) {
+    if (isset($_POST['timeline_year'])) {
+        update_post_meta($post_id, 'timeline_year', intval($_POST['timeline_year']));
     }
-    
-    // Check if user has permission to edit this post
-    if ( ! current_user_can( 'edit_post', $post_id ) ) {
-        return;
+    if (isset($_POST['timeline_month'])) {
+        update_post_meta($post_id, 'timeline_month', intval($_POST['timeline_month']));
     }
-    
-    // Check if this is an autosave
-    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-        return;
+    if (isset($_POST['timeline_day'])) {
+        update_post_meta($post_id, 'timeline_day', intval($_POST['timeline_day']));
     }
-    
-    // Check the post type
-    if ( 'timeline_article' !== get_post_type( $post_id ) ) {
-        return;
+    if (isset($_POST['timeline_time_of_day'])) {
+        update_post_meta($post_id, 'timeline_time_of_day', sanitize_text_field($_POST['timeline_time_of_day']));
     }
-    
-    // Get plugin settings for validation
-    $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
-    $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
-    
-    // Sanitize and validate timeline year
-    if ( isset( $_POST['timeline_year'] ) ) {
-        $year = intval( $_POST['timeline_year'] );
-        
-        // Validate year based on settings
-        $min_year = $allow_negative_years ? -9999 : ( $allow_year_zero ? 0 : 1 );
-        
-        if ( $year >= $min_year ) {
-            update_post_meta( $post_id, 'timeline_year', $year );
-        } else {
-            // Add admin notice for invalid year
-            add_action( 'admin_notices', function() use ( $year, $min_year ) {
-                echo '<div class="notice notice-error is-dismissible"><p>' . 
-                     esc_html( sprintf( __( 'Timeline year %d is not allowed. Minimum allowed year is %d.', 'timeline-calendar' ), $year, $min_year ) ) . 
-                     '</p></div>';
-            } );
-        }
+    if (isset($_POST['timeline_reference'])) {
+        update_post_meta($post_id, 'timeline_reference', sanitize_text_field($_POST['timeline_reference']));
     }
-    
-    // Sanitize and save timeline month
-    if ( isset( $_POST['timeline_month'] ) ) {
-        $month = absint( $_POST['timeline_month'] );
-        if ( $month >= 1 && $month <= 12 ) {
-            update_post_meta( $post_id, 'timeline_month', $month );
-        }
-    }
-    
-    // Sanitize and save timeline day
-    if ( isset( $_POST['timeline_day'] ) ) {
-        $day = absint( $_POST['timeline_day'] );
-        if ( $day >= 1 && $day <= 31 ) {
-            update_post_meta( $post_id, 'timeline_day', $day );
-        }
-    }
-    
-    // Sanitize and save timeline time of day
-    if ( isset( $_POST['timeline_time_of_day'] ) ) {
-        $time_of_day = sanitize_text_field( wp_unslash( $_POST['timeline_time_of_day'] ) );
-        update_post_meta( $post_id, 'timeline_time_of_day', $time_of_day );
-    }
-    
-    // Sanitize and save timeline reference
-    if ( isset( $_POST['timeline_reference'] ) ) {
-        $reference = sanitize_text_field( wp_unslash( $_POST['timeline_reference'] ) );
-        update_post_meta( $post_id, 'timeline_reference', $reference );
-    }
-} );
+});
 
 // Enqueue scripts and styles
-add_action( 'wp_enqueue_scripts', function() {
+add_action('wp_enqueue_scripts', function() {
     // Only load on timeline pages or when shortcodes are used
-    if ( is_timeline_request() || has_timeline_shortcode() ) {
+    if (is_timeline_request() || has_timeline_shortcode()) {
         // Load styles with lower priority to respect theme styles
-        wp_enqueue_style( 
-            'timeline-calendar-style', 
-            TIMELINE_CALENDAR_PLUGIN_URL . 'assets/style.css', 
-            array(), 
-            TIMELINE_CALENDAR_VERSION 
-        );
-        wp_enqueue_script( 
-            'timeline-calendar-js', 
-            TIMELINE_CALENDAR_PLUGIN_URL . 'assets/calendar.js', 
-            array( 'jquery' ), 
-            TIMELINE_CALENDAR_VERSION, 
-            true 
-        );
-        wp_enqueue_script( 
-            'timeline-header-js', 
-            TIMELINE_CALENDAR_PLUGIN_URL . 'assets/timeline-header.js', 
-            array( 'jquery' ), 
-            TIMELINE_CALENDAR_VERSION, 
-            true 
-        );
-        wp_enqueue_script( 
-            'timeline-year-view-js', 
-            TIMELINE_CALENDAR_PLUGIN_URL . 'assets/year-view.js', 
-            array( 'jquery' ), 
-            TIMELINE_CALENDAR_VERSION, 
-            true 
-        );
+        wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.2');
+        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery'], '1.0.3', true);
+        wp_enqueue_script('timeline-header-js', plugins_url('assets/timeline-header.js', __FILE__), ['jquery'], '1.0.1', true);
+        wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery'], '1.0.1', true);
         wp_enqueue_script(
             'timeline-sparkline-calendar',
-            TIMELINE_CALENDAR_PLUGIN_URL . 'assets/sparkline-calendar.js',
-            array( 'jquery' ),
-            TIMELINE_CALENDAR_VERSION,
+            plugin_dir_url(__FILE__) . 'assets/sparkline-calendar.js',
+            array('jquery'),
+            '1.0.12',
             true
         );
         
         // Localize script with timeline calendar settings and AJAX URL
-        wp_localize_script( 'timeline-calendar-js', 'timelineCalendarSettings', array(
-            'referenceYear' => get_timeline_calendar_option( 'reference_year', 1989 ),
-            'allowYearZero' => get_timeline_calendar_option( 'allow_year_zero', false ),
-            'allowNegativeYears' => get_timeline_calendar_option( 'allow_negative_years', false ),
-            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce' => wp_create_nonce( 'timeline_calendar_nonce' )
-        ) );
+        wp_localize_script('timeline-calendar-js', 'timelineCalendarSettings', array(
+            'referenceYear' => get_timeline_calendar_option('reference_year', 1989),
+            'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
+            'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false),
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('timeline_calendar_nonce')
+        ));
     }
-} );
+});
+
+// Add theme integration enhancements
+add_action('wp_enqueue_scripts', function() {
+    // Only enqueue if timeline content is present
+    if (!is_timeline_request() && !has_timeline_shortcode()) {
+        return;
+    }
+    
+    // Enqueue timeline styles with theme-aware versioning
+    wp_enqueue_style(
+        'timeline-calendar-styles',
+        TIMELINE_CALENDAR_PLUGIN_URL . 'assets/style.css',
+        array(), // No dependencies to avoid theme conflicts
+        TIMELINE_CALENDAR_VERSION
+    );
+    
+    // Add theme-specific CSS custom properties
+    wp_add_inline_style('timeline-calendar-styles', timeline_calendar_get_theme_css_variables());
+    
+    // Enqueue timeline scripts
+    wp_enqueue_script(
+        'timeline-calendar-sparkline',
+        TIMELINE_CALENDAR_PLUGIN_URL . 'assets/sparkline-calendar.js',
+        array(), // No jQuery dependency for better theme compatibility
+        TIMELINE_CALENDAR_VERSION,
+        true
+    );
+    
+    wp_enqueue_script(
+        'timeline-calendar-main',
+        TIMELINE_CALENDAR_PLUGIN_URL . 'assets/timeline-calendar.js',
+        array('timeline-calendar-sparkline'),
+        TIMELINE_CALENDAR_VERSION,
+        true
+    );
+    
+    // Localize script with theme-aware settings
+    wp_localize_script('timeline-calendar-main', 'timelineCalendarSettings', array(
+        'ajaxUrl' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('timeline_calendar_nonce'),
+        'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
+        'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false),
+        'themeSupport' => timeline_calendar_get_theme_support(),
+        'isRTL' => is_rtl(),
+        'textDirection' => get_option('text_direction', 'ltr'),
+        'dateFormat' => get_option('date_format', 'F j, Y'),
+        'timeFormat' => get_option('time_format', 'g:i a'),
+        'timezone' => wp_timezone_string(),
+        'locale' => get_locale(),
+        'homeUrl' => home_url(),
+        'restUrl' => rest_url(),
+        'restNonce' => wp_create_nonce('wp_rest')
+    ));
+}, 20); // Lower priority to ensure theme styles load first
+
+/**
+ * Get theme-specific CSS custom properties
+ *
+ * @return string CSS custom properties for theme integration
+ */
+function timeline_calendar_get_theme_css_variables() {
+    $css = '';
+    
+    // Get theme customizer colors if available
+    $primary_color = get_theme_mod('primary_color', '');
+    $secondary_color = get_theme_mod('secondary_color', '');
+    $background_color = get_theme_mod('background_color', '');
+    $text_color = get_theme_mod('text_color', '');
+    
+    // Get WordPress core colors
+    $wp_colors = get_theme_support('editor-color-palette');
+    $wp_colors = is_array($wp_colors) ? $wp_colors[0] : array();
+    
+    // Build CSS custom properties
+    $css .= ":root {\n";
+    
+    // Primary colors with fallbacks
+    if ($primary_color) {
+        $css .= "    --timeline-calendar-primary: {$primary_color};\n";
+    }
+    if ($secondary_color) {
+        $css .= "    --timeline-calendar-secondary: {$secondary_color};\n";
+    }
+    if ($background_color) {
+        $css .= "    --timeline-calendar-background: {$background_color};\n";
+    }
+    if ($text_color) {
+        $css .= "    --timeline-calendar-text: {$text_color};\n";
+    }
+    
+    // WordPress core color palette integration
+    if (!empty($wp_colors)) {
+        foreach ($wp_colors as $index => $color) {
+            $css .= "    --timeline-calendar-wp-color-{$index}: {$color['color']};\n";
+        }
+    }
+    
+    // Theme-specific spacing and typography
+    $css .= "    --timeline-calendar-spacing: " . (get_theme_mod('content_width', 1200) / 100) . "rem;\n";
+    $css .= "    --timeline-calendar-border-radius: " . (get_theme_mod('border_radius', 4)) . "px;\n";
+    $css .= "    --timeline-calendar-shadow: " . (get_theme_mod('box_shadow', '0 2px 8px rgba(0, 0, 0, 0.1)')) . ";\n";
+    
+    $css .= "}\n";
+    
+    // RTL support
+    if (is_rtl()) {
+        $css .= "\n/* RTL Support */\n";
+        $css .= ".timeline-container { direction: rtl; }\n";
+        $css .= ".timeline-breadcrumbs { direction: rtl; }\n";
+        $css .= ".timeline-nav-prev { transform: scaleX(-1); }\n";
+        $css .= ".timeline-nav-next { transform: scaleX(-1); }\n";
+    }
+    
+    return $css;
+}
+
+/**
+ * Get theme support information
+ *
+ * @return array Theme support features
+ */
+function timeline_calendar_get_theme_support() {
+    $support = array(
+        'custom-background' => current_theme_supports('custom-background'),
+        'custom-header' => current_theme_supports('custom-header'),
+        'custom-logo' => current_theme_supports('custom-logo'),
+        'custom-colors' => current_theme_supports('custom-colors'),
+        'editor-styles' => current_theme_supports('editor-styles'),
+        'responsive-embeds' => current_theme_supports('responsive-embeds'),
+        'wp-block-styles' => current_theme_supports('wp-block-styles'),
+        'wide-alignment' => current_theme_supports('wide-alignment'),
+        'dark-editor-style' => current_theme_supports('dark-editor-style'),
+        'align-wide' => current_theme_supports('align-wide'),
+        'editor-color-palette' => current_theme_supports('editor-color-palette'),
+        'editor-font-sizes' => current_theme_supports('editor-font-sizes'),
+        'editor-gradient-presets' => current_theme_supports('editor-gradient-presets'),
+        'post-thumbnails' => current_theme_supports('post-thumbnails'),
+        'automatic-feed-links' => current_theme_supports('automatic-feed-links'),
+        'title-tag' => current_theme_supports('title-tag'),
+        'html5' => current_theme_supports('html5'),
+        'customize-selective-refresh-widgets' => current_theme_supports('customize-selective-refresh-widgets'),
+        'responsive-embeds' => current_theme_supports('responsive-embeds'),
+        'align-wide' => current_theme_supports('align-wide'),
+        'dark-editor-style' => current_theme_supports('dark-editor-style'),
+        'disable-custom-colors' => current_theme_supports('disable-custom-colors'),
+        'disable-custom-font-sizes' => current_theme_supports('disable-custom-font-sizes'),
+        'disable-custom-gradients' => current_theme_supports('disable-custom-gradients'),
+        'editor-font-sizes' => current_theme_supports('editor-font-sizes'),
+        'editor-gradient-presets' => current_theme_supports('editor-gradient-presets'),
+        'editor-spacing-scale' => current_theme_supports('editor-spacing-scale'),
+        'units' => current_theme_supports('units'),
+    );
+    
+    return $support;
+}
+
+/**
+ * Add theme compatibility body classes
+ */
+add_filter('body_class', function($classes) {
+    if (is_timeline_request() || has_timeline_shortcode()) {
+        $classes[] = 'timeline-calendar-active';
+        
+        // Add theme-specific classes
+        $theme = wp_get_theme();
+        $classes[] = 'theme-' . sanitize_title($theme->get('Name'));
+        $classes[] = 'theme-version-' . sanitize_title($theme->get('Version'));
+        
+        // Add support-based classes
+        $support = timeline_calendar_get_theme_support();
+        foreach ($support as $feature => $supported) {
+            if ($supported) {
+                $classes[] = 'supports-' . str_replace('_', '-', $feature);
+            }
+        }
+        
+        // Add RTL class
+        if (is_rtl()) {
+            $classes[] = 'timeline-rtl';
+        }
+        
+        // Add block editor support class
+        if (current_theme_supports('wp-block-styles')) {
+            $classes[] = 'supports-block-styles';
+        }
+    }
+    
+    return $classes;
+});
+
+/**
+ * Add theme compatibility meta tags
+ */
+add_action('wp_head', function() {
+    if (is_timeline_request() || has_timeline_shortcode()) {
+        // Add theme compatibility meta
+        echo '<meta name="timeline-calendar-theme" content="' . esc_attr(wp_get_theme()->get('Name')) . '">';
+        echo '<meta name="timeline-calendar-theme-version" content="' . esc_attr(wp_get_theme()->get('Version')) . '">';
+        
+        // Add color scheme meta if available
+        $color_scheme = get_theme_mod('color_scheme', '');
+        if ($color_scheme) {
+            echo '<meta name="timeline-calendar-color-scheme" content="' . esc_attr($color_scheme) . '">';
+        }
+    }
+}, 1);
+
+/**
+ * Add theme compatibility filters for content
+ */
+add_filter('timeline_calendar_content', function($content) {
+    // Apply theme content filters
+    $content = apply_filters('the_content', $content);
+    
+    // Add theme-specific wrapper classes
+    $theme = wp_get_theme();
+    $theme_name = sanitize_title($theme->get('Name'));
+    
+    $content = '<div class="timeline-calendar-content theme-' . $theme_name . '">' . $content . '</div>';
+    
+    return $content;
+});
+
+/**
+ * Add theme compatibility for shortcodes
+ */
+add_filter('timeline_calendar_shortcode_wrapper', function($wrapper, $shortcode_name) {
+    $theme = wp_get_theme();
+    $theme_name = sanitize_title($theme->get('Name'));
+    
+    $wrapper = str_replace('class="', 'class="theme-' . $theme_name . ' ', $wrapper);
+    
+    return $wrapper;
+}, 10, 2);
 
 // Calendar shortcode
 add_shortcode('timeline_calendar', function() {
@@ -572,28 +673,9 @@ add_shortcode('timeline_sparkline_calendar', function() {
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof TimelineSparklineCalendar !== 'undefined') {
-            // Get plugin settings for year restrictions
-            const allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
-            const allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
-            
-            let startYear, endYear;
-            if (allowNegativeYears && allowYearZero) {
-                startYear = -2;
-                endYear = 4;
-            } else if (allowNegativeYears && !allowYearZero) {
-                startYear = -2;
-                endYear = 5; // Extend to 5 to compensate for skipping Year 0
-            } else if (allowYearZero) {
-                startYear = 0;
-                endYear = 6;
-            } else {
-                startYear = 1;
-                endYear = 7;
-            }
-            
             new TimelineSparklineCalendar('#timeline-sparkline-calendar', {
-                startYear: startYear,
-                endYear: endYear,
+                startYear: <?php echo get_timeline_calendar_option('allow_negative_years', false) ? '-2' : '1'; ?>,
+                endYear: 4,
                 yearsPerView: 7
             });
         }
@@ -627,24 +709,6 @@ add_shortcode('timeline_sparkline', function($atts) {
             
             <?php if ($atts['start_year'] !== null): ?>
             config.startYear = <?php echo intval($atts['start_year']); ?>;
-            <?php else: ?>
-            // Use plugin settings for default year range
-            const allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
-            const allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
-            
-            if (allowNegativeYears && allowYearZero) {
-                config.startYear = -2;
-                config.endYear = 4;
-            } else if (allowNegativeYears && !allowYearZero) {
-                config.startYear = -2;
-                config.endYear = 5; // Extend to 5 to compensate for skipping Year 0
-            } else if (allowYearZero) {
-                config.startYear = 0;
-                config.endYear = 6;
-            } else {
-                config.startYear = 1;
-                config.endYear = 7;
-            }
             <?php endif; ?>
             
             <?php if ($atts['end_year'] !== null): ?>
@@ -724,47 +788,28 @@ add_shortcode('timeline_year_calendar', function($atts) {
 });
 
 // AJAX: Fetch available years
-add_action( 'wp_ajax_timeline_calendar_years', 'timeline_calendar_years_ajax' );
-add_action( 'wp_ajax_nopriv_timeline_calendar_years', 'timeline_calendar_years_ajax' );
-
-/**
- * AJAX handler for fetching available timeline years
- */
+add_action('wp_ajax_timeline_calendar_years', 'timeline_calendar_years_ajax');
+add_action('wp_ajax_nopriv_timeline_calendar_years', 'timeline_calendar_years_ajax');
 function timeline_calendar_years_ajax() {
     // Verify nonce for security (but don't fail if nonce is missing for public access)
-    if ( isset( $_REQUEST['nonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'timeline_calendar_nonce' ) ) {
-        wp_die( esc_html__( 'Security check failed', 'timeline-calendar' ) );
+    if (isset($_REQUEST['nonce']) && !wp_verify_nonce($_REQUEST['nonce'], 'timeline_calendar_nonce')) {
+        wp_die('Security check failed');
     }
     
     global $wpdb;
-    
-    // Get minimum allowed year based on settings
-    $min_year = get_timeline_min_year();
-    
-    // Use prepared statement for security with year restriction
-    $years = $wpdb->get_col( $wpdb->prepare( "
+    $years = $wpdb->get_col("
         SELECT DISTINCT meta_value 
         FROM {$wpdb->postmeta} 
-        WHERE meta_key = %s 
-        AND CAST(meta_value AS SIGNED) >= %d
+        WHERE meta_key = 'timeline_year' 
         ORDER BY CAST(meta_value AS SIGNED)
-    ", 'timeline_year', $min_year ) );
+    ");
     
-    // If no years found, return sample years based on settings
-    if ( empty( $years ) ) {
-        $allow_year_zero = get_timeline_calendar_option( 'allow_year_zero', false );
-        $allow_negative_years = get_timeline_calendar_option( 'allow_negative_years', false );
-        
-        if ( $allow_negative_years ) {
-            $years = array( '-2', '-1', '0', '1', '2', '3', '4' );
-        } elseif ( $allow_year_zero ) {
-            $years = array( '0', '1', '2', '3', '4', '5', '6' );
-        } else {
-            $years = array( '1', '2', '3', '4', '5', '6', '7' );
-        }
+    // If no years found, return some sample years
+    if (empty($years)) {
+        $years = ['-2', '-1', '0', '1', '2', '3', '4'];
     }
     
-    wp_send_json( $years );
+    wp_send_json($years);
 }
 
 // This Day in History shortcode
@@ -800,11 +845,11 @@ add_shortcode('timeline_this_day_in_history', function() {
             formData.append('month', month);
             formData.append('day', day);
             
-            if (typeof timelineCalendarSettings !== 'undefined' && timelineCalendarSettings.nonce) {
-                formData.append('nonce', timelineCalendarSettings.nonce);
+            if (typeof timelineCalendarAjax !== 'undefined' && timelineCalendarAjax.nonce) {
+                formData.append('nonce', timelineCalendarAjax.nonce);
             }
             
-            fetch(timelineCalendarSettings.ajaxUrl || '<?php echo admin_url('admin-ajax.php'); ?>', {
+            fetch(timelineCalendarAjax.ajaxurl || '<?php echo admin_url('admin-ajax.php'); ?>', {
                 method: 'POST',
                 body: formData
             })
@@ -1269,15 +1314,6 @@ function timeline_calendar_template_include($template) {
         'comment_count' => 0,
         'filter' => 'raw'
     ]);
-    
-    // Prevent content filters from being applied to this virtual post
-    add_filter('the_content', function($content) use ($timeline_post) {
-        global $post;
-        if ($post && $post->ID === $timeline_post->ID) {
-            return $timeline_post->post_content;
-        }
-        return $content;
-    }, 1);
 
     // Set up the WordPress query to use our virtual post
     $wp_query->post = $timeline_post;
@@ -1320,13 +1356,12 @@ function timeline_calendar_get_content() {
     // Add timeline initialization JavaScript to footer
     add_action('wp_footer', 'timeline_calendar_add_footer_script');
     
-    // Capture the template output without content filters
     ob_start();
-    include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
-    $content = ob_get_clean();
     
-    // Return the content directly without applying content filters
-    return $content;
+    // Include the timeline template
+    include plugin_dir_path(__FILE__) . 'templates/timeline-template.php';
+    
+    return ob_get_clean();
 }
 
 // Add timeline initialization script to footer
@@ -1360,29 +1395,9 @@ function timeline_calendar_add_footer_script() {
         sparklineElements.forEach(function(element) {
             if (typeof TimelineSparklineCalendar !== 'undefined') {
                 console.log('Initializing sparkline calendar:', element.id);
-                
-                // Get plugin settings for year restrictions
-                var allowYearZero = <?php echo get_timeline_calendar_option('allow_year_zero', false) ? 'true' : 'false'; ?>;
-                var allowNegativeYears = <?php echo get_timeline_calendar_option('allow_negative_years', false) ? 'true' : 'false'; ?>;
-                
-                var startYear, endYear;
-                if (allowNegativeYears && allowYearZero) {
-                    startYear = -2;
-                    endYear = 4;
-                } else if (allowNegativeYears && !allowYearZero) {
-                    startYear = -2;
-                    endYear = 5; // Extend to 5 to compensate for skipping Year 0
-                } else if (allowYearZero) {
-                    startYear = 0;
-                    endYear = 6;
-                } else {
-                    startYear = 1;
-                    endYear = 7;
-                }
-                
                 new TimelineSparklineCalendar('#' + element.id, {
-                    startYear: startYear,
-                    endYear: endYear,
+                    startYear: -2,
+                    endYear: 4,
                     yearsPerView: 7
                 });
             } else {
