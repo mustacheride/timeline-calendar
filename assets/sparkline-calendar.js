@@ -95,6 +95,35 @@ class TimelineSparklineCalendar {
         return year >= 1; // Default: only positive years allowed
     }
     
+    checkForArticlesBeyondRange() {
+        // Check if there are any articles beyond the current year range
+        const currentMaxYear = this.currentYearRange.end;
+        
+        // Look for any years in the data that are beyond the current range
+        const availableYears = Object.keys(this.data).map(year => parseInt(year)).filter(year => {
+            // Only consider years that are allowed by settings
+            return this.isYearAllowed(year);
+        });
+        
+        // Check if there are any years beyond the current range
+        const yearsBeyondRange = availableYears.filter(year => year > currentMaxYear);
+        
+        // Check if any of those years have articles
+        for (const year of yearsBeyondRange) {
+            const yearData = this.data[year];
+            if (yearData) {
+                // Check if any month in this year has articles
+                for (let month = 1; month <= 12; month++) {
+                    if (yearData[month] && yearData[month] > 0) {
+                        return true; // Found articles beyond current range
+                    }
+                }
+            }
+        }
+        
+        return false; // No articles beyond current range
+    }
+    
     async init() {
         await this.loadData();
         this.render();
@@ -188,7 +217,14 @@ class TimelineSparklineCalendar {
             rightNav.innerHTML = '→';
             rightNav.dataset.direction = 'next';
             
-            // Note: Right navigation is always enabled as we can always go forward in time
+            // Check if there are articles beyond the current range
+            const hasArticlesBeyond = this.checkForArticlesBeyondRange();
+            if (!hasArticlesBeyond) {
+                rightNav.disabled = true;
+                rightNav.classList.add('timeline-nav-disabled');
+                rightNav.title = 'No more timeline articles available';
+            }
+            
             sparklineContainer.appendChild(rightNav);
         }
         
@@ -254,6 +290,12 @@ class TimelineSparklineCalendar {
         this.element.addEventListener('click', (e) => {
             if (e.target.classList.contains('timeline-sparkline-nav-left') || 
                 e.target.classList.contains('timeline-sparkline-nav-right')) {
+                
+                // Don't navigate if button is disabled
+                if (e.target.disabled) {
+                    return;
+                }
+                
                 const direction = e.target.dataset.direction;
                 this.navigate(direction);
             }
@@ -572,10 +614,17 @@ class TimelineSparklineCalendar {
                 console.log(`Cannot navigate before year ${minAllowedYear} with current settings`);
             }
         } else {
-            this.currentYearRange.start += yearsPerView;
-            this.currentYearRange.end += yearsPerView;
-            await this.loadData();
-            this.render();
+            // Check if there are articles beyond the current range before navigating
+            const hasArticlesBeyond = this.checkForArticlesBeyondRange();
+            if (hasArticlesBeyond) {
+                this.currentYearRange.start += yearsPerView;
+                this.currentYearRange.end += yearsPerView;
+                await this.loadData();
+                this.render();
+            } else {
+                // Show feedback that there are no more articles
+                console.log('No more timeline articles available beyond current range');
+            }
         }
     }
     
