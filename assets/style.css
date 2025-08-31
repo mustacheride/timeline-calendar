@@ -309,13 +309,13 @@ body.timeline-calendar-page .page-title {
     background: var(--timeline-calendar-border);
     border-radius: 4px;
     overflow: hidden;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .calendar-day {
     background: var(--timeline-calendar-bg);
-    padding: 0.35rem;
-    min-height: 35px;
+    padding: 0.5rem;
+    min-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -330,6 +330,11 @@ body.timeline-calendar-page .page-title {
 
 .calendar-day:empty,
 .calendar-day:not(:has(*)) {
+    background: var(--timeline-calendar-hover);
+    cursor: default;
+}
+
+.calendar-day.empty {
     background: var(--timeline-calendar-hover);
     cursor: default;
 }
