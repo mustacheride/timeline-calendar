@@ -276,8 +276,8 @@ body.timeline-calendar-page .page-title {
 .timeline-year-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.25rem;
-    margin-bottom: 0.25rem;
+    gap: 2px;
+    margin-bottom: 2px;
 }
 
 .timeline-year-row:last-child {
@@ -491,7 +491,7 @@ body.timeline-calendar-page .page-title {
 @media (max-width: 768px) {
     .timeline-year-row {
         grid-template-columns: 1fr;
-        gap: 0.25rem;
+        gap: 2px;
     }
     
     .timeline-month-block {
