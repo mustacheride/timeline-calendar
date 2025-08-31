@@ -459,6 +459,7 @@ add_action('wp_enqueue_scripts', function() {
     
     // Localize script with theme-aware settings
     wp_localize_script('timeline-calendar-main', 'timelineCalendarSettings', array(
+        'referenceYear' => get_timeline_calendar_option('reference_year', 1989),
         'ajaxUrl' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('timeline_calendar_nonce'),
         'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
