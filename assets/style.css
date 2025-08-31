@@ -1227,6 +1227,12 @@ body.timeline-calendar-page .page-title {
     font-size: 0 !important;
 }
 
+/* Hide unwanted br tags in timeline navigation */
+.timeline-year-navigation br,
+.timeline-year-view br {
+    display: none !important;
+}
+
 .timeline-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;

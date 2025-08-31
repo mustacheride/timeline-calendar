@@ -791,6 +791,9 @@ add_shortcode('timeline_year_calendar', function($atts) {
     $output = preg_replace('/<p[^>]*>\s*<\/p>/', '', $output);
     $output = preg_replace('/<p[^>]*>\s*<p[^>]*>\s*<\/p>\s*<\/p>/', '', $output);
     
+    // Remove any br tags that WordPress might add
+    $output = preg_replace('/<br\s*\/?>/i', '', $output);
+    
     return $output;
 });
 
