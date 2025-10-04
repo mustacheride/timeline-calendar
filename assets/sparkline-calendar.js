@@ -56,7 +56,7 @@ class TimelineSparklineCalendar {
             } else if (allowYearZero) {
                 return 0;
             } else {
-                return 1;
+                return 1; // When Year 0 is disabled, start from Year 1
             }
         }
         return 1; // Default to year 1 if settings not available
@@ -73,7 +73,7 @@ class TimelineSparklineCalendar {
             } else if (allowYearZero) {
                 return 6;
             } else {
-                return 7;
+                return 7; // When Year 0 is disabled, end at Year 7 (6 years from Year 1)
             }
         }
         return 7; // Default to year 7 if settings not available
@@ -93,6 +93,17 @@ class TimelineSparklineCalendar {
             }
         }
         return year >= 1; // Default: only positive years allowed
+    }
+    
+    // Convert fictional year to real year (consistent with calendar.js)
+    // The reference year alignment is fixed and doesn't change based on Year 0 setting
+    getRealYear(fictionalYear) {
+        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989;
+        
+        // Fixed mapping: Year 1 always maps to reference year
+        // Year 0 (if it exists) maps to reference year - 1
+        // Year 2 maps to reference year + 1, etc.
+        return referenceYear + (fictionalYear - 1);
     }
     
     checkForArticlesBeyondRange() {
