@@ -1,7 +1,9 @@
 class TimelineCalendar {
     constructor(root = null, year = null, month = null) {
         this.root = root || document.getElementById('timeline-calendar-root');
-        this.currentYear = year !== null ? year : 0;
+        // Default to Year 1 if Year 0 is not allowed, otherwise default to Year 0
+        const defaultYear = this.getDefaultYear();
+        this.currentYear = year !== null ? year : defaultYear;
         this.currentMonth = month !== null ? month : 1;
         this.articles = [];
         this.selectedDay = null;
@@ -17,15 +19,20 @@ class TimelineCalendar {
         this.init();
     }
 
-    // Convert fictional year to real year (Year 1 = reference year)
-    getRealYear(fictionalYear) {
-        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1983;
+    // Get the default year based on plugin settings
+    getDefaultYear() {
         const allowYearZero = window.timelineCalendarSettings ? window.timelineCalendarSettings.allowYearZero : false;
+        return allowYearZero ? 0 : 1;
+    }
+
+    // Convert fictional year to real year (Year 1 = reference year)
+    // The reference year alignment is fixed and doesn't change based on Year 0 setting
+    getRealYear(fictionalYear) {
+        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989;
         
-        // If Year 0 is not allowed and we're dealing with Year 0, treat it as Year 1
-        if (!allowYearZero && fictionalYear === 0) {
-            fictionalYear = 1;
-        }
+        // Fixed mapping: Year 1 always maps to reference year
+        // Year 0 (if it exists) maps to reference year - 1
+        // Year 2 maps to reference year + 1, etc.
         return referenceYear + (fictionalYear - 1);
     }
 
@@ -106,9 +113,12 @@ class TimelineCalendar {
     attachNavHandlers() {
         document.addEventListener('click', async e => {
             if (e.target.id === 'cal-prev-year') {
-                this.currentYear--;
-                await this.loadArticlesForMonth();
-                this.renderCalendar();
+                const minYear = this.getDefaultYear();
+                if (this.currentYear > minYear) {
+                    this.currentYear--;
+                    await this.loadArticlesForMonth();
+                    this.renderCalendar();
+                }
             } else if (e.target.id === 'cal-next-year') {
                 this.currentYear++;
                 await this.loadArticlesForMonth();
@@ -117,7 +127,10 @@ class TimelineCalendar {
                 this.currentMonth--;
                 if (this.currentMonth < 1) {
                     this.currentMonth = 12;
-                    this.currentYear--;
+                    const minYear = this.getDefaultYear();
+                    if (this.currentYear > minYear) {
+                        this.currentYear--;
+                    }
                 }
                 await this.loadArticlesForMonth();
                 this.renderCalendar();
