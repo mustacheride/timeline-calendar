@@ -1,10 +1,16 @@
 class TimelineYearView {
     constructor() {
-        this.currentYear = 0;
+        this.currentYear = this.getDefaultYear();
         this.availableYears = [];
         this.yearListElement = document.getElementById('timeline-year-list');
         this.yearCalendarElement = document.querySelector('.timeline-year-calendar');
         this.init();
+    }
+
+    // Get the default year based on plugin settings
+    getDefaultYear() {
+        const allowYearZero = window.timelineCalendarSettings ? window.timelineCalendarSettings.allowYearZero : false;
+        return allowYearZero ? 0 : 1;
     }
 
     async init() {
@@ -36,8 +42,8 @@ class TimelineYearView {
             }
         } catch (error) {
             console.error('Failed to load years:', error);
-            this.availableYears = [0];
-            this.currentYear = 0;
+            this.availableYears = [this.getDefaultYear()];
+            this.currentYear = this.getDefaultYear();
         }
     }
 
