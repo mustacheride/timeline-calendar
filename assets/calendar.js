@@ -19,7 +19,13 @@ class TimelineCalendar {
 
     // Convert fictional year to real year (Year 1 = reference year)
     getRealYear(fictionalYear) {
-        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989;
+        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1983;
+        const allowYearZero = window.timelineCalendarSettings ? window.timelineCalendarSettings.allowYearZero : false;
+        
+        // If Year 0 is not allowed and we're dealing with Year 0, treat it as Year 1
+        if (!allowYearZero && fictionalYear === 0) {
+            fictionalYear = 1;
+        }
         return referenceYear + (fictionalYear - 1);
     }
 
