@@ -259,7 +259,9 @@ class TimelineSparklineCalendar {
         // Year label
         const yearLabel = document.createElement('div');
         yearLabel.className = 'timeline-sparkline-year-label';
-        yearLabel.textContent = `Year ${year}`;
+        yearLabel.textContent = window.TimelineYearDisplay
+            ? TimelineYearDisplay.formatYear(year)
+            : `Year ${year}`;
         yearElement.appendChild(yearLabel);
         
         // Sparkline (12 months)
@@ -354,7 +356,9 @@ class TimelineSparklineCalendar {
                 
                 // Create a temporary link for context menu
                 const link = document.createElement('a');
-                link.href = `/timeline/${year}/${month}/`;
+                link.href = window.TimelineYearDisplay
+                    ? TimelineYearDisplay.timelinePath(year, month)
+                    : `/timeline/${year}/${month}/`;
                 link.style.display = 'none';
                 document.body.appendChild(link);
                 
@@ -514,12 +518,15 @@ class TimelineSparklineCalendar {
         // Format the month header
         const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         const monthName = monthNames[parseInt(month) - 1];
-        const monthTitle = `${monthName}, Year ${year}`;
+        const monthTitle = `${monthName}, ${window.TimelineYearDisplay ? TimelineYearDisplay.formatYear(year) : 'Year ' + year}`;
+        const monthPath = window.TimelineYearDisplay
+            ? TimelineYearDisplay.timelinePath(year, month)
+            : `/timeline/${year}/${month}/`;
         const articleCount = articles.length;
         const articleText = articleCount === 1 ? 'article' : 'articles';
         
         let html = `<h4 style='margin: 0 0 0.75rem 0; color: #333; border-bottom: 2px solid #0066cc; padding-bottom: 0.5rem; text-align: center;'>
-            <a href='/timeline/${year}/${month}/' style='color: #333; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#333"'>${monthTitle}</a>
+            <a href='${monthPath}' style='color: #333; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#333"'>${monthTitle}</a>
             <div style='font-size: 0.8rem; color: #666; font-weight: normal; margin-top: 0.25rem;'>${articleCount} ${articleText}</div>
         </h4>`;
         
@@ -548,7 +555,7 @@ class TimelineSparklineCalendar {
                 
                 // Date column (fixed width) - increased for longer month names
                 html += `<div style='flex-shrink: 0; width: 120px; font-size: 0.85rem; color: #666; font-weight: 500;'>
-                    <a href='/timeline/${year}/${month}/${day}/' style='color: #666; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#666"'>
+                    <a href='${window.TimelineYearDisplay ? TimelineYearDisplay.timelinePath(year, month, day) : `/timeline/${year}/${month}/${day}/`}' style='color: #666; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#666"'>
                         ${monthName} ${day}
                     </a>
                 </div>`;
@@ -663,11 +670,15 @@ class TimelineSparklineCalendar {
     }
     
     navigateToYear(year) {
-        window.location.href = `/timeline/${year}/`;
+        window.location.href = window.TimelineYearDisplay
+            ? TimelineYearDisplay.timelinePath(year)
+            : `/timeline/${year}/`;
     }
     
     navigateToMonth(year, month) {
-        window.location.href = `/timeline/${year}/${month}/`;
+        window.location.href = window.TimelineYearDisplay
+            ? TimelineYearDisplay.timelinePath(year, month)
+            : `/timeline/${year}/${month}/`;
     }
 }
 

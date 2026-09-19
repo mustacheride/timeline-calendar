@@ -39,10 +39,10 @@ echo '<!-- Timeline template loaded: ' . esc_html( wp_json_encode( $debug_vars )
  */
 function get_timeline_breadcrumbs( $year = null, $month = null, $day = null, $article = null ) {
 	$breadcrumbs = array();
-	$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' ) ) . '">' . esc_html__( 'Timeline', 'timeline-calendar' ) . '</a>';
+	$breadcrumbs[] = '<a href="' . esc_url( timeline_public_url() ) . '">' . esc_html__( 'Timeline', 'timeline-calendar' ) . '</a>';
 	
 	if ( $year !== null ) {
-		$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' ) ) . '">' . esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $year ) ) . '</a>';
+		$breadcrumbs[] = '<a href="' . esc_url( timeline_public_url( $year ) ) . '">' . esc_html( timeline_format_year( $year ) ) . '</a>';
 		
 		if ( $month !== null ) {
 			$month_names = array(
@@ -59,10 +59,10 @@ function get_timeline_breadcrumbs( $year = null, $month = null, $day = null, $ar
 				11 => __( 'November', 'timeline-calendar' ),
 				12 => __( 'December', 'timeline-calendar' )
 			);
-			$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' . $month . '/' ) ) . '">' . esc_html( $month_names[ $month ] ) . '</a>';
+			$breadcrumbs[] = '<a href="' . esc_url( timeline_public_url( $year, $month ) ) . '">' . esc_html( $month_names[ $month ] ) . '</a>';
 			
 			if ( $day !== null ) {
-				$breadcrumbs[] = '<a href="' . esc_url( home_url( '/timeline/' . $year . '/' . $month . '/' . $day . '/' ) ) . '">' . esc_html( $day ) . '</a>';
+				$breadcrumbs[] = '<a href="' . esc_url( timeline_public_url( $year, $month, $day ) ) . '">' . esc_html( $day ) . '</a>';
 				
 				if ( $article !== null ) {
 					// Fetch the actual post title instead of using the slug
@@ -182,7 +182,7 @@ echo "-->";
                     ?>
                     <p><?php echo esc_html__( 'Total Articles:', 'timeline-calendar' ); ?> <?php echo esc_html( $total_articles ); ?></p>
                     <?php if ( $year_range ) : ?>
-                        <p><?php echo esc_html__( 'Year Range:', 'timeline-calendar' ); ?> <?php echo esc_html( $year_range->min_year ); ?> - <?php echo esc_html( $year_range->max_year ); ?></p>
+                        <p><?php echo esc_html__( 'Year Range:', 'timeline-calendar' ); ?> <?php echo esc_html( timeline_format_year( $year_range->min_year ) ); ?> - <?php echo esc_html( timeline_format_year( $year_range->max_year ) ); ?></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -243,7 +243,7 @@ echo "-->";
                                             11 => __( 'November', 'timeline-calendar' ),
                                             12 => __( 'December', 'timeline-calendar' )
                                         );
-                                        echo esc_html( sprintf( __( '%s %s, Year %s', 'timeline-calendar' ), $month_names[ $timeline_month ], $timeline_day, $timeline_year ) ); 
+                                        echo esc_html( $month_names[ $timeline_month ] . ' ' . $timeline_day . ', ' . timeline_format_year( $timeline_year ) ); 
                                         ?>
                                     </span>
                                     <?php 
@@ -469,7 +469,7 @@ echo "-->";
                 
                 <h2><?php 
                     $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                    echo esc_html($month_names[intval($timeline_month)] . ' ' . intval($timeline_day) . ', Year ' . intval($timeline_year)); 
+                    echo esc_html($month_names[intval($timeline_month)] . ' ' . intval($timeline_day) . ', ' . timeline_format_year($timeline_year)); 
                 ?></h2>
                 <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null, $timeline_month !== null ? intval($timeline_month) : null, $timeline_day !== null ? intval($timeline_day) : null); ?>
                 
@@ -557,7 +557,7 @@ echo "-->";
                         <h3>No Articles Found</h3>
                         <p>No articles found for <?php 
                             $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                            echo esc_html($month_names[intval($timeline_month)] . ' ' . intval($timeline_day) . ', Year ' . intval($timeline_year)); 
+                            echo esc_html($month_names[intval($timeline_month)] . ' ' . intval($timeline_day) . ', ' . timeline_format_year($timeline_year)); 
                         ?>.</p>
                     </div>
                 <?php
@@ -603,22 +603,22 @@ echo "-->";
                     ?>
                     
                     <?php if ( $prev_year_allowed ) : ?>
-                        <a href="<?php echo esc_url( home_url( '/timeline/' . $prev_year . '/' . $prev_month . '/' . $prev_day . '/' ) ); ?>" class="timeline-nav-prev">
-                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?> <?php echo esc_html( $prev_day ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $prev_year ) ); ?>
+                        <a href="<?php echo esc_url( timeline_public_url( $prev_year, $prev_month, $prev_day ) ); ?>" class="timeline-nav-prev">
+                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?> <?php echo esc_html( $prev_day ); ?>, <?php echo esc_html( timeline_format_year( $prev_year ) ); ?>
                         </a>
                     <?php else : ?>
-                        <span class="timeline-nav-prev timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( 'Year %s is not allowed with current settings', 'timeline-calendar' ), $prev_year ) ); ?>">
-                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?> <?php echo esc_html( $prev_day ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $prev_year ) ); ?>
+                        <span class="timeline-nav-prev timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( '%s is not allowed with current settings', 'timeline-calendar' ), timeline_format_year( $prev_year ) ) ); ?>">
+                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?> <?php echo esc_html( $prev_day ); ?>, <?php echo esc_html( timeline_format_year( $prev_year ) ); ?>
                         </span>
                     <?php endif; ?>
                     
                     <?php if ( $next_year_allowed ) : ?>
-                        <a href="<?php echo esc_url( home_url( '/timeline/' . $next_year . '/' . $next_month . '/' . $next_day . '/' ) ); ?>" class="timeline-nav-next">
-                            <?php echo esc_html( $month_names[$next_month] ); ?> <?php echo esc_html( $next_day ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $next_year ) ); ?> &rarr;
+                        <a href="<?php echo esc_url( timeline_public_url( $next_year, $next_month, $next_day ) ); ?>" class="timeline-nav-next">
+                            <?php echo esc_html( $month_names[$next_month] ); ?> <?php echo esc_html( $next_day ); ?>, <?php echo esc_html( timeline_format_year( $next_year ) ); ?> &rarr;
                         </a>
                     <?php else : ?>
-                        <span class="timeline-nav-next timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( 'Year %s is not allowed with current settings', 'timeline-calendar' ), $next_year ) ); ?>">
-                            <?php echo esc_html( $month_names[$next_month] ); ?> <?php echo esc_html( $next_day ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $next_year ) ); ?> &rarr;
+                        <span class="timeline-nav-next timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( '%s is not allowed with current settings', 'timeline-calendar' ), timeline_format_year( $next_year ) ) ); ?>">
+                            <?php echo esc_html( $month_names[$next_month] ); ?> <?php echo esc_html( $next_day ); ?>, <?php echo esc_html( timeline_format_year( $next_year ) ); ?> &rarr;
                         </span>
                     <?php endif; ?>
                 </div>
@@ -643,7 +643,7 @@ echo "-->";
                         AND pm3.meta_value = %d
                     ", $timeline_year, $timeline_month, $timeline_day));
                     ?>
-                    <p>Articles on <?php echo esc_html($month_names[intval($timeline_month)]); ?> <?php echo esc_html(intval($timeline_day)); ?>, Year <?php echo esc_html(intval($timeline_year)); ?>: <?php echo esc_html($day_articles); ?></p>
+                    <p>Articles on <?php echo esc_html($month_names[intval($timeline_month)]); ?> <?php echo esc_html(intval($timeline_day)); ?>, <?php echo esc_html(timeline_format_year($timeline_year)); ?>: <?php echo esc_html($day_articles); ?></p>
                 </div>
             </div>
             
@@ -709,7 +709,7 @@ echo "-->";
                 
                 <h2><?php 
                     $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                    echo esc_html($month_names[intval($timeline_month)] . ', Year ' . intval($timeline_year)); 
+                    echo esc_html($month_names[intval($timeline_month)] . ', ' . timeline_format_year($timeline_year)); 
                 ?></h2>
                 <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null, $timeline_month !== null ? intval($timeline_month) : null); ?>
                 
@@ -740,22 +740,22 @@ echo "-->";
                     ?>
                     
                     <?php if ( $prev_year_allowed ) : ?>
-                        <a href="<?php echo esc_url( home_url( '/timeline/' . $prev_year . '/' . $prev_month . '/' ) ); ?>" class="timeline-nav-prev">
-                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $prev_year ) ); ?>
+                        <a href="<?php echo esc_url( timeline_public_url( $prev_year, $prev_month ) ); ?>" class="timeline-nav-prev">
+                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?>, <?php echo esc_html( timeline_format_year( $prev_year ) ); ?>
                         </a>
                     <?php else : ?>
-                        <span class="timeline-nav-prev timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( 'Year %s is not allowed with current settings', 'timeline-calendar' ), $prev_year ) ); ?>">
-                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $prev_year ) ); ?>
+                        <span class="timeline-nav-prev timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( '%s is not allowed with current settings', 'timeline-calendar' ), timeline_format_year( $prev_year ) ) ); ?>">
+                            &larr; <?php echo esc_html( $month_names[$prev_month] ); ?>, <?php echo esc_html( timeline_format_year( $prev_year ) ); ?>
                         </span>
                     <?php endif; ?>
                     
                     <?php if ( $next_year_allowed ) : ?>
-                        <a href="<?php echo esc_url( home_url( '/timeline/' . $next_year . '/' . $next_month . '/' ) ); ?>" class="timeline-nav-next">
-                            <?php echo esc_html( $month_names[$next_month] ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $next_year ) ); ?> &rarr;
+                        <a href="<?php echo esc_url( timeline_public_url( $next_year, $next_month ) ); ?>" class="timeline-nav-next">
+                            <?php echo esc_html( $month_names[$next_month] ); ?>, <?php echo esc_html( timeline_format_year( $next_year ) ); ?> &rarr;
                         </a>
                     <?php else : ?>
-                        <span class="timeline-nav-next timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( 'Year %s is not allowed with current settings', 'timeline-calendar' ), $next_year ) ); ?>">
-                            <?php echo esc_html( $month_names[$next_month] ); ?>, <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $next_year ) ); ?> &rarr;
+                        <span class="timeline-nav-next timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( '%s is not allowed with current settings', 'timeline-calendar' ), timeline_format_year( $next_year ) ) ); ?>">
+                            <?php echo esc_html( $month_names[$next_month] ); ?>, <?php echo esc_html( timeline_format_year( $next_year ) ); ?> &rarr;
                         </span>
                     <?php endif; ?>
                 </div>
@@ -791,7 +791,7 @@ echo "-->";
                         AND pm3.meta_key = 'timeline_day'
                     ", $timeline_year, $timeline_month));
                     ?>
-                    <p>Articles in <?php echo esc_html($month_names[intval($timeline_month)]); ?>, Year <?php echo esc_html(intval($timeline_year)); ?>: <?php echo esc_html($month_articles); ?></p>
+                    <p>Articles in <?php echo esc_html($month_names[intval($timeline_month)]); ?>, <?php echo esc_html(timeline_format_year($timeline_year)); ?>: <?php echo esc_html($month_articles); ?></p>
                     <p>Days with Articles: <?php echo esc_html($month_days_with_articles); ?></p>
                 </div>
             </div>
@@ -864,7 +864,7 @@ echo "-->";
                 <!-- Sparkline Calendar at the top -->
                 <div class="timeline-sparkline-calendar" id="timeline-year-sparkline-<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>"></div>
                 
-                <h2>Year <?php echo esc_html(intval($timeline_year)); ?> Overview</h2>
+                <h2><?php echo esc_html(timeline_format_year($timeline_year)); ?> Overview</h2>
                 <?php echo get_timeline_breadcrumbs($timeline_year !== null ? intval($timeline_year) : null); ?>
                 
                 <!-- Month Grid -->
@@ -877,7 +877,7 @@ echo "-->";
                         if ($i % 3 === 0) echo "<div class='timeline-year-row'>";
                     ?>
                         <div class='timeline-month-block'>
-                            <h4><a href="<?php echo home_url('/timeline/' . ($timeline_year !== null ? intval($timeline_year) : 0) . '/' . $num . '/'); ?>"><?php echo $name; ?></a></h4>
+                            <h4><a href="<?php echo timeline_public_url( $timeline_year !== null ? intval($timeline_year) : 0, $num ); ?>"><?php echo $name; ?></a></h4>
                             <div class='timeline-calendar-root' data-year='<?php echo $timeline_year !== null ? intval($timeline_year) : 0; ?>' data-month='<?php echo $num; ?>'></div>
                         </div>
                     <?php
@@ -899,22 +899,22 @@ echo "-->";
                     ?>
                     
                     <?php if ( $prev_year_allowed ) : ?>
-                        <a href="<?php echo esc_url( home_url( '/timeline/' . $prev_year . '/' ) ); ?>" class="timeline-nav-prev">
-                            &larr; <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $prev_year ) ); ?>
+                        <a href="<?php echo esc_url( timeline_public_url( $prev_year ) ); ?>" class="timeline-nav-prev">
+                            &larr; <?php echo esc_html( timeline_format_year( $prev_year ) ); ?>
                         </a>
                     <?php else : ?>
-                        <span class="timeline-nav-prev timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( 'Year %s is not allowed with current settings', 'timeline-calendar' ), $prev_year ) ); ?>">
-                            &larr; <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $prev_year ) ); ?>
+                        <span class="timeline-nav-prev timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( '%s is not allowed with current settings', 'timeline-calendar' ), timeline_format_year( $prev_year ) ) ); ?>">
+                            &larr; <?php echo esc_html( timeline_format_year( $prev_year ) ); ?>
                         </span>
                     <?php endif; ?>
                     
                     <?php if ( $next_year_allowed ) : ?>
-                        <a href="<?php echo esc_url( home_url( '/timeline/' . $next_year . '/' ) ); ?>" class="timeline-nav-next">
-                            <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $next_year ) ); ?> &rarr;
+                        <a href="<?php echo esc_url( timeline_public_url( $next_year ) ); ?>" class="timeline-nav-next">
+                            <?php echo esc_html( timeline_format_year( $next_year ) ); ?> &rarr;
                         </a>
                     <?php else : ?>
-                        <span class="timeline-nav-next timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( 'Year %s is not allowed with current settings', 'timeline-calendar' ), $next_year ) ); ?>">
-                            <?php echo esc_html( sprintf( __( 'Year %s', 'timeline-calendar' ), $next_year ) ); ?> &rarr;
+                        <span class="timeline-nav-next timeline-nav-disabled" title="<?php echo esc_attr( sprintf( __( '%s is not allowed with current settings', 'timeline-calendar' ), timeline_format_year( $next_year ) ) ); ?>">
+                            <?php echo esc_html( timeline_format_year( $next_year ) ); ?> &rarr;
                         </span>
                     <?php endif; ?>
                 </div>
@@ -944,7 +944,7 @@ echo "-->";
                         AND pm2.meta_key = 'timeline_month'
                     ", $timeline_year));
                     ?>
-                    <p>Articles in Year <?php echo esc_html(intval($timeline_year)); ?>: <?php echo esc_html($year_articles); ?></p>
+                    <p>Articles in <?php echo esc_html(timeline_format_year($timeline_year)); ?>: <?php echo esc_html($year_articles); ?></p>
                     <p>Months with Articles: <?php echo esc_html($year_months_with_articles); ?></p>
                 </div>
             </div>

@@ -53,7 +53,10 @@ class TimelineYearView {
         let html = '';
         this.availableYears.forEach(year => {
             const yearInt = parseInt(year);
-            html += `<div class="timeline-year-item" data-year="${yearInt}">${yearInt}</div>`;
+            const label = window.TimelineYearDisplay
+                ? TimelineYearDisplay.formatYear(yearInt)
+                : String(yearInt);
+            html += `<div class="timeline-year-item" data-year="${yearInt}">${label}</div>`;
         });
         this.yearListElement.innerHTML = html;
     }

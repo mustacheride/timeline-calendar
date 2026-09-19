@@ -81,7 +81,7 @@ class TimelineCalendar {
             html += `<div class='calendar-nav'>
                 <button id='cal-prev-year'>&lt;&lt;</button>
                 <button id='cal-prev-month'>&lt;</button>
-                <span>${months[this.currentMonth-1]}, Year ${this.currentYear}</span>
+                <span>${months[this.currentMonth-1]}, ${window.TimelineYearDisplay ? TimelineYearDisplay.formatYear(this.currentYear) : 'Year ' + this.currentYear}</span>
                 <button id='cal-next-month'>&gt;</button>
                 <button id='cal-next-year'>&gt;&gt;</button>
             </div>`;
@@ -278,9 +278,12 @@ class TimelineCalendar {
         // Format the date properly
         const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         const monthName = months[this.currentMonth - 1];
-        const dateTitle = `${monthName} ${day}, Year ${this.currentYear}`;
+        const dateTitle = `${monthName} ${day}, ${window.TimelineYearDisplay ? TimelineYearDisplay.formatYear(this.currentYear) : 'Year ' + this.currentYear}`;
+        const dayPath = window.TimelineYearDisplay
+            ? TimelineYearDisplay.timelinePath(this.currentYear, this.currentMonth, day)
+            : `/timeline/${this.currentYear}/${this.currentMonth}/${day}/`;
         
-        let html = `<h4 style='margin: 0 0 0.5rem 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;'><a href='/timeline/${this.currentYear}/${this.currentMonth}/${day}/' style='color: #333; text-decoration: none;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${dateTitle}</a></h4>`;
+        let html = `<h4 style='margin: 0 0 0.5rem 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;'><a href='${dayPath}' style='color: #333; text-decoration: none;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${dateTitle}</a></h4>`;
         html += '<ul style="list-style: none; padding: 0; margin: 0;">';
         for (const art of articlesForDay) {
             const timeBadge = art.timeline_time_of_day ? `<span style='background: #0066cc; color: white; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;'>${art.timeline_time_of_day}</span>` : '';
@@ -341,7 +344,9 @@ class TimelineCalendar {
     navigateToDayView(day) {
         const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         const monthName = months[this.currentMonth - 1].toLowerCase();
-        const dayViewUrl = `/timeline/${this.currentYear}/${this.currentMonth}/${day}/`;
+        const dayViewUrl = window.TimelineYearDisplay
+            ? TimelineYearDisplay.timelinePath(this.currentYear, this.currentMonth, day)
+            : `/timeline/${this.currentYear}/${this.currentMonth}/${day}/`;
         window.location.href = dayViewUrl;
     }
     handleDayClick(day) {

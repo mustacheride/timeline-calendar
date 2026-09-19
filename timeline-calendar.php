@@ -38,7 +38,8 @@ class TimelineCalendarSettings {
         $this->options = get_option('timeline_calendar_options', array(
             'reference_year' => 1989,
             'allow_year_zero' => false,
-            'allow_negative_years' => false
+            'allow_negative_years' => false,
+            'year_display_mode' => 'relative',
         ));
     }
     
@@ -88,6 +89,14 @@ class TimelineCalendarSettings {
             'timeline-calendar-settings',
             'timeline_calendar_setting_section'
         );
+
+        add_settings_field(
+            'year_display_mode',
+            'Year Display Mode',
+            array($this, 'year_display_mode_callback'),
+            'timeline-calendar-settings',
+            'timeline_calendar_setting_section'
+        );
         
         add_settings_field(
             'allow_year_zero',
@@ -112,6 +121,12 @@ class TimelineCalendarSettings {
         if (isset($input['reference_year'])) {
             $new_input['reference_year'] = intval($input['reference_year']);
         }
+
+        if (isset($input['year_display_mode']) && $input['year_display_mode'] === 'absolute') {
+            $new_input['year_display_mode'] = 'absolute';
+        } else {
+            $new_input['year_display_mode'] = 'relative';
+        }
         
         if (isset($input['allow_year_zero'])) {
             $new_input['allow_year_zero'] = (bool) $input['allow_year_zero'];
@@ -133,7 +148,18 @@ class TimelineCalendarSettings {
             '<input type="number" id="reference_year" name="timeline_calendar_options[reference_year]" value="%s" step="1" />',
             isset($this->options['reference_year']) ? esc_attr($this->options['reference_year']) : 1989
         );
-        echo '<p class="description">The year to use as reference for aligning days of the week in the calendar. This affects how the calendar grid is displayed.</p>';
+        echo '<p class="description">The year to use as reference for aligning days of the week in the calendar. This affects how the calendar grid is displayed. In Absolute display mode, Year 1 maps to this calendar year.</p>';
+    }
+
+    public function year_display_mode_callback() {
+        $mode = isset($this->options['year_display_mode']) ? $this->options['year_display_mode'] : 'relative';
+        ?>
+        <select id="year_display_mode" name="timeline_calendar_options[year_display_mode]">
+            <option value="relative" <?php selected($mode, 'relative'); ?>><?php esc_html_e('Relative (Year 1, Year 2, …)', 'timeline-calendar'); ?></option>
+            <option value="absolute" <?php selected($mode, 'absolute'); ?>><?php esc_html_e('Absolute (1983, 1984, …)', 'timeline-calendar'); ?></option>
+        </select>
+        <p class="description"><?php esc_html_e('Controls public labels and URLs. Articles still store fictional timeline years internally.', 'timeline-calendar'); ?></p>
+        <?php
     }
     
     public function allow_year_zero_callback() {
@@ -165,9 +191,91 @@ function get_timeline_calendar_option($key, $default = null) {
     $options = get_option('timeline_calendar_options', array(
         'reference_year' => 1989,
         'allow_year_zero' => false,
-        'allow_negative_years' => false
+        'allow_negative_years' => false,
+        'year_display_mode' => 'relative',
     ));
     return isset($options[$key]) ? $options[$key] : $default;
+}
+
+/**
+ * Whether public labels/URLs use absolute calendar years.
+ */
+function timeline_is_absolute_display_mode() {
+    return get_timeline_calendar_option('year_display_mode', 'relative') === 'absolute';
+}
+
+/**
+ * Fictional timeline year → absolute calendar year (Year 1 = reference year).
+ */
+function timeline_fictional_to_absolute($fictional_year) {
+    $reference = intval(get_timeline_calendar_option('reference_year', 1989));
+    return $reference + (intval($fictional_year) - 1);
+}
+
+/**
+ * Absolute calendar year → fictional timeline year.
+ */
+function timeline_absolute_to_fictional($absolute_year) {
+    $reference = intval(get_timeline_calendar_option('reference_year', 1989));
+    return intval($absolute_year) - $reference + 1;
+}
+
+/**
+ * Format a fictional timeline year for display.
+ */
+function timeline_format_year($fictional_year) {
+    $year = intval($fictional_year);
+    if (timeline_is_absolute_display_mode()) {
+        return (string) timeline_fictional_to_absolute($year);
+    }
+    return sprintf(__('Year %s', 'timeline-calendar'), $year);
+}
+
+/**
+ * Year segment for public timeline URLs (fictional or absolute).
+ */
+function timeline_year_for_url($fictional_year) {
+    $year = intval($fictional_year);
+    if (timeline_is_absolute_display_mode()) {
+        return timeline_fictional_to_absolute($year);
+    }
+    return $year;
+}
+
+/**
+ * Resolve a year from a URL path into the fictional year stored in post meta.
+ * In absolute mode, calendar years convert back; |year| <= 100 is treated as legacy fictional.
+ */
+function timeline_year_from_url($url_year) {
+    $year = intval($url_year);
+    if (!timeline_is_absolute_display_mode()) {
+        return $year;
+    }
+    if (abs($year) <= 100) {
+        return $year;
+    }
+    return timeline_absolute_to_fictional($year);
+}
+
+/**
+ * Build a /timeline/... URL using display-mode-aware year segments.
+ * Pass fictional years; months/days/slugs as-is.
+ */
+function timeline_public_url($fictional_year = null, $month = null, $day = null, $slug = null) {
+    $parts = array('timeline');
+    if ($fictional_year !== null && $fictional_year !== '') {
+        $parts[] = timeline_year_for_url($fictional_year);
+        if ($month !== null && $month !== '') {
+            $parts[] = intval($month);
+            if ($day !== null && $day !== '') {
+                $parts[] = intval($day);
+                if ($slug !== null && $slug !== '') {
+                    $parts[] = $slug;
+                }
+            }
+        }
+    }
+    return home_url(user_trailingslashit(implode('/', $parts)));
 }
 
 /**
@@ -297,7 +405,16 @@ add_action('manage_timeline_article_posts_custom_column', function($column, $pos
 
     if ($column === 'timeline_year') {
         $year = get_post_meta($post_id, 'timeline_year', true);
-        echo $year !== '' && $year !== null ? esc_html($year) : '—';
+        if ($year === '' || $year === null) {
+            echo '—';
+            return;
+        }
+        if (timeline_is_absolute_display_mode()) {
+            echo esc_html(timeline_format_year($year));
+            echo ' <span style="color:#666;">(' . esc_html(sprintf(__('Year %s', 'timeline-calendar'), $year)) . ')</span>';
+        } else {
+            echo esc_html($year);
+        }
         return;
     }
 
@@ -357,6 +474,13 @@ add_action('add_meta_boxes', function() {
             $min_year = $allow_negative_years ? -9999 : ($allow_year_zero ? 0 : 1);
             
             echo '<label>Year: <input type="number" name="timeline_year" id="timeline_year" value="' . esc_attr($year) . '" step="1" min="' . $min_year . '" /></label> ';
+            if (timeline_is_absolute_display_mode() && $year !== '' && $year !== null) {
+                echo '<span id="timeline_year_absolute_hint" style="margin-left:0.5em;color:#666;">'
+                    . esc_html(sprintf(__('Displays as %s', 'timeline-calendar'), timeline_format_year($year)))
+                    . '</span> ';
+            } elseif (timeline_is_absolute_display_mode()) {
+                echo '<span id="timeline_year_absolute_hint" style="margin-left:0.5em;color:#666;"></span> ';
+            }
             echo '<label>Month: <select name="timeline_month" id="timeline_month">';
             $months = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
             foreach ($months as $num=>$name) {
@@ -399,21 +523,53 @@ add_action('add_meta_boxes', function() {
                 // Get timeline calendar settings
                 var timelineSettings = <?php echo json_encode(array(
                     'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
-                    'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false)
+                    'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false),
+                    'referenceYear' => intval(get_timeline_calendar_option('reference_year', 1989)),
+                    'yearDisplayMode' => get_timeline_calendar_option('year_display_mode', 'relative'),
                 )); ?>;
+
+                function yearForUrl(fictionalYear) {
+                    var y = parseInt(fictionalYear, 10);
+                    if (timelineSettings.yearDisplayMode === 'absolute') {
+                        return timelineSettings.referenceYear + (y - 1);
+                    }
+                    return y;
+                }
+
+                function formatYearLabel(fictionalYear) {
+                    var y = parseInt(fictionalYear, 10);
+                    if (timelineSettings.yearDisplayMode === 'absolute') {
+                        return String(timelineSettings.referenceYear + (y - 1));
+                    }
+                    return 'Year ' + y;
+                }
+
+                function updateAbsoluteHint() {
+                    var hint = $('#timeline_year_absolute_hint');
+                    if (!hint.length || timelineSettings.yearDisplayMode !== 'absolute') {
+                        return;
+                    }
+                    var year = $('#timeline_year').val();
+                    if (year === '') {
+                        hint.text('');
+                        return;
+                    }
+                    hint.text('Displays as ' + formatYearLabel(year));
+                }
                 
                 function updatePermalink() {
                     var year = $('#timeline_year').val();
                     var month = $('#timeline_month').val();
                     var day = $('#timeline_day').val();
                     var postName = $('#post_name').val() || ($('#title').val() || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    var urlYear = year !== '' ? yearForUrl(year) : '';
                     var viewLink = $('#timeline-view-on-site');
                     if (viewLink.length && year !== '' && month !== '' && day !== '' && postName) {
-                        viewLink.attr('href', <?php echo json_encode(trailingslashit(home_url('/timeline/'))); ?> + year + '/' + month + '/' + day + '/' + postName + '/');
+                        viewLink.attr('href', <?php echo json_encode(trailingslashit(home_url('/timeline/'))); ?> + urlYear + '/' + month + '/' + day + '/' + postName + '/');
                     }
                     
                     if (year !== '' && month !== '' && day !== '' && postName) {
-                        var newPermalink = '<?php echo home_url('/'); ?>timeline/' + year + '/' + month + '/' + day + '/' + postName + '/';
+                        var newPermalink = '<?php echo home_url('/'); ?>timeline/' + urlYear + '/' + month + '/' + day + '/' + postName + '/';
                         
                         // Update the permalink display
                         var permalinkLink = $('.permalink a');
@@ -424,9 +580,10 @@ add_action('add_meta_boxes', function() {
                         // Update the sample permalink input
                         var samplePermalink = $('#sample-permalink');
                         if (samplePermalink.length) {
-                            samplePermalink.val('timeline/' + year + '/' + month + '/' + day + '/' + postName + '/');
+                            samplePermalink.val('timeline/' + urlYear + '/' + month + '/' + day + '/' + postName + '/');
                         }
                     }
+                    updateAbsoluteHint();
                 }
                 
                 // Validate year input based on settings
@@ -477,14 +634,21 @@ add_action('wp_enqueue_scripts', function() {
     if (is_timeline_request() || has_timeline_shortcode()) {
         // Load styles with lower priority to respect theme styles
         wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.7');
-        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery'], '1.0.4', true);
+        wp_enqueue_script(
+            'timeline-year-display',
+            plugins_url('assets/timeline-year-display.js', __FILE__),
+            [],
+            '1.0.1',
+            true
+        );
+        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery', 'timeline-year-display'], '1.0.5', true);
         wp_enqueue_script('timeline-header-js', plugins_url('assets/timeline-header.js', __FILE__), ['jquery'], '1.0.1', true);
-        wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery'], '1.0.1', true);
+        wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery', 'timeline-year-display'], '1.0.2', true);
         wp_enqueue_script(
             'timeline-sparkline-calendar',
             plugin_dir_url(__FILE__) . 'assets/sparkline-calendar.js',
-            array('jquery'),
-            '1.0.14',
+            array('jquery', 'timeline-year-display'),
+            '1.0.15',
             true
         );
         wp_enqueue_script(
@@ -496,10 +660,11 @@ add_action('wp_enqueue_scripts', function() {
         );
         
         // Localize script with timeline calendar settings and AJAX URL
-        wp_localize_script('timeline-calendar-js', 'timelineCalendarSettings', array(
+        wp_localize_script('timeline-year-display', 'timelineCalendarSettings', array(
             'referenceYear' => get_timeline_calendar_option('reference_year', 1989),
             'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
             'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false),
+            'yearDisplayMode' => get_timeline_calendar_option('year_display_mode', 'relative'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('timeline_calendar_nonce')
         ));
@@ -1055,7 +1220,7 @@ function timeline_this_day_in_history_ajax() {
         <?php foreach ($articles as $article): ?>
             <div class="timeline-this-day-item">
                 <div class="timeline-this-day-header">
-                    <div class="timeline-this-day-year">Year <?php echo esc_html($article['timeline_year']); ?></div>
+                    <div class="timeline-this-day-year"><?php echo esc_html(timeline_format_year($article['timeline_year'])); ?></div>
                     <?php if (!empty($article['timeline_time_of_day'])): ?>
                         <span class="timeline-this-day-time"><?php echo esc_html($article['timeline_time_of_day']); ?></span>
                     <?php endif; ?>
@@ -1179,10 +1344,10 @@ add_action('admin_menu', function() {
                     <h2>Test URLs</h2>
                     <p>Here are some example URLs you can test:</p>
                     <ul>
-                        <li><a href="<?php echo home_url('/timeline/'); ?>" target="_blank">Timeline Overview</a></li>
-                        <li><a href="<?php echo home_url('/timeline/3/'); ?>" target="_blank">Year 3</a></li>
-                        <li><a href="<?php echo home_url('/timeline/3/8/'); ?>" target="_blank">August, Year 3</a></li>
-                        <li><a href="<?php echo home_url('/timeline/3/8/15/'); ?>" target="_blank">August 15, Year 3</a></li>
+                        <li><a href="<?php echo esc_url(timeline_public_url()); ?>" target="_blank">Timeline Overview</a></li>
+                        <li><a href="<?php echo esc_url(timeline_public_url(3)); ?>" target="_blank"><?php echo esc_html(timeline_format_year(3)); ?></a></li>
+                        <li><a href="<?php echo esc_url(timeline_public_url(3, 8)); ?>" target="_blank"><?php echo esc_html(sprintf(__('August, %s', 'timeline-calendar'), timeline_format_year(3))); ?></a></li>
+                        <li><a href="<?php echo esc_url(timeline_public_url(3, 8, 15)); ?>" target="_blank"><?php echo esc_html(sprintf(__('August 15, %s', 'timeline-calendar'), timeline_format_year(3))); ?></a></li>
                     </ul>
                 </div>
                 
@@ -1219,6 +1384,32 @@ add_action('parse_request', function($wp) {
     $timeline_month = array_key_exists('timeline_month', $wp->query_vars) ? $wp->query_vars['timeline_month'] : null;
     $timeline_day = array_key_exists('timeline_day', $wp->query_vars) ? $wp->query_vars['timeline_day'] : null;
     $timeline_article = array_key_exists('timeline_article', $wp->query_vars) ? $wp->query_vars['timeline_article'] : null;
+
+    // Convert absolute URL years to fictional storage years; redirect legacy relative URLs in absolute mode
+    if ($timeline_year !== null && $timeline_year !== '') {
+        $raw_year = intval($timeline_year);
+        $fictional_year = timeline_year_from_url($raw_year);
+        $wp->query_vars['timeline_year'] = $fictional_year;
+        $timeline_year = $fictional_year;
+
+        if (timeline_is_absolute_display_mode()) {
+            $canonical_year = timeline_year_for_url($fictional_year);
+            if ($canonical_year !== $raw_year) {
+                $parts = array('timeline', $canonical_year);
+                if ($timeline_month !== null && $timeline_month !== '') {
+                    $parts[] = intval($timeline_month);
+                    if ($timeline_day !== null && $timeline_day !== '') {
+                        $parts[] = intval($timeline_day);
+                        if ($timeline_article !== null && $timeline_article !== '') {
+                            $parts[] = $timeline_article;
+                        }
+                    }
+                }
+                wp_safe_redirect(home_url(user_trailingslashit(implode('/', $parts))), 301);
+                exit;
+            }
+        }
+    }
     
     // Check if this is a timeline request
     if ($timeline_overview !== null || $timeline_year !== null || $timeline_month !== null || $timeline_day !== null || $timeline_article !== null) {
@@ -1266,12 +1457,12 @@ add_action('template_redirect', function() {
         $wp_query->post_title = $timeline_article;
     } elseif ($timeline_day !== null) {
         $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-        $wp_query->post_title = $month_names[$timeline_month] . ' ' . $timeline_day . ', Year ' . $timeline_year;
+        $wp_query->post_title = $month_names[intval($timeline_month)] . ' ' . $timeline_day . ', ' . timeline_format_year($timeline_year);
     } elseif ($timeline_month !== null) {
         $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-        $wp_query->post_title = $month_names[$timeline_month] . ', Year ' . $timeline_year;
+        $wp_query->post_title = $month_names[intval($timeline_month)] . ', ' . timeline_format_year($timeline_year);
     } elseif ($timeline_year !== null) {
-        $wp_query->post_title = 'Year ' . $timeline_year;
+        $wp_query->post_title = timeline_format_year($timeline_year);
     }
     
     // Use WordPress template hierarchy to integrate with theme
@@ -1515,12 +1706,12 @@ add_action('init', function() {
                 $wp_query->post_title = $article;
             } elseif ($day) {
                 $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                $wp_query->post_title = $month_names[$month] . ' ' . $day . ', Year ' . $year;
+                $wp_query->post_title = $month_names[$month] . ' ' . $day . ', ' . timeline_format_year($year);
             } elseif ($month) {
                 $month_names = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'];
-                $wp_query->post_title = $month_names[$month] . ', Year ' . $year;
+                $wp_query->post_title = $month_names[$month] . ', ' . timeline_format_year($year);
             } elseif ($year) {
-                $wp_query->post_title = 'Year ' . $year;
+                $wp_query->post_title = timeline_format_year($year);
             } else {
                 $wp_query->post_title = '';
             }
@@ -1604,7 +1795,7 @@ function get_timeline_permalink($post_id) {
 
     // Allow Year 0 / negatives — do not use truthy checks on year
     if ($post && $year !== '' && $year !== false && $month !== '' && $month !== false && $day !== '' && $day !== false) {
-        return home_url(user_trailingslashit("timeline/{$year}/{$month}/{$day}/{$post->post_name}"));
+        return timeline_public_url($year, $month, $day, $post->post_name);
     }
 
     // Unfiltered CPT fallback (avoid recursion through our permalink filters)
@@ -1713,7 +1904,7 @@ function debug_timeline_permalinks() {
             
             echo '<div style="margin-bottom: 1em; padding: 0.5em; background: white; border: 1px solid #ddd;">';
             echo '<strong>' . get_the_title() . '</strong><br>';
-            echo 'Timeline Date: Year ' . $year . ', Month ' . $month . ', Day ' . $day . '<br>';
+            echo 'Timeline Date: ' . esc_html(timeline_format_year($year)) . ', Month ' . $month . ', Day ' . $day . '<br>';
             echo 'Old Permalink: <a href="' . $old_permalink . '" target="_blank">' . $old_permalink . '</a><br>';
             echo 'New Permalink: <a href="' . $new_permalink . '" target="_blank">' . $new_permalink . '</a><br>';
             echo '</div>';
