@@ -633,7 +633,7 @@ add_action('wp_enqueue_scripts', function() {
     // Only load on timeline pages or when shortcodes are used
     if (is_timeline_request() || has_timeline_shortcode()) {
         // Load styles with lower priority to respect theme styles
-        wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.7');
+        wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.11');
         wp_enqueue_script(
             'timeline-year-display',
             plugins_url('assets/timeline-year-display.js', __FILE__),
@@ -641,14 +641,14 @@ add_action('wp_enqueue_scripts', function() {
             '1.0.1',
             true
         );
-        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery', 'timeline-year-display'], '1.0.5', true);
+        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery', 'timeline-year-display'], '1.0.6', true);
         wp_enqueue_script('timeline-header-js', plugins_url('assets/timeline-header.js', __FILE__), ['jquery'], '1.0.1', true);
         wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery', 'timeline-year-display'], '1.0.2', true);
         wp_enqueue_script(
             'timeline-sparkline-calendar',
             plugin_dir_url(__FILE__) . 'assets/sparkline-calendar.js',
             array('jquery', 'timeline-year-display'),
-            '1.0.15',
+            '1.0.17',
             true
         );
         wp_enqueue_script(
@@ -677,20 +677,9 @@ add_action('wp_enqueue_scripts', function() {
     if (!is_timeline_request() && !has_timeline_shortcode()) {
         return;
     }
-    
-    // Enqueue timeline styles with theme-aware versioning
-    wp_enqueue_style(
-        'timeline-calendar-styles',
-        TIMELINE_CALENDAR_PLUGIN_URL . 'assets/style.css',
-        array(), // No dependencies to avoid theme conflicts
-        TIMELINE_CALENDAR_VERSION
-    );
-    
-    // Add theme-specific CSS custom properties
-    wp_add_inline_style('timeline-calendar-styles', timeline_calendar_get_theme_css_variables());
-    
-    // Theme CSS variables only here — scripts are enqueued in the primary handler
-    // (avoids duplicate sparkline.js and 404 for missing timeline-calendar.js)
+
+    // Attach theme CSS variables to the primary stylesheet (avoid a second style.css load)
+    wp_add_inline_style('timeline-calendar-style', timeline_calendar_get_theme_css_variables());
 }, 20); // Lower priority to ensure theme styles load first
 
 /**

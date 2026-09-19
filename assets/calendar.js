@@ -196,14 +196,10 @@ class TimelineCalendar {
         
         const modal = document.createElement('div');
         modal.id = 'calendar-hover-modal';
+        modal.className = 'timeline-hover-modal';
         modal.style.display = 'none';
         modal.style.position = 'fixed';
         modal.style.zIndex = '10000';
-        modal.style.background = '#fff';
-        modal.style.border = '1px solid #ccc';
-        modal.style.borderRadius = '8px';
-        modal.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        modal.style.padding = '1rem';
         modal.style.maxWidth = '300px';
         modal.style.maxHeight = '400px';
         modal.style.overflowY = 'auto';
@@ -283,12 +279,14 @@ class TimelineCalendar {
             ? TimelineYearDisplay.timelinePath(this.currentYear, this.currentMonth, day)
             : `/timeline/${this.currentYear}/${this.currentMonth}/${day}/`;
         
-        let html = `<h4 style='margin: 0 0 0.5rem 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;'><a href='${dayPath}' style='color: #333; text-decoration: none;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${dateTitle}</a></h4>`;
-        html += '<ul style="list-style: none; padding: 0; margin: 0;">';
+        let html = `<h4 class="timeline-hover-modal-title"><a href="${dayPath}">${dateTitle}</a></h4>`;
+        html += '<ul class="timeline-hover-modal-list">';
         for (const art of articlesForDay) {
-            const timeBadge = art.timeline_time_of_day ? `<span style='background: #0066cc; color: white; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;'>${art.timeline_time_of_day}</span>` : '';
-            html += `<li style='padding: 0.25rem 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;'>
-                <a href='${art.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; flex: 1;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${art.title}</a>
+            const timeBadge = art.timeline_time_of_day
+                ? `<span class="timeline-hover-modal-badge">${art.timeline_time_of_day}</span>`
+                : '';
+            html += `<li class="timeline-hover-modal-row">
+                <a class="timeline-hover-modal-link" href="${art.permalink}">${art.title}</a>
                 ${timeBadge}
             </li>`;
         }

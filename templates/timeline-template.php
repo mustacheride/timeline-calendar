@@ -227,8 +227,7 @@ echo "-->";
                         <header class="timeline-article-header">
                             <div class="timeline-article-meta">
                                 <div class="timeline-article-meta-row">
-                                    <span class="timeline-date">
-                                        <?php 
+                                    <span class="timeline-date"><?php
                                         $month_names = array(
                                             1 => __( 'January', 'timeline-calendar' ),
                                             2 => __( 'February', 'timeline-calendar' ),
@@ -243,12 +242,11 @@ echo "-->";
                                             11 => __( 'November', 'timeline-calendar' ),
                                             12 => __( 'December', 'timeline-calendar' )
                                         );
-                                        echo esc_html( $month_names[ $timeline_month ] . ' ' . $timeline_day . ', ' . timeline_format_year( $timeline_year ) ); 
-                                        ?>
-                                    </span>
-                                    <?php 
+                                        echo esc_html( $month_names[ $timeline_month ] . ' ' . $timeline_day . ', ' . timeline_format_year( $timeline_year ) );
+                                    ?></span>
+                                    <?php
                                     $time_of_day = get_post_meta(get_the_ID(), 'timeline_time_of_day', true);
-                                    if (!empty($time_of_day)): 
+                                    if (!empty($time_of_day)):
                                     ?>
                                         <span class="timeline-article-time-of-day"><?php echo esc_html($time_of_day); ?></span>
                                     <?php endif; ?>

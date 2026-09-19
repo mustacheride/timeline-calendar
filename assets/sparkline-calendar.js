@@ -296,8 +296,7 @@ class TimelineSparklineCalendar {
                                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 monthElement.title = `${monthNames[month]} ${year}: ${articleCount} article${articleCount !== 1 ? 's' : ''}`;
             } else {
-                // Set minimum height for months with no articles
-                monthElement.style.height = '8px';
+                monthElement.style.height = '0px';
             }
             
             sparkline.appendChild(monthElement);
@@ -405,14 +404,10 @@ class TimelineSparklineCalendar {
         
         const modal = document.createElement('div');
         modal.id = 'sparkline-hover-modal';
+        modal.className = 'timeline-hover-modal';
         modal.style.display = 'none';
         modal.style.position = 'fixed';
         modal.style.zIndex = '10000';
-        modal.style.background = '#fff';
-        modal.style.border = '1px solid #ccc';
-        modal.style.borderRadius = '8px';
-        modal.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        modal.style.padding = '1rem';
         modal.style.maxWidth = '350px';
         modal.style.maxHeight = '500px';
         modal.style.overflowY = 'auto';
@@ -475,14 +470,14 @@ class TimelineSparklineCalendar {
         const listDiv = document.getElementById('sparkline-hover-modal-list');
         
         // Show loading state
-        listDiv.innerHTML = '<div style="text-align: center; padding: 1rem; color: #666;">Loading articles...</div>';
+        listDiv.innerHTML = '<div class="timeline-hover-modal-status">Loading articles...</div>';
         modal.style.display = 'block';
         
         // Load articles for this month
         const articles = await this.loadArticlesForMonth(year, month);
         
         if (articles.length === 0) {
-            listDiv.innerHTML = '<div style="text-align: center; padding: 1rem; color: #666;">No articles found for this month.</div>';
+            listDiv.innerHTML = '<div class="timeline-hover-modal-status">No articles found for this month.</div>';
             return;
         }
         
@@ -525,9 +520,9 @@ class TimelineSparklineCalendar {
         const articleCount = articles.length;
         const articleText = articleCount === 1 ? 'article' : 'articles';
         
-        let html = `<h4 style='margin: 0 0 0.75rem 0; color: #333; border-bottom: 2px solid #0066cc; padding-bottom: 0.5rem; text-align: center;'>
-            <a href='${monthPath}' style='color: #333; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#333"'>${monthTitle}</a>
-            <div style='font-size: 0.8rem; color: #666; font-weight: normal; margin-top: 0.25rem;'>${articleCount} ${articleText}</div>
+        let html = `<h4 class="timeline-hover-modal-title">
+            <a href="${monthPath}">${monthTitle}</a>
+            <div class="timeline-hover-modal-count">${articleCount} ${articleText}</div>
         </h4>`;
         
         // Group articles by day
@@ -543,37 +538,27 @@ class TimelineSparklineCalendar {
         // Render articles in a compact format
         const sortedDays = Object.keys(articlesByDay).sort((a, b) => parseInt(a) - parseInt(b));
         
-        html += '<div style="margin: 0;">';
+        html += '<div class="timeline-hover-modal-rows">';
         
         for (const day of sortedDays) {
             const dayArticles = articlesByDay[day];
             
-            dayArticles.forEach((article, index) => {
-                const timeBadge = article.timeline_time_of_day ? `<span style='background: #0066cc; color: white; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-left: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;'>${article.timeline_time_of_day}</span>` : '';
+            dayArticles.forEach((article) => {
+                const timeBadge = article.timeline_time_of_day
+                    ? `<span class="timeline-hover-modal-badge">${article.timeline_time_of_day}</span>`
+                    : '';
+                const dayPath = window.TimelineYearDisplay
+                    ? TimelineYearDisplay.timelinePath(year, month, day)
+                    : `/timeline/${year}/${month}/${day}/`;
                 
-                html += `<div style='padding: 0.4rem 0; border-bottom: 1px solid #f5f5f5; display: flex; align-items: flex-start; gap: 0.75rem;'>`;
-                
-                // Date column (fixed width) - increased for longer month names
-                html += `<div style='flex-shrink: 0; width: 120px; font-size: 0.85rem; color: #666; font-weight: 500;'>
-                    <a href='${window.TimelineYearDisplay ? TimelineYearDisplay.timelinePath(year, month, day) : `/timeline/${year}/${month}/${day}/`}' style='color: #666; text-decoration: none;' onmouseover='this.style.color="#0066cc"' onmouseout='this.style.color="#666"'>
-                        ${monthName} ${day}
-                    </a>
-                </div>`;
-                
-                // Article title and time badge container - now in a single row
-                html += `<div style='flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.5rem;'>`;
-                
-                // Article title (flexible width)
-                html += `<a href='${article.permalink}' style='color: #0066cc; text-decoration: none; font-size: 0.9rem; line-height: 1.3; word-wrap: break-word; overflow-wrap: break-word; flex: 1;' onmouseover='this.style.textDecoration="underline"' onmouseout='this.style.textDecoration="none"'>${article.title}</a>`;
-                
-                // Time badge (if exists) - now positioned to the right
+                html += `<div class="timeline-hover-modal-row">`;
+                html += `<div class="timeline-hover-modal-date"><a href="${dayPath}">${monthName} ${day}</a></div>`;
+                html += `<div class="timeline-hover-modal-article">`;
+                html += `<a class="timeline-hover-modal-link" href="${article.permalink}">${article.title}</a>`;
                 if (timeBadge) {
-                    html += `<div style='flex-shrink: 0;'>${timeBadge}</div>`;
+                    html += `<div class="timeline-hover-modal-badge-wrap">${timeBadge}</div>`;
                 }
-                
-                html += `</div>`;
-                
-                html += '</div>';
+                html += `</div></div>`;
             });
         }
         
