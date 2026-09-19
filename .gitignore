@@ -120,4 +120,9 @@ languages/*.mo
 
 # Temporary files
 *.tmp
-*.temp 
+*.temp
+
+# Local debug / browser automation artifacts
+.playwright-mcp/
+hamburger-*.png
+theme-verify-*.png 
