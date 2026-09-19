@@ -274,6 +274,71 @@ add_action('init', function() {
     ]);
 });
 
+// Admin list table: Year / Month / Day columns
+add_filter('manage_timeline_article_posts_columns', function($columns) {
+    $new_columns = [];
+    foreach ($columns as $key => $label) {
+        $new_columns[$key] = $label;
+        if ($key === 'title') {
+            $new_columns['timeline_year'] = __('Year', 'timeline-calendar');
+            $new_columns['timeline_month'] = __('Month', 'timeline-calendar');
+            $new_columns['timeline_day'] = __('Day', 'timeline-calendar');
+        }
+    }
+    return $new_columns;
+});
+
+add_action('manage_timeline_article_posts_custom_column', function($column, $post_id) {
+    $month_names = [
+        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+    ];
+
+    if ($column === 'timeline_year') {
+        $year = get_post_meta($post_id, 'timeline_year', true);
+        echo $year !== '' && $year !== null ? esc_html($year) : '—';
+        return;
+    }
+
+    if ($column === 'timeline_month') {
+        $month = intval(get_post_meta($post_id, 'timeline_month', true));
+        echo isset($month_names[$month]) ? esc_html($month_names[$month]) : '—';
+        return;
+    }
+
+    if ($column === 'timeline_day') {
+        $day = get_post_meta($post_id, 'timeline_day', true);
+        echo $day !== '' && $day !== null ? esc_html($day) : '—';
+    }
+}, 10, 2);
+
+add_filter('manage_edit-timeline_article_sortable_columns', function($columns) {
+    $columns['timeline_year'] = 'timeline_year';
+    $columns['timeline_month'] = 'timeline_month';
+    $columns['timeline_day'] = 'timeline_day';
+    return $columns;
+});
+
+add_action('pre_get_posts', function($query) {
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+    $orderby = $query->get('orderby');
+    if (!in_array($orderby, ['timeline_year', 'timeline_month', 'timeline_day'], true)) {
+        return;
+    }
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$screen || $screen->post_type !== 'timeline_article') {
+        // pre_get_posts can run before screen is set; also check query post_type
+        if ($query->get('post_type') !== 'timeline_article') {
+            return;
+        }
+    }
+    $query->set('meta_key', $orderby);
+    $query->set('orderby', 'meta_value_num');
+});
+
 // Add meta box for timeline year/month/day
 add_action('add_meta_boxes', function() {
     add_meta_box(
@@ -318,6 +383,14 @@ add_action('add_meta_boxes', function() {
             $reference = get_post_meta($post->ID, 'timeline_reference', true);
             echo '<br><br><label>Reference: <input type="text" name="timeline_reference" id="timeline_reference" value="' . esc_attr($reference) . '" placeholder="e.g., Wikipedia, Book Title, or URL" style="width: 100%; max-width: 400px;" /></label>';
             echo '<p><em>Add a research reference or source link (optional).</em></p>';
+
+            $timeline_url = get_timeline_permalink($post->ID);
+            $has_timeline_date = ($year !== '' && $year !== false && $month !== '' && $month !== false && $day !== '' && $day !== false);
+            if ($has_timeline_date && $post->post_status === 'publish') {
+                echo '<p style="margin-top:1em;"><a class="button button-secondary" id="timeline-view-on-site" href="' . esc_url($timeline_url) . '" target="_blank" rel="noopener noreferrer">' . esc_html__('View on site', 'timeline-calendar') . '</a></p>';
+            } elseif ($has_timeline_date) {
+                echo '<p style="margin-top:1em;"><em>' . esc_html__('Publish to view this article on the live timeline.', 'timeline-calendar') . '</em></p>';
+            }
             
             echo '<p><em>Changing these values will update the permalink below.</em></p>';
             ?>
@@ -333,9 +406,13 @@ add_action('add_meta_boxes', function() {
                     var year = $('#timeline_year').val();
                     var month = $('#timeline_month').val();
                     var day = $('#timeline_day').val();
-                    var postName = $('#post_name').val() || $('#title').val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    var postName = $('#post_name').val() || ($('#title').val() || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                    var viewLink = $('#timeline-view-on-site');
+                    if (viewLink.length && year !== '' && month !== '' && day !== '' && postName) {
+                        viewLink.attr('href', <?php echo json_encode(trailingslashit(home_url('/timeline/'))); ?> + year + '/' + month + '/' + day + '/' + postName + '/');
+                    }
                     
-                    if (year && month && day && postName) {
+                    if (year !== '' && month !== '' && day !== '' && postName) {
                         var newPermalink = '<?php echo home_url('/'); ?>timeline/' + year + '/' + month + '/' + day + '/' + postName + '/';
                         
                         // Update the permalink display
@@ -399,15 +476,22 @@ add_action('wp_enqueue_scripts', function() {
     // Only load on timeline pages or when shortcodes are used
     if (is_timeline_request() || has_timeline_shortcode()) {
         // Load styles with lower priority to respect theme styles
-        wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.2');
-        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery'], '1.0.3', true);
+        wp_enqueue_style('timeline-calendar-style', plugins_url('assets/style.css', __FILE__), [], '1.0.7');
+        wp_enqueue_script('timeline-calendar-js', plugins_url('assets/calendar.js', __FILE__), ['jquery'], '1.0.4', true);
         wp_enqueue_script('timeline-header-js', plugins_url('assets/timeline-header.js', __FILE__), ['jquery'], '1.0.1', true);
         wp_enqueue_script('timeline-year-view-js', plugins_url('assets/year-view.js', __FILE__), ['jquery'], '1.0.1', true);
         wp_enqueue_script(
             'timeline-sparkline-calendar',
             plugin_dir_url(__FILE__) . 'assets/sparkline-calendar.js',
             array('jquery'),
-            '1.0.12',
+            '1.0.14',
+            true
+        );
+        wp_enqueue_script(
+            'timeline-this-day-in-history',
+            plugins_url('assets/this-day-in-history.js', __FILE__),
+            array('timeline-calendar-js'),
+            '1.0.1',
             true
         );
         
@@ -440,41 +524,8 @@ add_action('wp_enqueue_scripts', function() {
     // Add theme-specific CSS custom properties
     wp_add_inline_style('timeline-calendar-styles', timeline_calendar_get_theme_css_variables());
     
-    // Enqueue timeline scripts
-    wp_enqueue_script(
-        'timeline-calendar-sparkline',
-        TIMELINE_CALENDAR_PLUGIN_URL . 'assets/sparkline-calendar.js',
-        array(), // No jQuery dependency for better theme compatibility
-        TIMELINE_CALENDAR_VERSION,
-        true
-    );
-    
-    wp_enqueue_script(
-        'timeline-calendar-main',
-        TIMELINE_CALENDAR_PLUGIN_URL . 'assets/timeline-calendar.js',
-        array('timeline-calendar-sparkline'),
-        TIMELINE_CALENDAR_VERSION,
-        true
-    );
-    
-    // Localize script with theme-aware settings
-    wp_localize_script('timeline-calendar-main', 'timelineCalendarSettings', array(
-        'referenceYear' => get_timeline_calendar_option('reference_year', 1989),
-        'ajaxUrl' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('timeline_calendar_nonce'),
-        'allowYearZero' => get_timeline_calendar_option('allow_year_zero', false),
-        'allowNegativeYears' => get_timeline_calendar_option('allow_negative_years', false),
-        'themeSupport' => timeline_calendar_get_theme_support(),
-        'isRTL' => is_rtl(),
-        'textDirection' => get_option('text_direction', 'ltr'),
-        'dateFormat' => get_option('date_format', 'F j, Y'),
-        'timeFormat' => get_option('time_format', 'g:i a'),
-        'timezone' => wp_timezone_string(),
-        'locale' => get_locale(),
-        'homeUrl' => home_url(),
-        'restUrl' => rest_url(),
-        'restNonce' => wp_create_nonce('wp_rest')
-    ));
+    // Theme CSS variables only here — scripts are enqueued in the primary handler
+    // (avoids duplicate sparkline.js and 404 for missing timeline-calendar.js)
 }, 20); // Lower priority to ensure theme styles load first
 
 /**
@@ -839,7 +890,8 @@ function timeline_calendar_years_ajax() {
     wp_send_json($years);
 }
 
-// This Day in History shortcode
+// This Day in History shortcode (JS lives in assets/this-day-in-history.js —
+// inline script breaks because wpautop injects </p><p> into the markup)
 add_shortcode('timeline_this_day_in_history', function() {
     ob_start();
     ?>
@@ -852,54 +904,6 @@ add_shortcode('timeline_this_day_in_history', function() {
             </div>
         </div>
     </div>
-    
-    <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        function loadThisDayInHistory() {
-            const now = new Date();
-            const month = now.getMonth() + 1; // JavaScript months are 0-based
-            const day = now.getDate();
-            
-            // Update subtitle with local date
-            const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
-                               'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('timeline-this-day-subtitle').textContent = 
-                monthNames[month] + ' ' + day + ' throughout the timeline';
-            
-            // Fetch articles for this date
-            const formData = new FormData();
-            formData.append('action', 'timeline_this_day_in_history');
-            formData.append('month', month);
-            formData.append('day', day);
-            
-            if (typeof timelineCalendarAjax !== 'undefined' && timelineCalendarAjax.nonce) {
-                formData.append('nonce', timelineCalendarAjax.nonce);
-            }
-            
-            fetch(timelineCalendarAjax.ajaxurl || '<?php echo admin_url('admin-ajax.php'); ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('timeline-this-day-content').innerHTML = data.data.html;
-                } else {
-                    document.getElementById('timeline-this-day-content').innerHTML = 
-                        '<div class="timeline-this-day-empty"><p>No timeline articles found for ' + 
-                        monthNames[month] + ' ' + day + '.</p></div>';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading This Day in History:', error);
-                document.getElementById('timeline-this-day-content').innerHTML = 
-                    '<div class="timeline-this-day-error"><p>Error loading timeline articles.</p></div>';
-            });
-        }
-        
-        loadThisDayInHistory();
-    });
-    </script>
     <?php
     return ob_get_clean();
 });
@@ -1301,7 +1305,8 @@ function has_timeline_shortcode() {
     if (is_a($post, 'WP_Post')) {
         return has_shortcode($post->post_content, 'timeline_calendar') ||
                has_shortcode($post->post_content, 'timeline_sparkline_calendar') ||
-               has_shortcode($post->post_content, 'timeline_year_calendar');
+               has_shortcode($post->post_content, 'timeline_year_calendar') ||
+               has_shortcode($post->post_content, 'timeline_this_day_in_history');
     }
     return false;
 }
@@ -1537,6 +1542,19 @@ function timeline_sparkline_data() {
     $end_year = isset($_GET['end_year']) ? intval($_GET['end_year']) : 8;
     
     global $wpdb;
+
+    // Global bounds (all published timeline articles) for nav enable/disable
+    $bounds = $wpdb->get_row("
+        SELECT
+            MIN(CAST(pm.meta_value AS SIGNED)) AS min_year,
+            MAX(CAST(pm.meta_value AS SIGNED)) AS max_year
+        FROM {$wpdb->posts} p
+        JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'timeline_year'
+        WHERE p.post_type = 'timeline_article'
+        AND p.post_status = 'publish'
+    ");
+    $min_year_bound = $bounds && $bounds->min_year !== null ? intval($bounds->min_year) : $start_year;
+    $max_year_bound = $bounds && $bounds->max_year !== null ? intval($bounds->max_year) : $end_year;
     
     // Get article counts per month for each year
     $results = $wpdb->get_results($wpdb->prepare("
@@ -1570,7 +1588,11 @@ function timeline_sparkline_data() {
         }
     }
     
-    wp_send_json_success($sparkline_data);
+    wp_send_json_success([
+        'sparkline' => $sparkline_data,
+        'min_year' => $min_year_bound,
+        'max_year' => $max_year_bound,
+    ]);
 } 
 
 // Custom function to generate timeline permalinks
@@ -1579,42 +1601,66 @@ function get_timeline_permalink($post_id) {
     $month = get_post_meta($post_id, 'timeline_month', true);
     $day = get_post_meta($post_id, 'timeline_day', true);
     $post = get_post($post_id);
-    
-    if ($year && $month && $day && $post) {
-        return home_url("/timeline/{$year}/{$month}/{$day}/{$post->post_name}/");
+
+    // Allow Year 0 / negatives — do not use truthy checks on year
+    if ($post && $year !== '' && $year !== false && $month !== '' && $month !== false && $day !== '' && $day !== false) {
+        return home_url(user_trailingslashit("timeline/{$year}/{$month}/{$day}/{$post->post_name}"));
     }
-    
-    // Fallback to default permalink if timeline data is missing
-    return get_permalink($post_id);
+
+    // Unfiltered CPT fallback (avoid recursion through our permalink filters)
+    if ($post) {
+        return home_url(user_trailingslashit($post->post_type . '/' . $post->post_name));
+    }
+
+    return home_url('/');
 }
 
-// Filter to show correct timeline permalinks in admin
-add_filter('post_link', function($permalink, $post) {
-    if ($post->post_type === 'timeline_article') {
+// CPT permalinks use post_type_link (not post_link) — this fixes View Post in the editor
+add_filter('post_type_link', function($permalink, $post) {
+    if ($post instanceof WP_Post && $post->post_type === 'timeline_article') {
         return get_timeline_permalink($post->ID);
     }
     return $permalink;
 }, 10, 2);
 
-// Filter to show correct timeline permalinks in admin for get_permalink()
-add_filter('get_permalink', function($permalink, $post_id) {
-    $post = get_post($post_id);
-    if ($post && $post->post_type === 'timeline_article') {
-        return get_timeline_permalink($post_id);
+add_filter('post_link', function($permalink, $post) {
+    if ($post instanceof WP_Post && $post->post_type === 'timeline_article') {
+        return get_timeline_permalink($post->ID);
     }
     return $permalink;
+}, 10, 2);
+
+add_filter('preview_post_link', function($preview_link, $post) {
+    if ($post instanceof WP_Post && $post->post_type === 'timeline_article') {
+        return get_timeline_permalink($post->ID);
+    }
+    return $preview_link;
+}, 10, 2);
+
+// Block editor "View Post" reads the REST link field
+add_filter('rest_prepare_timeline_article', function($response, $post) {
+    if (!($response instanceof WP_REST_Response)) {
+        return $response;
+    }
+    $data = $response->get_data();
+    $data['link'] = get_timeline_permalink($post->ID);
+    $response->set_data($data);
+    return $response;
+}, 10, 2);
+
+// List table row action: View on live timeline
+add_filter('post_row_actions', function($actions, $post) {
+    if ($post->post_type !== 'timeline_article') {
+        return $actions;
+    }
+    $url = get_timeline_permalink($post->ID);
+    if ($post->post_status === 'publish') {
+        $actions['view'] = '<a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">' . esc_html__('View', 'timeline-calendar') . '</a>';
+    }
+    return $actions;
 }, 10, 2);
 
 // Filter to update the permalink display in the admin edit screen
-add_filter('admin_post_link', function($permalink, $post_id) {
-    $post = get_post($post_id);
-    if ($post && $post->post_type === 'timeline_article') {
-        return get_timeline_permalink($post_id);
-    }
-    return $permalink;
-}, 10, 2);
-
-// Filter to update the permalink preview in the admin edit screen
 add_filter('sample_permalink_html', function($html, $post_id, $title, $name, $post) {
     if ($post && $post->post_type === 'timeline_article') {
         $timeline_permalink = get_timeline_permalink($post_id);

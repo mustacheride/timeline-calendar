@@ -28,7 +28,10 @@ class TimelineCalendar {
     // Convert fictional year to real year (Year 1 = reference year)
     // The reference year alignment is fixed and doesn't change based on Year 0 setting
     getRealYear(fictionalYear) {
-        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989;
+        // wp_localize_script stringifies values — Number() prevents "1983"+0 => "19830"
+        const referenceYear = Number(
+            window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989
+        );
         
         // Fixed mapping: Year 1 always maps to reference year
         // Year 0 (if it exists) maps to reference year - 1

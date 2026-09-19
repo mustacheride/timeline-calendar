@@ -29,6 +29,8 @@ class TimelineSparklineCalendar {
         
         this.data = {};
         this.globalMaxArticles = 0;
+        this.minYearBound = null;
+        this.maxYearBound = null;
         this.currentYearRange = { 
             start: this.options.startYear, 
             end: this.options.endYear 
@@ -98,7 +100,10 @@ class TimelineSparklineCalendar {
     // Convert fictional year to real year (consistent with calendar.js)
     // The reference year alignment is fixed and doesn't change based on Year 0 setting
     getRealYear(fictionalYear) {
-        const referenceYear = window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989;
+        // wp_localize_script stringifies values — Number() prevents "1983"+0 => "19830"
+        const referenceYear = Number(
+            window.timelineCalendarSettings ? window.timelineCalendarSettings.referenceYear : 1989
+        );
         
         // Fixed mapping: Year 1 always maps to reference year
         // Year 0 (if it exists) maps to reference year - 1
@@ -107,32 +112,27 @@ class TimelineSparklineCalendar {
     }
     
     checkForArticlesBeyondRange() {
-        // Check if there are any articles beyond the current year range
-        const currentMaxYear = this.currentYearRange.end;
-        
-        // Look for any years in the data that are beyond the current range
-        const availableYears = Object.keys(this.data).map(year => parseInt(year)).filter(year => {
-            // Only consider years that are allowed by settings
-            return this.isYearAllowed(year);
-        });
-        
-        // Check if there are any years beyond the current range
-        const yearsBeyondRange = availableYears.filter(year => year > currentMaxYear);
-        
-        // Check if any of those years have articles
-        for (const year of yearsBeyondRange) {
-            const yearData = this.data[year];
-            if (yearData) {
-                // Check if any month in this year has articles
-                for (let month = 1; month <= 12; month++) {
-                    if (yearData[month] && yearData[month] > 0) {
-                        return true; // Found articles beyond current range
-                    }
-                }
-            }
+        const maxBound = this.getMaxYearBound();
+        return maxBound > this.currentYearRange.end;
+    }
+
+    checkForArticlesBeforeRange() {
+        const minBound = this.getMinYearBound();
+        return minBound < this.currentYearRange.start;
+    }
+
+    getMinYearBound() {
+        if (this.minYearBound !== null && !Number.isNaN(this.minYearBound)) {
+            return this.minYearBound;
         }
-        
-        return false; // No articles beyond current range
+        return this.getDefaultStartYear();
+    }
+
+    getMaxYearBound() {
+        if (this.maxYearBound !== null && !Number.isNaN(this.maxYearBound)) {
+            return this.maxYearBound;
+        }
+        return this.currentYearRange.end;
     }
     
     async init() {
@@ -153,7 +153,15 @@ class TimelineSparklineCalendar {
             const data = await response.json();
             
             if (data.success) {
-                this.data = data.data;
+                // New payload: { sparkline, min_year, max_year }; keep backward compat
+                const payload = data.data || {};
+                if (payload.sparkline) {
+                    this.data = payload.sparkline;
+                    this.minYearBound = parseInt(payload.min_year, 10);
+                    this.maxYearBound = parseInt(payload.max_year, 10);
+                } else {
+                    this.data = payload;
+                }
                 
                 // Calculate global maximum article count across all years and months
                 this.globalMaxArticles = 0;
@@ -189,12 +197,11 @@ class TimelineSparklineCalendar {
             leftNav.innerHTML = '←';
             leftNav.dataset.direction = 'prev';
             
-            // Check if navigation should be disabled
-            const minAllowedYear = this.getDefaultStartYear();
-            if (this.currentYearRange.start <= minAllowedYear) {
+            // Disable prev when nothing earlier exists in the timeline
+            if (!this.checkForArticlesBeforeRange()) {
                 leftNav.disabled = true;
                 leftNav.classList.add('timeline-nav-disabled');
-                leftNav.title = `Years before ${minAllowedYear} are not allowed with current settings`;
+                leftNav.title = 'No earlier timeline articles';
             }
             sparklineContainer.appendChild(leftNav);
         }
@@ -207,12 +214,15 @@ class TimelineSparklineCalendar {
         const yearsContainer = document.createElement('div');
         yearsContainer.className = 'timeline-sparkline-years';
         
-        // Render each year in numerical order, filtering out restricted years
+        // Render years in the current window only (numerical order)
         const sortedYears = Object.keys(this.data).sort((a, b) => parseInt(a) - parseInt(b));
         sortedYears.forEach(year => {
-            // Filter out Year 0 if not allowed
-            if (year === '0' && !this.isYearAllowed(0)) {
-                return; // Skip Year 0
+            const yearNum = parseInt(year, 10);
+            if (yearNum < this.currentYearRange.start || yearNum > this.currentYearRange.end) {
+                return;
+            }
+            if (!this.isYearAllowed(yearNum)) {
+                return;
             }
             const yearElement = this.createYearElement(year, this.data[year]);
             yearsContainer.appendChild(yearElement);
@@ -228,9 +238,8 @@ class TimelineSparklineCalendar {
             rightNav.innerHTML = '→';
             rightNav.dataset.direction = 'next';
             
-            // Check if there are articles beyond the current range
-            const hasArticlesBeyond = this.checkForArticlesBeyondRange();
-            if (!hasArticlesBeyond) {
+            // Disable next when nothing later exists in the timeline
+            if (!this.checkForArticlesBeyondRange()) {
                 rightNav.disabled = true;
                 rightNav.classList.add('timeline-nav-disabled');
                 rightNav.title = 'No more timeline articles available';
@@ -614,35 +623,42 @@ class TimelineSparklineCalendar {
     }
 
     async navigate(direction) {
-        const yearsPerView = this.yearsPerView; // Use the configured years per view
+        const yearsPerView = this.yearsPerView;
+        const span = this.currentYearRange.end - this.currentYearRange.start;
         
         if (direction === 'prev') {
-            const newStart = this.currentYearRange.start - yearsPerView;
-            const newEnd = this.currentYearRange.end - yearsPerView;
-            
-            // Check if navigation would go below minimum allowed year
-            const minAllowedYear = this.getDefaultStartYear();
-            if (newStart >= minAllowedYear) {
-                this.currentYearRange.start = newStart;
-                this.currentYearRange.end = newEnd;
-                await this.loadData();
-                this.render();
-            } else {
-                // Show feedback that we can't go further back
-                console.log(`Cannot navigate before year ${minAllowedYear} with current settings`);
+            if (!this.checkForArticlesBeforeRange()) {
+                console.log('No earlier timeline articles');
+                return;
             }
+            let newStart = this.currentYearRange.start - yearsPerView;
+            let newEnd = this.currentYearRange.end - yearsPerView;
+            const minBound = this.getMinYearBound();
+            if (newStart < minBound) {
+                newStart = minBound;
+                newEnd = minBound + span;
+            }
+            this.currentYearRange.start = newStart;
+            this.currentYearRange.end = newEnd;
+            await this.loadData();
         } else {
-            // Check if there are articles beyond the current range before navigating
-            const hasArticlesBeyond = this.checkForArticlesBeyondRange();
-            if (hasArticlesBeyond) {
-                this.currentYearRange.start += yearsPerView;
-                this.currentYearRange.end += yearsPerView;
-                await this.loadData();
-                this.render();
-            } else {
-                // Show feedback that there are no more articles
+            if (!this.checkForArticlesBeyondRange()) {
                 console.log('No more timeline articles available beyond current range');
+                return;
             }
+            let newStart = this.currentYearRange.start + yearsPerView;
+            let newEnd = this.currentYearRange.end + yearsPerView;
+            const maxBound = this.getMaxYearBound();
+            if (newEnd > maxBound && newStart > maxBound) {
+                return;
+            }
+            if (newEnd > maxBound) {
+                newEnd = maxBound;
+                newStart = maxBound - span;
+            }
+            this.currentYearRange.start = newStart;
+            this.currentYearRange.end = newEnd;
+            await this.loadData();
         }
     }
     
